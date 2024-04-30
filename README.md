@@ -45,7 +45,7 @@ Easy tasks for MIDI Scripter:
 Complex tasks for MIDI Scripter:
 1. Create and map complex macros involving multiple hardware or virtual MIDI controllers.
 2. Make custom sequencer or MIDI input generator.
-3. Make music education ot trainer GUI application based on MIDI input.
+3. Make music education or trainer GUI application based on MIDI input.
 
 ## Installation
 1. [Python 3.11+](https://www.python.org/downloads/) with "Add python.exe to PATH" option.
