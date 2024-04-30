@@ -27,7 +27,9 @@ if __name__ == '__main__':  # combine multiple scripts by importing them
 
 ![Screenshot](https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot.png?raw=true)
 
-[Scripting guide and API documentation available](https://maboroshy.github.io/midi-scripter)
+[You can find more examples here.](https://github.com/Maboroshy/midi-scripter/tree/master/examples)
+
+[Scripting guide and API documentation available.](https://maboroshy.github.io/midi-scripter)
 
 Easy tasks for MIDI Scripter:  
 1. Filter, modify and route MIDI, OSC and keyboard messages in any way.  
