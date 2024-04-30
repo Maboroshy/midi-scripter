@@ -31,6 +31,9 @@ if __name__ == '__main__':  # combine multiple scripts by importing them
 
 [Scripting guide and API documentation available.](https://maboroshy.github.io/midi-scripter)
 
+Currently MIDI Scripter is at "beta" development stage. It's fully functional but needs some more testing. It targets only Windows for now. Linux and macOS support will follow.
+
+## Features
 Easy tasks for MIDI Scripter:  
 1. Filter, modify and route MIDI, OSC and keyboard messages in any way.  
 2. Map MIDI, OSC and keyboard to each other.  
@@ -43,8 +46,6 @@ Complex tasks for MIDI Scripter:
 1. Create and map complex macros involving multiple hardware or virtual MIDI controllers.
 2. Make custom sequencer or MIDI input generator.
 3. Make music education ot trainer GUI application based on MIDI input.
-
-Currently MIDI Scripter is at "beta" development stage. It's fully functional but needs some more testing. It targets only Windows for now but Linux and macOS support will follow.
 
 ## Installation
 1. [Python 3.11+](https://www.python.org/downloads/) with "Add python.exe to PATH" option.
