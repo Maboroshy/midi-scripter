@@ -10,3 +10,4 @@ and sends it through virtual MIDI output.
 - [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) app with 'To DAW' virtual port for output.
 - Replace `'MIDI Keyboard'` with your MIDI controller port name.
 - Set 'loopMIDI Out' virtual port as an input in your DAW.
+- Arrange the widgets in script's GUI.

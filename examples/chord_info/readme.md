@@ -13,6 +13,7 @@ Degree for chords out of scale will be printed red.
 - music21 library: `pip install music21` in console.
 - [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) app with 'From DAW' virtual port for input.
 - Set 'loopMIDI In' virtual port as an output from your DAW.
+- Arrange the widgets in script's GUI.
 
 ## Notes
 The script shouldn't be a proxy since music21 introduces too much latency. 
