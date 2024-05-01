@@ -61,8 +61,8 @@ class ScripterGUI(QApplication):
         if pathlib.Path(midiscripter.base.shared.script_path).is_file():
             # These settings saved only for restart
             self.processEvents()  # update win status to get correct status
-            QSettings().setValue('restart win minimized', int(self.main_window.isMinimized()))
-            QSettings().setValue('restart closed to tray', int(not self.main_window.isVisible()))
+            QSettings().setValue('restart win minimized', self.main_window.isMinimized())
+            QSettings().setValue('restart closed to tray', not self.main_window.isVisible())
             self.exit(1467)
 
     def __cleanup(self):

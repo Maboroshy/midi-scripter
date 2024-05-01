@@ -82,11 +82,11 @@ class MainWindow(QMainWindow):
         self.move(QSettings().value('win position', self.__get_screen_center()))
         self.restoreState(QSettings().value('win state'))
 
-        if QSettings().value('restart win minimized', False):
+        if QSettings().value('restart win minimized', False, type=bool):
             self.showMinimized()
             # 'win minimized' set by restart request, cleared for the next normal start
-            QSettings().setValue('restart win minimized', 0)
-        elif QSettings().value('win maximized', False):
+            QSettings().setValue('restart win minimized', False)
+        elif QSettings().value('win maximized', False, type=bool):
             self.showMaximized()
         else:
             self.show()
@@ -96,14 +96,14 @@ class MainWindow(QMainWindow):
         self.move(QSettings().value('win position', self.__get_screen_center()))
 
         # 'win visible' set by restart request, cleared for the next normal start
-        if QSettings().value('restart closed to tray', False):
-            QSettings().setValue('restart closed to tray', 0)
+        if QSettings().value('restart closed to tray', False, type=bool):
+            QSettings().setValue('restart closed to tray', False)
             self.close()
 
     def closeEvent(self, event: QCloseEvent):
         event.ignore()
         QSettings().setValue('win state', self.saveState())
-        QSettings().setValue('win maximized', int(self.isMaximized()))
+        QSettings().setValue('win maximized', self.isMaximized())
 
         if not self.isMaximized():
             QSettings().setValue('win size', self.size())
