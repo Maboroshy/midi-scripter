@@ -1,13 +1,14 @@
 import pathlib
 import platform
 import sys
-from typing import TYPE_CHECKING, Optional
 from collections.abc import Callable
 
-import win32com.client
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
+
+if platform.system() == 'Windows':
+    import win32com.client
 
 import midiscripter.base.shared
 import midiscripter.file_event

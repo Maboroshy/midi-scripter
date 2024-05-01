@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING, Optional, Union
-from collections.abc import Callable
+import platform
+from typing import TYPE_CHECKING, Callable
 
 import rtmidi
 import rtmidi.midiconstants
@@ -66,7 +66,11 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
             self.is_enabled = True
             log('Opened {port}', port=self)
         except ValueError:
-            log.red("Can't find port {port}. Check the port name.", port=self)
+            if platform.system() == 'Windows':
+                log.red("Can't find port {port}. Check the port name.", port=self)
+            else:
+                self.__rtmidi_port.open_virtual_port(self.__port_name)
+                log('Created and opened virtual port {port}', port=self)
         except Exception:
             log.red('Failed to open {port}', port=self)
 
@@ -123,7 +127,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
 
     def __convert_to_msg(
         self, rt_midi_data: tuple[hex, ...]
-    ) -> Union['midiscripter.midi.midi_msg.ChannelMsg', 'midiscripter.midi.midi_msg.SysexMsg']:
+    ) -> 'midiscripter.midi.midi_msg.ChannelMsg | midiscripter.midi.midi_msg.SysexMsg':
         if (
             rt_midi_data[0] == rtmidi.midiconstants.SYSTEM_EXCLUSIVE
             and rt_midi_data[-1] == rtmidi.midiconstants.END_OF_EXCLUSIVE
