@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import midiscripter.base.msg_base
 
@@ -18,14 +18,14 @@ class OscMsg(midiscripter.base.msg_base.Msg):
     data: str | bytes | bool | int | float | list | tuple
     """Message data"""
 
-    source: Optional['OscIn']
+    source: 'None | OscIn'
 
     def __init__(
         self,
         address: str,
         data: str | bytes | bool | int | float | list | tuple = None,
         *,
-        source: Optional['OscIn'] = None,
+        source: 'None | OscIn' = None,
     ):
         """
         Args:

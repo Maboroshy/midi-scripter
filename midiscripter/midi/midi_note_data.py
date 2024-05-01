@@ -1,5 +1,4 @@
 import re
-from typing import Union
 
 _NOTE_NAMES = {
     'Cb': -1,

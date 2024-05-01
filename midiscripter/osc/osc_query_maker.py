@@ -1,5 +1,4 @@
 import queue
-from typing import Union
 
 from midiscripter.logger import log
 from midiscripter.osc.osc_msg import OscMsg

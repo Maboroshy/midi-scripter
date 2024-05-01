@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from collections.abc import Sequence
 
 import midiscripter.base.msg_base
@@ -36,7 +36,7 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
     VALUE_CHANGED - New value.
     """
 
-    source: Optional['GuiWidget']
+    source: 'None | GuiWidget'
 
     __match_args__: tuple[str] = ('type', 'data')
 
@@ -45,7 +45,7 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
         type: GuiEventType,
         data: str | int | bool | Sequence | None = None,
         *,
-        source: Optional['GuiWidget'] = None,
+        source: 'None | GuiWidget' = None,
     ):
         super().__init__(source)
         self.type = type

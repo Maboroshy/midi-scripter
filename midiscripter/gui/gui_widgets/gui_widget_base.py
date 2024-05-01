@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from collections.abc import Sequence
 
 from PySide6.QtWidgets import *

@@ -1,12 +1,12 @@
 import collections
 import threading
 import time
-from typing import TYPE_CHECKING, Union
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import midiscripter.base.shared
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from midiscripter.logger.console_sink import ConsoleSink
     from midiscripter.logger.html_sink import HtmlSink
 
@@ -71,7 +71,7 @@ class Log:
         return self.__sink
 
     @_sink.setter
-    def _sink(self, sink_obj: Union['HtmlSink', 'ConsoleSink', Callable[[list[str]], None]]):
+    def _sink(self, sink_obj: 'HtmlSink | ConsoleSink | Callable[[list[str]], None]'):
         self.__sink = sink_obj
         self._flush()
         self.__start_buffer_flush_thread()

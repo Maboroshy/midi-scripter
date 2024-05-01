@@ -1,5 +1,5 @@
 import pathlib
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import midiscripter.base.msg_base
 
@@ -26,14 +26,14 @@ class FileEventMsg(midiscripter.base.msg_base.Msg):
     path: pathlib.Path
     """File path of event"""
 
-    source: Optional['FileEventIn']
+    source: 'None | FileEventIn'
 
     def __init__(
         self,
         type: FileEventType | str,
         path: pathlib.Path,
         *,
-        source: Optional['FileEventIn'] = None,
+        source: 'None | FileEventIn' = None,
     ):
         """
         Args:

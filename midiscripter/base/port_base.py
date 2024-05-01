@@ -2,8 +2,8 @@ import collections
 import contextlib
 import copy
 import traceback
-from typing import TYPE_CHECKING, TypeVar
 from collections.abc import Callable, Hashable
+from typing import TYPE_CHECKING, TypeVar
 
 import midiscripter.base.shared
 from midiscripter.logger import log

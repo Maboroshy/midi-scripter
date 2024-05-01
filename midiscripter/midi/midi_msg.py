@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from collections.abc import Sequence
 
 import rtmidi.midiconstants
@@ -41,7 +41,7 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
     data1: int | tuple[int, int]
     data2: int | tuple[int, ...]
     combined_data: int | tuple[int, ...]
-    source: Optional['MidiIn']
+    source: 'None | MidiIn'
 
     def __new__(cls, *args, **kwargs):
         if args and isinstance(args[0], tuple) or not args and 'combined_data' in kwargs:
@@ -80,7 +80,7 @@ class ChannelMsg(MidiMsg):
         data1: int = 0,
         data2: int = 127,
         *,
-        source: Optional['MidiIn'] = None,
+        source: 'None | MidiIn' = None,
     ):
         """
         Args:
@@ -126,7 +126,7 @@ class SysexMsg(MidiMsg):
     def __new__(cls, *args, **kwargs):
         return object.__new__(SysexMsg)
 
-    def __init__(self, combined_data: tuple[int, ...], *, source: Optional['MidiIn'] = None):
+    def __init__(self, combined_data: tuple[int, ...], *, source: 'None | MidiIn' = None):
         """
         Args:
             combined_data: Whole sysex message including opening (`240`) and closing (`247`) bytes

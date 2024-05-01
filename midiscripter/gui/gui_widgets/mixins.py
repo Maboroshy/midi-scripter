@@ -1,4 +1,3 @@
-from typing import Optional, Union
 from collections.abc import Sequence
 
 from PySide6.QtCore import *

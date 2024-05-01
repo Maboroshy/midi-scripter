@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
 import pynput.keyboard
@@ -48,14 +48,14 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
     keycodes: list[pynput.keyboard.Key]
     """Keycodes in the order they were pressed. Use when press order matters."""
 
-    source: Optional['KeyIn']
+    source: 'None | KeyIn'
 
     def __init__(
         self,
         type: KeyEventType,
         shortcut_or_keycodes: str | Iterable[pynput.keyboard.Key],
         *,
-        source: Optional['KeyIn'] = None,
+        source: 'None | KeyIn' = None,
     ):
         """
         Args:

@@ -1,5 +1,3 @@
-from typing import Union
-
 import pythonosc.osc_server
 import pythonosc.udp_client
 

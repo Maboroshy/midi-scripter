@@ -1,5 +1,4 @@
 import time
-from typing import Union
 
 import midiscripter.base.port_base
 import midiscripter.base.shared
