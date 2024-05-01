@@ -41,7 +41,7 @@ class SavedCheckedStateAction(QAction):
         # replaces force _state_changed that causes widgets toggled by action to pop up
         self.setChecked(default_state)
         self.toggled.connect(self.__state_changed)
-        self.setChecked(QSettings().value(self.__setting_name, int(default_state)))
+        self.setChecked(bool(QSettings().value(self.__setting_name, int(default_state))))
 
     def __bool__(self):
         return bool(QSettings().value(self.__setting_name, int(self.__default_state)))
