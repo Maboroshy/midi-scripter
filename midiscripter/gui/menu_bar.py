@@ -1,14 +1,9 @@
 import pathlib
-import platform
-import sys
 from collections.abc import Callable
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
-
-if platform.system() == 'Windows':
-    import win32com.client
 
 import midiscripter.base.autostart
 import midiscripter.base.shared
