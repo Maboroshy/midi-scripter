@@ -10,6 +10,7 @@ from PySide6.QtWidgets import *
 if platform.system() == 'Windows':
     import win32com.client
 
+import midiscripter.base.autostart
 import midiscripter.base.shared
 import midiscripter.file_event
 import midiscripter.gui.main_window
@@ -77,16 +78,10 @@ class MenuBar(QMenuBar):
         # Options
         options_menu = self.addMenu('Options')
 
-        if platform.system() == 'Windows':
-            shortcut_name = (
-                f'{self.autostart_shortcut_prefix}'
-                f'{pathlib.Path(midiscripter.base.shared.script_path).stem}.lnk'
-            )
-            self.__autostart_script_path = self.autostart_path / shortcut_name
-            toggle_autostart = options_menu.addAction('Run at start up')
-            toggle_autostart.setCheckable(True)
-            toggle_autostart.setChecked(self.__autostart_script_path.is_file())
-            toggle_autostart.toggled.connect(self.__set_autostart)
+        toggle_autostart = options_menu.addAction('Run at start up')
+        toggle_autostart.setCheckable(True)
+        toggle_autostart.setChecked(midiscripter.base.autostart._check_if_enabled())
+        toggle_autostart.toggled.connect(self.__set_autostart)
 
         self.always_on_top = SavedCheckedStateAction(
             'Window always on top',
@@ -145,16 +140,7 @@ class MenuBar(QMenuBar):
 
     @Slot(bool)
     def __set_autostart(self, state: bool) -> None:
-        other_autostart_shortcuts = []
-        for path in self.autostart_path.iterdir():
-            if (
-                path.name.startswith(self.autostart_shortcut_prefix)
-                and path.is_file()
-                and path != self.__autostart_script_path.resolve()
-            ):
-                other_autostart_shortcuts.append(path)  # noqa: PERF401
-
-        if other_autostart_shortcuts:
+        if midiscripter.base.autostart._check_if_other_scripts_present():
             remove_other_dialog = QMessageBox()
             remove_other_dialog.setText(
                 'There are other scripts with enabled autostart. Disable them?'
@@ -167,22 +153,12 @@ class MenuBar(QMenuBar):
             if remove_other_dialog_pressed_button == QMessageBox.Cancel:
                 return
             elif remove_other_dialog_pressed_button == QMessageBox.Yes:
-                for shortcut_path in other_autostart_shortcuts:
-                    shortcut_path.unlink()
+                midiscripter.base.autostart._disable_others()
 
         if state:
-            shell = win32com.client.Dispatch('WScript.Shell')
-            shortcut = shell.CreateShortCut(str(self.__autostart_script_path.resolve()))
-            shortcut.Targetpath = str(pathlib.Path(sys.executable).parent / 'pythonw.exe')
-            shortcut.WorkingDirectory = str(
-                pathlib.Path(midiscripter.base.shared.script_path).parent.resolve()
-            )
-            shortcut.Arguments = (
-                f'"{pathlib.Path(midiscripter.base.shared.script_path).resolve()}" "--tray"'
-            )
-            shortcut.save()
+            midiscripter.base.autostart._enable()
         else:
-            self.__autostart_script_path.resolve().unlink(True)
+            midiscripter.base.autostart._disable()
 
     def __set_watching_script_file(self, new_status: bool):
         if new_status:
