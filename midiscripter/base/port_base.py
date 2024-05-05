@@ -229,17 +229,21 @@ class Output(Port):
         Args:
             msg: Message to send.
         """
-        with self._check_and_log_sent_message(msg):
-            raise NotImplementedError
-
-    @contextlib.contextmanager
-    def _check_and_log_sent_message(self, msg: 'Msg'):
-        if not self.is_enabled:
-            log.red("Can't send message {msg}. {output} is disabled!", msg=msg, output=self)
+        if not self._validate_msg_send(msg):
             return
 
-        yield
+        raise NotImplementedError
 
+        # noinspection PyUnreachableCode
+        self._log_msg_sent(msg)
+
+    def _validate_msg_send(self, msg: 'Msg') -> bool:
+        if not self.is_enabled:
+            log.red("Can't send message {msg}. {output} is disabled!", msg=msg, output=self)
+            return False
+        return True
+
+    def _log_msg_sent(self, msg: 'Msg') -> None:
         if msg.source:
             log(
                 '{output} sent message {msg} received {age_ms} ms ago',

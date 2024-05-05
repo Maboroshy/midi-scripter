@@ -249,14 +249,16 @@ class PortsWidget(QTreeWidget):
             if new_checked_state:
                 if not port_instance.is_enabled:
                     port_instance._open()
-                    port_instance.is_enabled = True
-                    log('Enabled {port}', port=port_instance)
 
-                if not port_instance.is_enabled:
-                    item.setData(
-                        0, Qt.ItemDataRole.BackgroundRole, QBrush(QColor().fromRgb(255, 0, 0, 20))
-                    )
-                    log.red("Can't enable {port}", port=port_instance)
+                    if port_instance.is_enabled:
+                        log('Enabled {port}', port=port_instance)
+                    else:
+                        item.setData(
+                            0,
+                            Qt.ItemDataRole.BackgroundRole,
+                            QBrush(QColor().fromRgb(255, 0, 0, 20)),
+                        )
+                        log.red("Can't enable {port}", port=port_instance)
                 else:
                     item.setData(
                         0,

@@ -51,6 +51,7 @@ class OscIn(midiscripter.base.port_base.Input):
 
     def _open(self):
         if self.__dispatcher:
+            self.is_enabled = True
             return
 
         self.__dispatcher = pythonosc.osc_server.Dispatcher()
@@ -88,6 +89,10 @@ class OscOut(midiscripter.base.port_base.Output):
         Args:
             msg: object to send
         """
-        with self._check_and_log_sent_message(msg):
-            data = list(msg.data) if isinstance(msg.data, tuple) else msg.data
-            self._osc_client.send_message(msg.address, data)
+        if not self._validate_msg_send(msg):
+            return
+
+        data = list(msg.data) if isinstance(msg.data, tuple) else msg.data
+        self._osc_client.send_message(msg.address, data)
+
+        self._log_msg_sent(msg)

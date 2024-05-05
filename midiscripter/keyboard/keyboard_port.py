@@ -51,6 +51,7 @@ class KeyIn(midiscripter.base.port_base.Input):
 
     def _open(self):
         if self.__pynput_listener:
+            self.is_enabled = True
             return
 
         self.__pynput_listener = pynput.keyboard.Listener(self.__on_press, self.__on_release)
@@ -80,10 +81,12 @@ class KeyOut(midiscripter.base.port_base.Output):
         Args:
             msg: object to send
         """
+        if not self._validate_msg_send(msg):
+            return
+
         # Log messages sent before actual sending, so receive messages for sent keys
         # won't be displayed before the message
-        with self._check_and_log_sent_message(msg):
-            pass
+        self._log_msg_sent(msg)
 
         if msg.type is KeyEventType.KEY_PRESS:
             for keycode in msg.keycodes:
