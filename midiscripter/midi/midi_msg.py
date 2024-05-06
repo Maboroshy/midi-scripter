@@ -114,10 +114,10 @@ class SysexMsg(MidiMsg):
     type = MidiType.SYSEX
     """MIDI message type."""
 
-    channel: tuple[int] | tuple[int, int, int]
+    channel: tuple[int, ...]
     """Manufacturer ID (protocol)."""
 
-    data1: tuple[int, int]
+    data1: tuple[int, ...]
     """Sub ID (model, device, command, etc.)."""
 
     data2: tuple[int, ...]
@@ -165,18 +165,24 @@ class SysexMsg(MidiMsg):
                 'Sysex message should start with 240 (0xF0) and end with 247 (0xF7)'
             )
 
-        # combined_data[0] is sysex status byte
-        sub_id_start_index = 4 if combined_data[1] == 0 else 2
-        data_start_index = sub_id_start_index + 2
-        manufacturer = tuple(combined_data[1:sub_id_start_index])
+        payload_data = combined_data[1:-1]  # without opening and closing bytes
 
-        if len(combined_data) < data_start_index + 1:  # +1 for closing 247 byte
+        if payload_data[0] == 0:  # 3 int manufacturer
+            channel_len = 3
+        elif payload_data[0] in (126, 127):  # universal
+            channel_len = 2
+        else:  # 1 int manufacturer
+            channel_len = 1
+
+        sub_id_len = 2
+
+        minimal_valid_msg_len = 1 + channel_len + sub_id_len + 1
+        if len(combined_data) < minimal_valid_msg_len:
             raise AttributeError(
-                f'Sysex message for manufacturer {manufacturer} '
-                f'should be at least {data_start_index + 1} ints '
-                f'starting with 240 and ending with 247'
+                f'This sysex message should be at least {minimal_valid_msg_len} ints '
+                f'starting with 240 and ending with 247, it has only {len(combined_data)}'
             )
 
-        self.channel = manufacturer
-        self.data1 = tuple(combined_data[sub_id_start_index:data_start_index])
-        self.data2 = tuple(combined_data[data_start_index:-1])  # sysex end byte excluded
+        self.channel = tuple(payload_data[0:channel_len])
+        self.data1 = tuple(payload_data[channel_len : channel_len + sub_id_len])
+        self.data2 = tuple(payload_data[channel_len + sub_id_len :])
