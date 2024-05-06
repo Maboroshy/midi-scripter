@@ -7,7 +7,8 @@ This script preserves sustain position by listening to sustain value
 and sending it to Ableton Live as soon as session record starts.
 
 ## Prerequisites
-- [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) app with `From DAW` and `To DAW` virtual ports.
+
+- `From DAW` and `To DAW` virtual ports.
 - [My fork of AbletonOSC](https://github.com/Maboroshy/AbletonOSC) 
 to detect session record status.
 - Set `To DAW` virtual port as an input in Ableton Live.
