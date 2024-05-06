@@ -27,7 +27,7 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         self.msg_to_send.source = self
 
         self.attached_passthrough_outs: list[Output] = []
-        """[`Output`][midiscripter.Output] ports attached 
+        """[`Output`][midiscripter.base.port_base.Output] ports attached 
            as pass-through ports to send metronome messages"""
 
     @property
@@ -44,7 +44,7 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         The output port should be compatible to send messages.
 
         Args:
-            output: [`Output`][midiscripter.Output] port to use for pass-through
+            output: [`Output`][midiscripter.base.port_base.Output] port to use for pass-through
         """
         if output not in self.attached_passthrough_outs:
             self.attached_passthrough_outs.append(output)
