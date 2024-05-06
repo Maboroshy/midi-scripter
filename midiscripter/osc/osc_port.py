@@ -40,7 +40,7 @@ class OscIn(midiscripter.base.port_base.Input):
         self.listener_ip_address, self.listener_port = _parse_ip_port(listener_ip_port)
         self.__dispatcher = None
 
-    def __osc_server_msg_handler(self, address: str, *data):
+    def __osc_server_msg_handler(self, address: str, *data) -> None:
         if not self.is_enabled:
             return
 
@@ -49,7 +49,7 @@ class OscIn(midiscripter.base.port_base.Input):
         input_msg = OscMsg(address, data, source=self)
         self._send_input_msg_to_calls(input_msg)
 
-    def _open(self):
+    def _open(self) -> None:
         if self.__dispatcher:
             self.is_enabled = True
             return
@@ -64,7 +64,7 @@ class OscIn(midiscripter.base.port_base.Input):
         self.is_enabled = True
         log('Opened {input}', input=self)
 
-    def _close(self):
+    def _close(self) -> None:
         self._osc_server.shutdown()
         self.is_enabled = False
         log('Stopped {input}', input=self)
@@ -83,7 +83,7 @@ class OscOut(midiscripter.base.port_base.Output):
         self._osc_client = pythonosc.udp_client.SimpleUDPClient(target_ip_address, target_port)
         self.is_enabled = True
 
-    def send(self, msg: OscMsg):
+    def send(self, msg: OscMsg) -> None:
         """Send the OSC message
 
         Args:

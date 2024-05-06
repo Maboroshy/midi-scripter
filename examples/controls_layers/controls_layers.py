@@ -28,14 +28,14 @@ LAYERS_CHANNELS_RANGE = range(
 )
 
 
-def send_saved_feedback_values():
+def send_saved_feedback_values() -> None:
     for control, value in layers_feedback_cc_values[current_layer_index].items():
         feedback_msg = MidiMsg(MidiType.CONTROL_CHANGE, MIDI_CONTROLLER_CHANNEL, control, value)
         to_midi_controller.send(feedback_msg)
 
 
 @layer_selector_widget.subscribe
-def gui_layer_selector(msg: GuiEventMsg):
+def gui_layer_selector(msg: GuiEventMsg) -> None:
     if not msg.matches(GuiEventType.SELECTED):
         return
 

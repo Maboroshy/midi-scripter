@@ -6,6 +6,7 @@ import pynput.keyboard
 import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
+    from collections.abc import Container
     from midiscripter.keyboard.keyboard_port import KeyIn
 
 
@@ -104,7 +105,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
         return self.__shortcut_cache
 
     @shortcut.setter
-    def shortcut(self, shortcut: str):
+    def shortcut(self, shortcut: str) -> None:
         self.keycodes = []
         for key in shortcut.split('+'):
             if len(key) == 1:
@@ -113,5 +114,9 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
                 key = getattr(pynput.keyboard.Key, key)
             self.keycodes.append(key)
 
-    def matches(self, type=None, shortcut=None):
+    def matches(
+        self,
+        type: 'None | Container[KeyEventType] | KeyEventType' = None,
+        shortcut: 'None | Container[str] | str' = None,
+    ) -> bool:
         return super().matches(type, shortcut)

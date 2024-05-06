@@ -72,7 +72,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
         """Port is available and can be opened."""
         return self.__port_name in self._available_names
 
-    def _open(self):
+    def _open(self) -> None:
         if self._rtmidi_port.is_port_open():
             self.is_enabled = True
             return
@@ -93,7 +93,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
         except Exception:
             log.red('Failed to open {port}', port=self)
 
-    def _close(self):
+    def _close(self) -> None:
         if not self._rtmidi_port.is_port_open():
             return
 
@@ -123,7 +123,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         """[`MidiOut`][midiscripter.MidiOut] ports attached as pass-through ports
         which will send all incoming messages as soon as they arrive before sending them to calls"""
 
-    def passthrough_out(self, midi_output: 'MidiOut'):
+    def passthrough_out(self, midi_output: 'MidiOut') -> None:
         """Attach [`MidiOut`][midiscripter.MidiOut] as a pass-through port
         to send all incoming messages as soon as they arrive,
         before sending them to calls. This can greatly reduce latency.
@@ -135,7 +135,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
             self.attached_passthrough_outs.append(midi_output)
             log('{input} input will pass through {output}', input=self, output=midi_output)
 
-    def __callback(self, rt_midi_input: tuple[tuple[hex, ...], float], _):
+    def __callback(self, rt_midi_input: tuple[tuple[hex, ...], float], _: list) -> None:
         if not self.is_enabled:
             return
 
@@ -202,7 +202,7 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
 
         self._log_msg_sent(msg)
 
-    def _passthrough_send(self, rt_midi_data: tuple[hex, hex, hex]):
+    def _passthrough_send(self, rt_midi_data: tuple[hex, hex, hex]) -> None:
         if self.is_enabled:
             try:
                 self._rtmidi_port.send_message(rt_midi_data)

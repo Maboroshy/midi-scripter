@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 
 
 @contextlib.contextmanager
-def _all_opened():
+def _all_opened() -> None:
     for port in _PortRegistryMeta.instance_registry.values():
         port._open()
 
     for call in midiscripter.base.shared.run_after_ports_open_subscribed_calls:
 
-        def __call_runner():
+        def __call_runner() -> None:
             try:
                 log('Running {call}', call=call)  # noqa: B023
                 call()  # noqa: B023

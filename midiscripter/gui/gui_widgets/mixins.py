@@ -32,13 +32,13 @@ class WrappedQWidgetMixin:
     def get_content(self) -> str | Sequence[str]:
         raise NotImplementedError
 
-    def set_content(self, new_content: str | Sequence[str]):
+    def set_content(self, new_content: str | Sequence[str]) -> None:
         raise NotImplementedError
 
     def get_value(self) -> str | None:
         raise NotImplementedError
 
-    def set_value(self, new_value: str | int | bool):
+    def set_value(self, new_value: str | int | bool) -> None:
         raise NotImplementedError
 
     def get_selected_item_index(self) -> int | None:
@@ -47,19 +47,19 @@ class WrappedQWidgetMixin:
     def get_selected_item_text(self) -> str | None:
         raise NotImplementedError
 
-    def set_selection(self, selection: int | str):
+    def set_selection(self, selection: int | str) -> None:
         raise NotImplementedError
 
     def get_toggle_state(self) -> bool | None:
         raise NotImplementedError
 
-    def set_toggle_state(self, new_state: bool):
+    def set_toggle_state(self, new_state: bool) -> None:
         raise NotImplementedError
 
     def get_color(self) -> str | None:
         return self.__color
 
-    def set_color(self, new_color_value: str | tuple[int, int, int]):
+    def set_color(self, new_color_value: str | tuple[int, int, int]) -> None:
         if isinstance(new_color_value, str):
             color = QColor(new_color_value)
         else:
@@ -90,11 +90,11 @@ class AdaptiveTextSizeMixin:
             self.__make_text_size_fit_widget_size()
             self.__longest_text_rect_size = text_rect
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
         self.__make_text_size_fit_widget_size()
 
-    def __make_text_size_fit_widget_size(self):
+    def __make_text_size_fit_widget_size(self) -> None:
         if not self.text():
             return
 

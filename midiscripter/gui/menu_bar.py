@@ -1,5 +1,5 @@
 import pathlib
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -10,17 +10,21 @@ import midiscripter.file_event
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from base.msg_base import Msg
+
 
 class SavedCheckedStateAction(QAction):
     def __init__(
         self,
         name: str,
-        func_for_state: Callable | None = None,
+        func_for_state: 'Callable | None' = None,
         *,
-        checked_func: Callable | None = None,
-        unchecked_func: Callable | None = None,
+        checked_func: 'Callable | None' = None,
+        unchecked_func: 'Callable | None' = None,
         default_state: bool = False,
-        key_shortcut: QKeySequence | None = None,
+        key_shortcut: 'QKeySequence | None' = None,
     ):
         super().__init__(name)
         self.__func_for_state = func_for_state
@@ -41,7 +45,7 @@ class SavedCheckedStateAction(QAction):
     def __bool__(self):
         return bool(QSettings().value(self.__setting_name, self.__default_state, type=bool))
 
-    def __state_changed(self, state: bool):
+    def __state_changed(self, state: bool) -> None:
         QSettings().setValue(self.__setting_name, state)
 
         if self.__func_for_state:
@@ -122,7 +126,7 @@ class MenuBar(QMenuBar):
             lambda: QDesktopServices.openUrl(QUrl('https://maboroshy.github.io/midi-scripter')),
         )
 
-    def _run_another_script(self):
+    def _run_another_script(self) -> None:
         file_path_str = QFileDialog.getOpenFileName(
             self,
             'Select python script',
@@ -155,7 +159,7 @@ class MenuBar(QMenuBar):
         else:
             self.autostart._disable()
 
-    def __set_watching_script_file(self, new_status: bool):
+    def __set_watching_script_file(self, new_status: bool) -> None:
         if new_status:
             self.file_watcher_port = midiscripter.file_event.FileEventIn(
                 midiscripter.base.shared.script_path
@@ -165,12 +169,12 @@ class MenuBar(QMenuBar):
         else:
             self.file_watcher_port.is_enabled = False
 
-    def __set_watching_midi_ports(self, new_status: bool):
+    def __set_watching_midi_ports(self, new_status: bool) -> None:
         if new_status:
             self.midi_port_watcher_port = midiscripter.midi.midi_ports_update.MidiPortsChangedIn()
 
             @self.midi_port_watcher_port.subscribe
-            def restart_on_midi_port_change(_):
+            def restart_on_midi_port_change(_: 'Msg') -> None:
                 QApplication.instance().request_restart.emit()
 
             self.midi_port_watcher_port._open()

@@ -112,7 +112,7 @@ class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
 
         self.qt_button_group.idReleased.connect(self.selection_changed_signal)
 
-    def set_selection(self, selection: int | str):
+    def set_selection(self, selection: int | str) -> None:
         try:
             self.wrapped_qt_buttons_map[selection].click()
         except KeyError:

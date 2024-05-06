@@ -20,14 +20,14 @@ class ListSelectorWidget(WrappedQWidgetMixin, QListWidget):
         self.__content = None
         self.currentRowChanged.connect(self.selection_changed_signal)
 
-    def get_content(self):
+    def get_content(self) -> tuple[str]:
         return self.__content
 
-    def set_content(self, list_items: Sequence[str]):
+    def set_content(self, list_items: tuple[str]) -> None:
         self.__content = list_items
         self.addItems(self.__content)
 
-    def set_selection(self, selection: int | str):
+    def set_selection(self, selection: int | str) -> None:
         if isinstance(selection, int):
             self.setCurrentRow(selection)
         else:

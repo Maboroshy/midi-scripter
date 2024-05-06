@@ -6,6 +6,7 @@ import rtmidi.midiconstants
 import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
+    from collections.abc import Container
     from midiscripter.midi.midi_port import MidiIn
 
 
@@ -49,7 +50,14 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
         else:
             return ChannelMsg.__new__(ChannelMsg, *args, **kwargs)
 
-    def matches(self, type=None, channel=None, data1=None, data2=None) -> bool:
+    def matches(
+        self,
+        type: 'None | Container[MidiType] | MidiType' = None,
+        channel: 'None | Container[ int | tuple[int] | tuple[int, int, int] ] | \
+                 int | tuple[int] | tuple[int, int, int]' = None,
+        data1: 'None | Container[int | tuple[int, int]] | int | tuple[int, int]' = None,
+        data2: 'None | Container[int | tuple[int, ...]] | int | tuple[int, ...]' = None,
+    ) -> bool:
         return super().matches(type, channel, data1, data2)
 
 
@@ -87,7 +95,7 @@ class ChannelMsg(MidiMsg):
             type: MIDI message type.
             channel: MIDI message channel
             data1: First data byte: note, control, program or aftertouch value
-            depending on MIDI message type
+                   depending on MIDI message type
             data2: Second data byte: velocity, value depending on MIDI message type
             source (MidiIn): The [`MidiIn`][midiscripter.MidiIn] instance that generated the message
         """
@@ -103,7 +111,7 @@ class ChannelMsg(MidiMsg):
         return self.data1 | (self.data2 << 7)
 
     @combined_data.setter
-    def combined_data(self, combined_data_value: int | Sequence[int]):
+    def combined_data(self, combined_data_value: int | Sequence[int]) -> None:
         self.data1 = combined_data_value & 0x7F
         self.data2 = combined_data_value >> 7
 
@@ -156,7 +164,7 @@ class SysexMsg(MidiMsg):
         )
 
     @combined_data.setter
-    def combined_data(self, combined_data: Sequence[int]):
+    def combined_data(self, combined_data: Sequence[int]) -> None:
         if (
             combined_data[0] != rtmidi.midiconstants.SYSTEM_EXCLUSIVE
             or combined_data[-1] != rtmidi.midiconstants.END_OF_EXCLUSIVE

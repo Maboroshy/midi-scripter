@@ -28,12 +28,12 @@ thread_executor = concurrent.futures.ThreadPoolExecutor(100)
 _precise_time_delta = time.time() - time.perf_counter()
 
 
-def precise_epoch_time():
+def precise_epoch_time() -> float:
     """current time in epoch format with nanosecond precision"""
     return _precise_time_delta + time.perf_counter()
 
 
-def restart_script():
+def restart_script() -> None:
     """Exit and restart current script"""
     os.execv(sys.executable, ['python', script_path])
     exit(0)
@@ -105,7 +105,7 @@ class AutostartManager:
     def _check_if_other_scripts_present(self) -> bool:
         return bool(self.__other_scripts_shortcuts())
 
-    def _enable(self):
+    def _enable(self) -> None:
         if platform.system() == 'Windows':
             shell = win32com.client.Dispatch('WScript.Shell')
             shortcut = shell.CreateShortCut(str(self.__autostart_shortcut_path.resolve()))
@@ -132,9 +132,9 @@ class AutostartManager:
             }
             self.__autostart_shortcut_path.write_bytes(plistlib.dumps(plist_file_content))
 
-    def _disable(self):
+    def _disable(self) -> None:
         self.__autostart_shortcut_path.unlink(missing_ok=True)
 
-    def _disable_others(self):
+    def _disable_others(self) -> None:
         for path in self.__other_scripts_shortcuts():
             path.unlink()

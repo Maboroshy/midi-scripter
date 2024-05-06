@@ -47,17 +47,17 @@ class LogView(QPlainTextEdit):
         log._sink = midiscripter.logger.html_sink.HtmlSink(self.append_html_entry.emit)
 
     @Slot(str)
-    def set_filter(self, filter_text: str):
+    def set_filter(self, filter_text: str) -> None:
         self.__filter_words = filter_text.split()
         self.__apply_filter()
 
-    def __apply_filter(self, to_last_n_blocks: int = 0):
+    def __apply_filter(self, to_last_n_blocks: int = 0) -> None:
         self.__hide_lines_not_matching_filter(to_last_n_blocks)
         if not to_last_n_blocks:
             self.__clear_highlighting()
         self.__highlight_filter_matches(to_last_n_blocks)
 
-    def __hide_lines_not_matching_filter(self, last_n_blocks: int = 0):
+    def __hide_lines_not_matching_filter(self, last_n_blocks: int = 0) -> None:
         document = self.document()
 
         start_from = 0 if not last_n_blocks else document.blockCount() - last_n_blocks
@@ -79,7 +79,7 @@ class LogView(QPlainTextEdit):
 
         self.setDocument(document)
 
-    def __clear_highlighting(self):
+    def __clear_highlighting(self) -> None:
         text_format = QTextCharFormat()
         text_format.setBackground(QBrush(Qt.NoBrush))
 
@@ -87,7 +87,7 @@ class LogView(QPlainTextEdit):
         cursor.select(QTextCursor.SelectionType.Document)
         cursor.mergeCharFormat(text_format)
 
-    def __highlight_filter_matches(self, last_n_blocks: int = 0):
+    def __highlight_filter_matches(self, last_n_blocks: int = 0) -> None:
         if not self.__filter_words:
             return
 
@@ -118,23 +118,23 @@ class LogView(QPlainTextEdit):
                 cursor.mergeCharFormat(text_format)
 
     @Slot(list)
-    def __add_entry(self, log_entries: list[str]):
+    def __add_entry(self, log_entries: list[str]) -> None:
         [self.appendHtml(f'<div>{entry}</div>') for entry in log_entries]
         self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
 
         if self.__filter_words:
             self.__apply_filter(len(log_entries))
 
-    def showEvent(self, event: QShowEvent):
+    def showEvent(self, event: QShowEvent) -> None:
         log.flushing_is_enabled = True
         log._flush()
         super().showEvent(event)
 
-    def hideEvent(self, event: QHideEvent):
+    def hideEvent(self, event: QHideEvent) -> None:
         log.flushing_is_enabled = False
         super().hideEvent(event)
 
-    def mouseMoveEvent(self, event: QMouseEvent):
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self.__anchor_text = self.anchorAt(event.pos())
         if self.__anchor_text:
             self.viewport().setCursor(Qt.PointingHandCursor)
@@ -142,7 +142,7 @@ class LogView(QPlainTextEdit):
             self.viewport().setCursor(Qt.IBeamCursor)
         super().mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event: QMouseEvent):
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and self.__anchor_text:
             QGuiApplication.clipboard().setText(self.__anchor_text)
             QToolTip().showText(
