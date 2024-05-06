@@ -133,7 +133,7 @@ class GuiButtonSelectorH(GuiWidget):
 
     def __init__(
         self,
-        content: Sequence[str],
+        content: tuple[str, ...],
         title: str | None = None,
         color: str | tuple[int, int, int] | None = None,
         *,
@@ -160,7 +160,7 @@ class GuiButtonSelectorV(GuiWidget):
 
     def __init__(
         self,
-        content: Sequence[str],
+        content: tuple[str, ...],
         title: str | None = None,
         color: str | tuple[int, int, int] | None = None,
         *,

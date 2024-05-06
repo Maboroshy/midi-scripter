@@ -1,3 +1,4 @@
+import types
 from typing import TYPE_CHECKING
 from collections.abc import Sequence
 
@@ -20,7 +21,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     def __init__(
         self,
-        content: str | Sequence[str],
+        content: str | tuple[str, ...],
         title: str | None = None,
         color: str | tuple[int, int, int] | None = None,
         *,
@@ -37,6 +38,9 @@ class GuiWidget(midiscripter.base.port_base.Input):
             select: Preset item text / index to select
             toggle_state: Preset toggle state
         """
+        if isinstance(content, types.GeneratorType):
+            content = tuple(content)
+
         self.title = title or str(content)
         """Widget's title."""
         super().__init__(self.title)
@@ -96,7 +100,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
         return self.qt_widget.get_content()
 
     @content.setter
-    def content(self, new_content: str | Sequence[str]):
+    def content(self, new_content: str | tuple[str, ...]):
         self.qt_widget.set_content_signal.emit(new_content)
         self.qt_widget.content_changed_signal.emit()
 

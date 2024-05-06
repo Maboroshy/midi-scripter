@@ -50,7 +50,7 @@ class GuiListSelector(GuiWidget):
 
     def __init__(
         self,
-        content: Sequence[str],
+        content: tuple[str, ...],
         title: str | None = None,
         color: str | tuple[int, int, int] | None = None,
         *,
