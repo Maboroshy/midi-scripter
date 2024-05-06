@@ -1,9 +1,9 @@
-from midiscripter import *  # tuned * import with no bloat
+from midiscripter import *
 
 midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you with port names
 proxy_output = MidiOut('To DAW')  # using loopMIDI virtual port for output
 
-# GUI controls in a single line, many widget available, custom widgets supported
+# GUI controls in a single line
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
 
 
