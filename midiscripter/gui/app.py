@@ -25,7 +25,9 @@ class ScripterGUI(QApplication):
     def __init__(self):
         super().__init__()
         self.setOrganizationName('MIDI Scripter')
-        self.setApplicationName(pathlib.Path(midiscripter.base.shared.script_path).name)
+        if midiscripter.base.shared.script_path:
+            self.setApplicationName(pathlib.Path(midiscripter.base.shared.script_path).name)
+
         icon_path = pathlib.Path(midiscripter.__file__).parent / 'resources' / 'icon.ico'
         self.setWindowIcon(QIcon(str(icon_path)))
 
@@ -89,6 +91,10 @@ def remove_qwidget(qwidget: QWidget):
 
 
 def start_gui() -> NoReturn:
+    if not midiscripter.base.shared.script_path:
+        print('Starter can only be called from a script')
+        exit(1)
+
     """Starts the script and runs GUI. Logging goes to GUI Log widget."""
     midiscripter.base.shared._raise_current_process_cpu_priority()
 
