@@ -5,7 +5,6 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-import midiscripter.base.autostart
 import midiscripter.base.shared
 import midiscripter.file_event
 import midiscripter.gui.main_window
@@ -73,9 +72,10 @@ class MenuBar(QMenuBar):
         # Options
         options_menu = self.addMenu('Options')
 
+        self.autostart = midiscripter.base.shared.AutostartManager()
         toggle_autostart = options_menu.addAction('Run at start up')
         toggle_autostart.setCheckable(True)
-        toggle_autostart.setChecked(midiscripter.base.autostart._check_if_enabled())
+        toggle_autostart.setChecked(self.autostart._check_if_enabled())
         toggle_autostart.toggled.connect(self.__set_autostart)
 
         self.always_on_top = SavedCheckedStateAction(
@@ -135,7 +135,7 @@ class MenuBar(QMenuBar):
 
     @Slot(bool)
     def __set_autostart(self, state: bool) -> None:
-        if midiscripter.base.autostart._check_if_other_scripts_present():
+        if self.autostart._check_if_other_scripts_present():
             remove_other_dialog = QMessageBox()
             remove_other_dialog.setText(
                 'There are other scripts with enabled autostart. Disable them?'
@@ -148,12 +148,12 @@ class MenuBar(QMenuBar):
             if remove_other_dialog_pressed_button == QMessageBox.Cancel:
                 return
             elif remove_other_dialog_pressed_button == QMessageBox.Yes:
-                midiscripter.base.autostart._disable_others()
+                self.autostart._disable_others()
 
         if state:
-            midiscripter.base.autostart._enable()
+            self.autostart._enable()
         else:
-            midiscripter.base.autostart._disable()
+            self.autostart._disable()
 
     def __set_watching_script_file(self, new_status: bool):
         if new_status:
