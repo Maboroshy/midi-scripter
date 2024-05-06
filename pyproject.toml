@@ -13,12 +13,9 @@ keywords = ['MIDI', 'OSC', 'script', 'automation', 'input']
 authors = [{name = 'Maboroshy'}]
 classifiers = [
   'Development Status :: 4 - Beta',
-  'Programming Language :: Python',
   'Programming Language :: Python :: 3.11',
   'Programming Language :: Python :: 3.12',
-  'Programming Language :: Python :: Implementation :: CPython',
   'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
-  'Operating System :: Microsoft :: Windows',
   'Topic :: Multimedia :: Sound/Audio',
   'Topic :: Multimedia :: Sound/Audio :: MIDI',
   'Topic :: Software Development :: Libraries :: Python Modules',
@@ -56,7 +53,8 @@ Source = 'https://github.com/Maboroshy/midi-scripter'
 line-length = 100
 
 [tool.ruff.lint]
-select = ['B', 'C', 'E', 'F', 'PERF', 'TCH', 'SIM', 'UP']
+select = ['B', 'C', 'E', 'F', 'PERF', 'TCH', 'SIM', 'UP', 'ANN001',
+  'ANN201', 'ANN202', ]
 ignore = ['E501', 'F401', 'F405', 'F403', 'SIM105']
 
 [tool.ruff.format]
