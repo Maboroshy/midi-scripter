@@ -18,7 +18,7 @@ An octave transposer with GUI controls in 10 lines of code:
 ``` python
 from midiscripter import *
 
-midi_keyboard = MidiIn('Port name')  # GUI will provide you with port names
+midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you with port names
 proxy_output = MidiOut('To DAW')  # using virtual port for output
 
 # GUI control in a single line
