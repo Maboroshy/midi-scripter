@@ -9,7 +9,7 @@ other Python code can send modified or brand-new messages with
 output ports. MIDI Scripter can act as a proxy to filter and transform and
 convert the input.
 
-MIDI Scripter included customizable GUI that provides messages logging,
+MIDI Scripter includes customizable GUI that provides messages logging,
 "ready to paste" port and message declarations and one line of code widgets for
 monitoring / controlling scripts.
 
