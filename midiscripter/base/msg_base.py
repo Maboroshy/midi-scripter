@@ -1,5 +1,4 @@
 import enum
-from typing import Optional
 from collections.abc import Container
 
 import midiscripter.base.shared

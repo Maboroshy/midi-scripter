@@ -1,10 +1,6 @@
 import pathlib
-import platform
-import sys
-from typing import TYPE_CHECKING, Optional
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
-import win32com.client
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
@@ -14,17 +10,21 @@ import midiscripter.file_event
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from base.msg_base import Msg
+
 
 class SavedCheckedStateAction(QAction):
     def __init__(
         self,
         name: str,
-        func_for_state: Callable | None = None,
+        func_for_state: 'Callable | None' = None,
         *,
-        checked_func: Callable | None = None,
-        unchecked_func: Callable | None = None,
+        checked_func: 'Callable | None' = None,
+        unchecked_func: 'Callable | None' = None,
         default_state: bool = False,
-        key_shortcut: QKeySequence | None = None,
+        key_shortcut: 'QKeySequence | None' = None,
     ):
         super().__init__(name)
         self.__func_for_state = func_for_state
@@ -40,13 +40,13 @@ class SavedCheckedStateAction(QAction):
         # replaces force _state_changed that causes widgets toggled by action to pop up
         self.setChecked(default_state)
         self.toggled.connect(self.__state_changed)
-        self.setChecked(QSettings().value(self.__setting_name, int(default_state)))
+        self.setChecked(bool(self))
 
     def __bool__(self):
-        return bool(QSettings().value(self.__setting_name, int(self.__default_state)))
+        return bool(QSettings().value(self.__setting_name, self.__default_state, type=bool))
 
-    def __state_changed(self, state: bool):
-        QSettings().setValue(self.__setting_name, int(state))
+    def __state_changed(self, state: bool) -> None:
+        QSettings().setValue(self.__setting_name, state)
 
         if self.__func_for_state:
             self.__func_for_state(state)
@@ -76,16 +76,11 @@ class MenuBar(QMenuBar):
         # Options
         options_menu = self.addMenu('Options')
 
-        if platform.system() == 'Windows':
-            shortcut_name = (
-                f'{self.autostart_shortcut_prefix}'
-                f'{pathlib.Path(midiscripter.base.shared.script_path).stem}.lnk'
-            )
-            self.__autostart_script_path = self.autostart_path / shortcut_name
-            toggle_autostart = options_menu.addAction('Run at start up')
-            toggle_autostart.setCheckable(True)
-            toggle_autostart.setChecked(self.__autostart_script_path.is_file())
-            toggle_autostart.toggled.connect(self.__set_autostart)
+        self.autostart = midiscripter.base.shared.AutostartManager()
+        toggle_autostart = options_menu.addAction('Run at start up')
+        toggle_autostart.setCheckable(True)
+        toggle_autostart.setChecked(self.autostart._check_if_enabled())
+        toggle_autostart.toggled.connect(self.__set_autostart)
 
         self.always_on_top = SavedCheckedStateAction(
             'Window always on top',
@@ -131,7 +126,7 @@ class MenuBar(QMenuBar):
             lambda: QDesktopServices.openUrl(QUrl('https://maboroshy.github.io/midi-scripter')),
         )
 
-    def _run_another_script(self):
+    def _run_another_script(self) -> None:
         file_path_str = QFileDialog.getOpenFileName(
             self,
             'Select python script',
@@ -144,16 +139,7 @@ class MenuBar(QMenuBar):
 
     @Slot(bool)
     def __set_autostart(self, state: bool) -> None:
-        other_autostart_shortcuts = []
-        for path in self.autostart_path.iterdir():
-            if (
-                path.name.startswith(self.autostart_shortcut_prefix)
-                and path.is_file()
-                and path != self.__autostart_script_path.resolve()
-            ):
-                other_autostart_shortcuts.append(path)  # noqa: PERF401
-
-        if other_autostart_shortcuts:
+        if self.autostart._check_if_other_scripts_present():
             remove_other_dialog = QMessageBox()
             remove_other_dialog.setText(
                 'There are other scripts with enabled autostart. Disable them?'
@@ -166,24 +152,14 @@ class MenuBar(QMenuBar):
             if remove_other_dialog_pressed_button == QMessageBox.Cancel:
                 return
             elif remove_other_dialog_pressed_button == QMessageBox.Yes:
-                for shortcut_path in other_autostart_shortcuts:
-                    shortcut_path.unlink()
+                self.autostart._disable_others()
 
         if state:
-            shell = win32com.client.Dispatch('WScript.Shell')
-            shortcut = shell.CreateShortCut(str(self.__autostart_script_path.resolve()))
-            shortcut.Targetpath = str(pathlib.Path(sys.executable).parent / 'pythonw.exe')
-            shortcut.WorkingDirectory = str(
-                pathlib.Path(midiscripter.base.shared.script_path).parent.resolve()
-            )
-            shortcut.Arguments = (
-                f'"{pathlib.Path(midiscripter.base.shared.script_path).resolve()}" "--tray"'
-            )
-            shortcut.save()
+            self.autostart._enable()
         else:
-            self.__autostart_script_path.resolve().unlink(True)
+            self.autostart._disable()
 
-    def __set_watching_script_file(self, new_status: bool):
+    def __set_watching_script_file(self, new_status: bool) -> None:
         if new_status:
             self.file_watcher_port = midiscripter.file_event.FileEventIn(
                 midiscripter.base.shared.script_path
@@ -193,12 +169,12 @@ class MenuBar(QMenuBar):
         else:
             self.file_watcher_port.is_enabled = False
 
-    def __set_watching_midi_ports(self, new_status: bool):
+    def __set_watching_midi_ports(self, new_status: bool) -> None:
         if new_status:
             self.midi_port_watcher_port = midiscripter.midi.midi_ports_update.MidiPortsChangedIn()
 
             @self.midi_port_watcher_port.subscribe
-            def restart_on_midi_port_change(_):
+            def restart_on_midi_port_change(_: 'Msg') -> None:
                 QApplication.instance().request_restart.emit()
 
             self.midi_port_watcher_port._open()

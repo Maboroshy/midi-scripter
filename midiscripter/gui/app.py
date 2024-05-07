@@ -25,7 +25,9 @@ class ScripterGUI(QApplication):
     def __init__(self):
         super().__init__()
         self.setOrganizationName('MIDI Scripter')
-        self.setApplicationName(pathlib.Path(midiscripter.base.shared.script_path).name)
+        if midiscripter.base.shared.script_path:
+            self.setApplicationName(pathlib.Path(midiscripter.base.shared.script_path).name)
+
         icon_path = pathlib.Path(midiscripter.__file__).parent / 'resources' / 'icon.ico'
         self.setWindowIcon(QIcon(str(icon_path)))
 
@@ -33,7 +35,7 @@ class ScripterGUI(QApplication):
         self.request_restart.connect(self, self.restart)
         self.aboutToQuit.connect(self.__cleanup)
 
-    def prepare_main_window(self, minimized_to_tray: bool = False):
+    def prepare_main_window(self, minimized_to_tray: bool = False) -> None:
         self.main_window = midiscripter.gui.main_window.MainWindow(self.widgets_to_add)
 
         if not minimized_to_tray:
@@ -41,7 +43,9 @@ class ScripterGUI(QApplication):
         else:
             self.main_window.close()
 
-    def restart_at_file_change(self, msg: 'midiscripter.file_event.file_change_msg.FileEventMsg'):
+    def restart_at_file_change(
+        self, msg: 'midiscripter.file_event.file_change_msg.FileEventMsg'
+    ) -> None:
         if msg.type not in (
             midiscripter.file_event.file_event_msg.FileEventType.CREATED,
             midiscripter.file_event.file_event_msg.FileEventType.MODIFIED,
@@ -57,15 +61,15 @@ class ScripterGUI(QApplication):
 
         self.request_restart.emit()
 
-    def restart(self):
+    def restart(self) -> NoReturn:
         if pathlib.Path(midiscripter.base.shared.script_path).is_file():
             # These settings saved only for restart
             self.processEvents()  # update win status to get correct status
-            QSettings().setValue('restart win minimized', int(self.main_window.isMinimized()))
-            QSettings().setValue('restart closed to tray', int(not self.main_window.isVisible()))
+            QSettings().setValue('restart win minimized', self.main_window.isMinimized())
+            QSettings().setValue('restart closed to tray', not self.main_window.isVisible())
             self.exit(1467)
 
-    def __cleanup(self):
+    def __cleanup(self) -> None:
         self.main_window.close()
         self.main_window.tray.hide()
 
@@ -74,13 +78,13 @@ class ScripterGUI(QApplication):
 app_instance = ScripterGUI()
 
 
-def add_qwidget(qwidget: QWidget):
+def add_qwidget(qwidget: QWidget) -> None:
     """Add custom pyside6 QWidget to the GUI"""
     if qwidget not in midiscripter.gui.app.ScripterGUI.widgets_to_add:
         midiscripter.gui.app.ScripterGUI.widgets_to_add.append(qwidget)
 
 
-def remove_qwidget(qwidget: QWidget):
+def remove_qwidget(qwidget: QWidget) -> None:
     """Remove custom pyside6 QWidget to the GUI"""
     try:
         midiscripter.gui.app.ScripterGUI.widgets_to_add.remove(qwidget)
@@ -89,6 +93,9 @@ def remove_qwidget(qwidget: QWidget):
 
 
 def start_gui() -> NoReturn:
+    if not midiscripter.base.shared.script_path:
+        raise RuntimeError('Starter can only be called from a script')
+
     """Starts the script and runs GUI. Logging goes to GUI Log widget."""
     midiscripter.base.shared._raise_current_process_cpu_priority()
 

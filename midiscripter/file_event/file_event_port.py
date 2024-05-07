@@ -1,5 +1,4 @@
 import pathlib
-from typing import Union
 
 import watchdog.events
 import watchdog.observers

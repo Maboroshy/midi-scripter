@@ -20,7 +20,7 @@ class KeyIn(midiscripter.base.port_base.Input):
         self.__pynput_listener = None
         self.pressed_keys = []
 
-    def __on_press(self, key: pynput.keyboard.Key):
+    def __on_press(self, key: pynput.keyboard.Key) -> None:
         if not self.is_enabled:
             return
 
@@ -33,7 +33,7 @@ class KeyIn(midiscripter.base.port_base.Input):
         msg = KeyMsg(KeyEventType.KEY_PRESS, self.pressed_keys.copy(), source=self)
         self._send_input_msg_to_calls(msg)
 
-    def __on_release(self, key: pynput.keyboard.Key):
+    def __on_release(self, key: pynput.keyboard.Key) -> None:
         if not self.is_enabled:
             return
 
@@ -49,8 +49,9 @@ class KeyIn(midiscripter.base.port_base.Input):
         except ValueError:
             pass
 
-    def _open(self):
+    def _open(self) -> None:
         if self.__pynput_listener:
+            self.is_enabled = True
             return
 
         self.__pynput_listener = pynput.keyboard.Listener(self.__on_press, self.__on_release)
@@ -59,7 +60,7 @@ class KeyIn(midiscripter.base.port_base.Input):
         self.is_enabled = True
         log('Started keyboard input listener')
 
-    def _close(self):
+    def _close(self) -> None:
         self.__pynput_listener.stop()
         self.is_enabled = False
         log('Stopped keyboard input listener')
@@ -74,16 +75,18 @@ class KeyOut(midiscripter.base.port_base.Output):
         super().__init__(self._force_uid)
         self.__pynput_controller = pynput.keyboard.Controller()
 
-    def send(self, msg: KeyMsg):
+    def send(self, msg: KeyMsg) -> None:
         """Send the keyboard input.
 
         Args:
             msg: object to send
         """
+        if not self._validate_msg_send(msg):
+            return
+
         # Log messages sent before actual sending, so receive messages for sent keys
         # won't be displayed before the message
-        with self._check_and_log_sent_message(msg):
-            pass
+        self._log_msg_sent(msg)
 
         if msg.type is KeyEventType.KEY_PRESS:
             for keycode in msg.keycodes:
@@ -99,5 +102,5 @@ class KeyOut(midiscripter.base.port_base.Output):
             for keycode in reversed(msg.keycodes):
                 self.__pynput_controller.release(keycode)
 
-    def type_in(self, string_to_type: str):
+    def type_in(self, string_to_type: str) -> None:
         self.__pynput_controller.type(string_to_type)

@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
+    from collections.abc import Container
     from midiscripter.osc.osc_port import OscIn
 
 
@@ -18,14 +19,14 @@ class OscMsg(midiscripter.base.msg_base.Msg):
     data: str | bytes | bool | int | float | list | tuple
     """Message data"""
 
-    source: Optional['OscIn']
+    source: 'None | OscIn'
 
     def __init__(
         self,
         address: str,
         data: str | bytes | bool | int | float | list | tuple = None,
         *,
-        source: Optional['OscIn'] = None,
+        source: 'None | OscIn' = None,
     ):
         """
         Args:
@@ -38,5 +39,10 @@ class OscMsg(midiscripter.base.msg_base.Msg):
         self.address = address
         self.data = data
 
-    def matches(self, address=None, data=None):
+    def matches(
+        self,
+        address: 'None | Container[str] | str' = None,
+        data: 'None | Container[str | bytes | bool | int | float | list | tuple] | \
+               str | bytes | bool | int | float | list | tuple' = None,
+    ) -> bool:
         return super().matches(self.type, address, data)

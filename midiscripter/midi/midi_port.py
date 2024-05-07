@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING, Optional, Union
+import platform
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import rtmidi
 import rtmidi.midiconstants
@@ -10,7 +11,6 @@ from midiscripter.midi.midi_msg import MidiType
 
 if TYPE_CHECKING:
     from midiscripter.midi.midi_msg import MidiMsg
-
 
 BYTE_TO_TYPE_MAP = {
     rtmidi.midiconstants.NOTE_ON: MidiType.NOTE_ON,
@@ -35,48 +35,71 @@ TYPE_TO_DATA_BYTES_COUNT = {
 }
 
 
+def _get_available_midi_port_names(
+    rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut],
+) -> list[str]:
+    raw_port_names = rtmidi_port_class().get_ports()
+    persistent_port_names = [port_name[: port_name.rfind(' ')] for port_name in raw_port_names]
+
+    if platform.system() == 'Windows':
+        return persistent_port_names
+    else:
+        port_names_without_prefixes = [
+            port_name[port_name.find(':') + 1 :] for port_name in persistent_port_names
+        ]
+        return port_names_without_prefixes
+
+
 class _MidiPortMixin(midiscripter.base.port_base.Port):
     # Attrs provided by the class that inherits from MidiPortMixin
     is_enabled: bool
     _available_names: list[str]
+    _is_virtual = False
 
     # noinspection PyMissingConstructor
     def __init__(self, port_name: str, input_callback: Callable | None = None):
         self.__port_name = port_name
 
         if input_callback:
-            self.__rtmidi_port = rtmidi.MidiIn()
-            self.__rtmidi_port.ignore_types(sysex=False)
-            self.__rtmidi_port.set_callback(input_callback)
+            self._rtmidi_port = rtmidi.MidiIn()
+            self._rtmidi_port.ignore_types(sysex=False)
+            self._rtmidi_port.set_callback(input_callback)
         else:
-            self.__rtmidi_port = rtmidi.MidiOut()
+            self._rtmidi_port = rtmidi.MidiOut()
 
     @property
     def _is_available(self) -> bool:
         """Port is available and can be opened."""
         return self.__port_name in self._available_names
 
-    def _open(self):
-        if self.__rtmidi_port.is_port_open():
+    def _open(self) -> None:
+        if self._rtmidi_port.is_port_open():
+            self.is_enabled = True
             return
 
         try:
             port_index = self._available_names.index(self.__port_name)
-            self.__rtmidi_port.open_port(port_index)
+            self._rtmidi_port.open_port(port_index)
             self.is_enabled = True
             log('Opened {port}', port=self)
         except ValueError:
-            log.red("Can't find port {port}. Check the port name.", port=self)
+            if platform.system() == 'Windows':
+                log.red("Can't find port {port}. Check the port name.", port=self)
+            else:
+                self._rtmidi_port.open_virtual_port(self.__port_name)
+                self._is_virtual = True
+                self.is_enabled = True
+                log('Created and opened virtual port {port}', port=self)
         except Exception:
             log.red('Failed to open {port}', port=self)
 
-    def _close(self):
-        if not self.__rtmidi_port.is_port_open():
+    def _close(self) -> None:
+        if not self._rtmidi_port.is_port_open():
             return
 
         try:
-            self.__rtmidi_port.close_port()
-            self.__rtmidi_port.delete()
+            self._rtmidi_port.close_port()
+            self._rtmidi_port.delete()
             self.is_enabled = False
             log('Closed {port}', port=self)
         except Exception:
@@ -86,9 +109,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
     """MIDI input port. Produces [`MidiMsg`][midiscripter.MidiMsg] objects."""
 
-    _available_names: list[str] = [
-        port_name[: port_name.rfind(' ')] for port_name in rtmidi.MidiIn().get_ports()
-    ]
+    _available_names: list[str] = _get_available_midi_port_names(rtmidi.MidiIn)
 
     def __init__(self, port_name: str):
         """
@@ -99,12 +120,13 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         midiscripter.base.port_base.Input.__init__(self, port_name)
 
         self.attached_passthrough_outs: list['MidiOut'] = []
-        """[`MidiOut`][midiscripter.MidiOut] ports attached as pass-through ports 
+        """[`MidiOut`][midiscripter.MidiOut] ports attached as pass-through ports
         which will send all incoming messages as soon as they arrive before sending them to calls"""
 
-    def passthrough_out(self, midi_output: 'MidiOut'):
-        """Attach [`MidiOut`][midiscripter.MidiOut] as a pass-through port to send all incoming messages
-        as soon as they arrive, before sending them to calls. This can greatly reduce latency.
+    def passthrough_out(self, midi_output: 'MidiOut') -> None:
+        """Attach [`MidiOut`][midiscripter.MidiOut] as a pass-through port
+        to send all incoming messages as soon as they arrive,
+        before sending them to calls. This can greatly reduce latency.
 
         Args:
             midi_output: [`MidiOut`][midiscripter.MidiOut] port to use for pass-through
@@ -113,7 +135,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
             self.attached_passthrough_outs.append(midi_output)
             log('{input} input will pass through {output}', input=self, output=midi_output)
 
-    def __callback(self, rt_midi_input: tuple[tuple[hex, ...], float], _):
+    def __callback(self, rt_midi_input: tuple[tuple[hex, ...], float], _: list) -> None:
         if not self.is_enabled:
             return
 
@@ -123,7 +145,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
 
     def __convert_to_msg(
         self, rt_midi_data: tuple[hex, ...]
-    ) -> Union['midiscripter.midi.midi_msg.ChannelMsg', 'midiscripter.midi.midi_msg.SysexMsg']:
+    ) -> 'midiscripter.midi.midi_msg.ChannelMsg | midiscripter.midi.midi_msg.SysexMsg':
         if (
             rt_midi_data[0] == rtmidi.midiconstants.SYSTEM_EXCLUSIVE
             and rt_midi_data[-1] == rtmidi.midiconstants.END_OF_EXCLUSIVE
@@ -145,9 +167,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
 class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
     """MIDI output port. Sends [`MidiMsg`][midiscripter.MidiMsg] objects."""
 
-    _available_names: list[str] = [
-        port_name[: port_name.rfind(' ')] for port_name in rtmidi.MidiOut().get_ports()
-    ]
+    _available_names: list[str] = _get_available_midi_port_names(rtmidi.MidiOut)
 
     def __init__(self, port_name: str):
         """
@@ -163,21 +183,29 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
         Args:
             msg: object to send
         """
-        with self._check_and_log_sent_message(msg):
-            if msg.type == MidiType.SYSEX:
-                rt_midi_output = msg.combined_data
-            else:
-                status_byte = (TYPE_TO_BYTE_MAP[msg.type] & 0xF0) | (msg.channel - 1 & 0xF)
-                msg_raw_data = status_byte, msg.data1, msg.data2
-                rt_midi_output = [msg_raw_data][: TYPE_TO_DATA_BYTES_COUNT[msg.type]]
+        if not self._validate_msg_send(msg):
+            return
 
-            self.__rtmidi_port.send_message(rt_midi_output)
+        if msg.type == MidiType.SYSEX:
+            rt_midi_output = msg.combined_data
+        else:
+            status_byte = (TYPE_TO_BYTE_MAP[msg.type] & 0xF0) | (msg.channel - 1 & 0xF)
+            msg_raw_data = status_byte, msg.data1, msg.data2
+            rt_midi_output = msg_raw_data[: TYPE_TO_DATA_BYTES_COUNT[msg.type]]
 
-    def _passthrough_send(self, rt_midi_data: tuple[hex, hex, hex]):
+        try:
+            self._rtmidi_port.send_message(rt_midi_output)
+        except Exception:
+            # For _rtmidi.SystemError: MidiOutWinMM::sendMessage: error sending MIDI message
+            log.red(f'Failed to send message: {msg}')
+            return
+
+        self._log_msg_sent(msg)
+
+    def _passthrough_send(self, rt_midi_data: tuple[hex, hex, hex]) -> None:
         if self.is_enabled:
             try:
-                self.__rtmidi_port.send_message(rt_midi_data)
-            except (
-                Exception
-            ):  # _rtmidi.SystemError: MidiOutWinMM::sendMessage: error sending MIDI message.
+                self._rtmidi_port.send_message(rt_midi_data)
+            except Exception:
+                # For _rtmidi.SystemError: MidiOutWinMM::sendMessage: error sending MIDI message
                 log.red(f'Failed to send message data: {rt_midi_data}')

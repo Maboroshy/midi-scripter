@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
@@ -21,7 +19,7 @@ class AdaptableLabelWidget(AdaptiveTextSizeMixin, WrappedQWidgetMixin, QLabel):
     def get_toggle_state(self) -> bool:
         return self.isEnabled()
 
-    def set_toggle_state(self, new_state: bool):
+    def set_toggle_state(self, new_state: bool) -> None:
         self.setEnabled(new_state)
 
 

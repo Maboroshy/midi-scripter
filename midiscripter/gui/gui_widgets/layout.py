@@ -22,8 +22,8 @@ class GuiWidgetLayout:
         """
         Args:
             rows: A tuple of items to put in a row.
-            Items can be widgets, layouts or tuples of widgets or layouts.
-            If item is a tuple it's a column of items inside the tuple.
+                  Items can be widgets, layouts or tuples of widgets or layouts.
+                  If item is a tuple it's a column of items inside the tuple.
 
         Warning:
             Calls can't be subscribed to `GuiWidgetLayout`.

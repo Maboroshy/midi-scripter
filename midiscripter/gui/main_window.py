@@ -9,7 +9,7 @@ import midiscripter.gui.ports_widget
 
 
 class TrayIcon(QSystemTrayIcon):
-    def __init__(self, icon, parent: 'MainWindow' = None):
+    def __init__(self, icon: QIcon, parent: 'MainWindow' = None):
         super().__init__(icon, parent)
         self.setToolTip(QApplication.instance().applicationName())
         self.activated.connect(self.__activated)
@@ -20,7 +20,7 @@ class TrayIcon(QSystemTrayIcon):
         menu.addAction('Quit', QApplication.instance().exit)
         self.setContextMenu(menu)
 
-    def __activated(self, reason: QSystemTrayIcon.ActivationReason):
+    def __activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
             if self.parent().isVisible():
                 self.parent().close()
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         self.tray = TrayIcon(self.windowIcon(), self)
         self.tray.show()
 
-    def add_widget_as_dock(self, widget: QWidget):
+    def add_widget_as_dock(self, widget: QWidget) -> None:
         dock = QDockWidget(self)
         dock.setObjectName(widget.objectName())
         dock.setWindowTitle(widget.objectName())
@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock)
         self.dock_widgets.append(dock)
 
-    def set_dock_titles_visibility(self, are_hidden: bool):
+    def set_dock_titles_visibility(self, are_hidden: bool) -> None:
         # Can't make full lock with setFixedSize due to AdaptiveTextSizeWidgets
         # that has "Ignore" size policy and always restore at maximum size after that
         for dock in self.dock_widgets:
@@ -76,17 +76,17 @@ class MainWindow(QMainWindow):
             else:
                 dock.setTitleBarWidget(None)
 
-    def show_from_tray(self):
+    def show_from_tray(self) -> None:
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
         self.resize(QSettings().value('win size', QSize(800, 500)))
         self.move(QSettings().value('win position', self.__get_screen_center()))
         self.restoreState(QSettings().value('win state'))
 
-        if QSettings().value('restart win minimized', False):
+        if QSettings().value('restart win minimized', False, type=bool):
             self.showMinimized()
             # 'win minimized' set by restart request, cleared for the next normal start
-            QSettings().setValue('restart win minimized', 0)
-        elif QSettings().value('win maximized', False):
+            QSettings().setValue('restart win minimized', False)
+        elif QSettings().value('win maximized', False, type=bool):
             self.showMaximized()
         else:
             self.show()
@@ -96,14 +96,14 @@ class MainWindow(QMainWindow):
         self.move(QSettings().value('win position', self.__get_screen_center()))
 
         # 'win visible' set by restart request, cleared for the next normal start
-        if QSettings().value('restart closed to tray', False):
-            QSettings().setValue('restart closed to tray', 0)
+        if QSettings().value('restart closed to tray', False, type=bool):
+            QSettings().setValue('restart closed to tray', False)
             self.close()
 
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, event: QCloseEvent) -> None:
         event.ignore()
         QSettings().setValue('win state', self.saveState())
-        QSettings().setValue('win maximized', int(self.isMaximized()))
+        QSettings().setValue('win maximized', self.isMaximized())
 
         if not self.isMaximized():
             QSettings().setValue('win size', self.size())
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
 
         self.hide()
 
-    def set_always_on_top(self, state: bool):
+    def set_always_on_top(self, state: bool) -> None:
         if state:
             self.setWindowFlags(self.__always_on_top_flags)
         else:

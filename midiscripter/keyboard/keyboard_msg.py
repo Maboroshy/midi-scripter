@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
 import pynput.keyboard
@@ -6,6 +6,7 @@ import pynput.keyboard
 import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
+    from collections.abc import Container
     from midiscripter.keyboard.keyboard_port import KeyIn
 
 
@@ -48,14 +49,14 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
     keycodes: list[pynput.keyboard.Key]
     """Keycodes in the order they were pressed. Use when press order matters."""
 
-    source: Optional['KeyIn']
+    source: 'None | KeyIn'
 
     def __init__(
         self,
         type: KeyEventType,
         shortcut_or_keycodes: str | Iterable[pynput.keyboard.Key],
         *,
-        source: Optional['KeyIn'] = None,
+        source: 'None | KeyIn' = None,
     ):
         """
         Args:
@@ -104,7 +105,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
         return self.__shortcut_cache
 
     @shortcut.setter
-    def shortcut(self, shortcut: str):
+    def shortcut(self, shortcut: str) -> None:
         self.keycodes = []
         for key in shortcut.split('+'):
             if len(key) == 1:
@@ -113,5 +114,9 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
                 key = getattr(pynput.keyboard.Key, key)
             self.keycodes.append(key)
 
-    def matches(self, type=None, shortcut=None):
+    def matches(
+        self,
+        type: 'None | Container[KeyEventType] | KeyEventType' = None,
+        shortcut: 'None | Container[str] | str' = None,
+    ) -> bool:
         return super().matches(type, shortcut)

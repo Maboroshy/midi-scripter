@@ -2,8 +2,8 @@ import collections
 import contextlib
 import copy
 import traceback
-from typing import TYPE_CHECKING, TypeVar
 from collections.abc import Callable, Hashable
+from typing import TYPE_CHECKING, TypeVar
 
 import midiscripter.base.shared
 from midiscripter.logger import log
@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 
 
 @contextlib.contextmanager
-def _all_opened():
+def _all_opened() -> None:
     for port in _PortRegistryMeta.instance_registry.values():
         port._open()
 
     for call in midiscripter.base.shared.run_after_ports_open_subscribed_calls:
 
-        def __call_runner():
+        def __call_runner() -> None:
             try:
                 log('Running {call}', call=call)  # noqa: B023
                 call()  # noqa: B023
@@ -229,17 +229,21 @@ class Output(Port):
         Args:
             msg: Message to send.
         """
-        with self._check_and_log_sent_message(msg):
-            raise NotImplementedError
-
-    @contextlib.contextmanager
-    def _check_and_log_sent_message(self, msg: 'Msg'):
-        if not self.is_enabled:
-            log.red("Can't send message {msg}. {output} is disabled!", msg=msg, output=self)
+        if not self._validate_msg_send(msg):
             return
 
-        yield
+        raise NotImplementedError
 
+        # noinspection PyUnreachableCode
+        self._log_msg_sent(msg)
+
+    def _validate_msg_send(self, msg: 'Msg') -> bool:
+        if not self.is_enabled:
+            log.red("Can't send message {msg}. {output} is disabled!", msg=msg, output=self)
+            return False
+        return True
+
+    def _log_msg_sent(self, msg: 'Msg') -> None:
         if msg.source:
             log(
                 '{output} sent message {msg} received {age_ms} ms ago',

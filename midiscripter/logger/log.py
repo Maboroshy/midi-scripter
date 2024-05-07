@@ -1,12 +1,12 @@
 import collections
 import threading
 import time
-from typing import TYPE_CHECKING, Union
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import midiscripter.base.shared
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from midiscripter.logger.console_sink import ConsoleSink
     from midiscripter.logger.html_sink import HtmlSink
 
@@ -40,7 +40,7 @@ class Log:
         self.__start_buffer_flush_thread()
         self.__wait_counter = 0
 
-    def __call__(self, text, **kwargs):
+    def __call__(self, text: str, **kwargs):
         """Print log message.
 
         Args:
@@ -65,21 +65,21 @@ class Log:
         self.__buffer.append((str(text), kwargs))
 
     @property
-    def _sink(self):
+    def _sink(self) -> 'Callable':
         """A callable that receives a list of log strings to print them for user.
         Set by starter. Can be altered to customize the logger."""
         return self.__sink
 
     @_sink.setter
-    def _sink(self, sink_obj: Union['HtmlSink', 'ConsoleSink', Callable[[list[str]], None]]):
+    def _sink(self, sink_obj: 'HtmlSink | ConsoleSink | Callable[[list[str]], None]') -> None:
         self.__sink = sink_obj
         self._flush()
         self.__start_buffer_flush_thread()
 
-    def __start_buffer_flush_thread(self):
+    def __start_buffer_flush_thread(self) -> None:
         threading.Thread(target=self._buffer_flush_worker, daemon=True).start()
 
-    def _buffer_flush_worker(self):
+    def _buffer_flush_worker(self) -> None:
         """Thread worker loop that flushes buffered messages"""
         while self._sink:
             time.sleep(self.FLUSH_DELAY)
@@ -87,7 +87,7 @@ class Log:
             if self.__buffer:
                 self._flush()
 
-    def _flush(self):
+    def _flush(self) -> None:
         """Sends buffered messages to sink"""
         output_entries = []
 
@@ -103,26 +103,26 @@ class Log:
         except (TypeError, RuntimeError):  # ignore Qt error on widget destruction at app exit
             pass
 
-    def red(self, text: str, **kwargs):
+    def red(self, text: str, **kwargs) -> None:
         """Print red log message."""
         self(text, _color='red', **kwargs)
 
-    def blue(self, text: str, **kwargs):
+    def blue(self, text: str, **kwargs) -> None:
         """Print blue log message."""
         self(text, _color='blue', **kwargs)
 
-    def cyan(self, text: str, **kwargs):
+    def cyan(self, text: str, **kwargs) -> None:
         """Print cyan log message."""
         self(text, _color='cyan', **kwargs)
 
-    def magenta(self, text: str, **kwargs):
+    def magenta(self, text: str, **kwargs) -> None:
         """Print magenta log message."""
         self(text, _color='magenta', **kwargs)
 
-    def green(self, text: str, **kwargs):
+    def green(self, text: str, **kwargs) -> None:
         """Print green log message."""
         self(text, _color='green', **kwargs)
 
-    def yellow(self, text: str, **kwargs):
+    def yellow(self, text: str, **kwargs) -> None:
         """Print yellow log message."""
         self(text, _color='yellow', **kwargs)

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 from collections.abc import Sequence
 
 from PySide6.QtWidgets import *
@@ -113,7 +112,7 @@ class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
 
         self.qt_button_group.idReleased.connect(self.selection_changed_signal)
 
-    def set_selection(self, selection: int | str):
+    def set_selection(self, selection: int | str) -> None:
         try:
             self.wrapped_qt_buttons_map[selection].click()
         except KeyError:
@@ -134,7 +133,7 @@ class GuiButtonSelectorH(GuiWidget):
 
     def __init__(
         self,
-        content: Sequence[str],
+        content: tuple[str, ...],
         title: str | None = None,
         color: str | tuple[int, int, int] | None = None,
         *,
@@ -161,7 +160,7 @@ class GuiButtonSelectorV(GuiWidget):
 
     def __init__(
         self,
-        content: Sequence[str],
+        content: tuple[str, ...],
         title: str | None = None,
         color: str | tuple[int, int, int] | None = None,
         *,

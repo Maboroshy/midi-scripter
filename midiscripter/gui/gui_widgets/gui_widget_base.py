@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Optional, Union
+import types
+from typing import TYPE_CHECKING
 from collections.abc import Sequence
 
 from PySide6.QtWidgets import *
@@ -20,7 +21,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     def __init__(
         self,
-        content: str | Sequence[str],
+        content: str | tuple[str, ...],
         title: str | None = None,
         color: str | tuple[int, int, int] | None = None,
         *,
@@ -37,6 +38,9 @@ class GuiWidget(midiscripter.base.port_base.Input):
             select: Preset item text / index to select
             toggle_state: Preset toggle state
         """
+        if isinstance(content, types.GeneratorType):
+            content = tuple(content)
+
         self.title = title or str(content)
         """Widget's title."""
         super().__init__(self.title)
@@ -91,12 +95,12 @@ class GuiWidget(midiscripter.base.port_base.Input):
         )
 
     @property
-    def content(self):
+    def content(self) -> str | tuple[str, ...]:
         """Widget's text or text for its items."""
         return self.qt_widget.get_content()
 
     @content.setter
-    def content(self, new_content: str | Sequence[str]):
+    def content(self, new_content: str | tuple[str, ...]) -> None:
         self.qt_widget.set_content_signal.emit(new_content)
         self.qt_widget.content_changed_signal.emit()
 
@@ -109,7 +113,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
             return None
 
     @value.setter
-    def value(self, new_value):
+    def value(self, new_value: str | None) -> None:
         self.qt_widget.set_value_signal.emit(new_value)
         self.qt_widget.value_changed_signal.emit()
 
@@ -129,7 +133,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
         except NotImplementedError:
             return None
 
-    def select(self, selection: int | str):
+    def select(self, selection: int | str) -> None:
         """Select widget's item
 
         Args:
@@ -147,7 +151,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
             return None
 
     @toggle_state.setter
-    def toggle_state(self, new_state: bool):
+    def toggle_state(self, new_state: bool) -> None:
         self.qt_widget.set_toggle_state_signal.emit(new_state)
         self.qt_widget.toggle_state_changed_signal.emit()
 
@@ -157,7 +161,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
         return self.qt_widget.get_color()
 
     @color.setter
-    def color(self, new_color_value: str | tuple[int, int, int]):
+    def color(self, new_color_value: str | tuple[int, int, int]) -> None:
         self.qt_widget.set_color_signal.emit(new_color_value)
         self._send_input_msg_to_calls(
             GuiEventMsg(GuiEventType.COLOR_SET, new_color_value, source=self)

@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING, Optional, Union
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence, Container
     from midiscripter.gui.gui_widgets.gui_widget_base import GuiWidget
 
 
@@ -24,7 +24,7 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
     type: GuiEventType
     """GUI event type."""
 
-    data: str | int | bool | Sequence | None
+    data: 'str | int | bool | Sequence | None'
     """New value set by event.
     
     Data meaning for event types:  
@@ -36,20 +36,25 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
     VALUE_CHANGED - New value.
     """
 
-    source: Optional['GuiWidget']
+    source: 'None | GuiWidget'
 
     __match_args__: tuple[str] = ('type', 'data')
 
     def __init__(
         self,
         type: GuiEventType,
-        data: str | int | bool | Sequence | None = None,
+        data: 'str | int | bool | Sequence | None' = None,
         *,
-        source: Optional['GuiWidget'] = None,
+        source: 'None | GuiWidget' = None,
     ):
         super().__init__(source)
         self.type = type
         self.data = data
 
-    def matches(self, type=None, data=None) -> bool:
+    def matches(
+        self,
+        type: 'None | Container[GuiEventType] | GuiEventType' = None,
+        data: 'None | Container[str | int | bool | Sequence | None] | \
+                       str | int | bool | Sequence | None' = None,
+    ) -> bool:
         return super().matches(type, data)

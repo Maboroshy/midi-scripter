@@ -3,7 +3,7 @@ site_url: https://maboroshy.github.io/midi-scripter
 repo_url: https://github.com/Maboroshy/midi-scripter
 
 nav:
-    - Guide: index.md
+    - Overview: index.md
 
     - API Documentation:
         - Midi:

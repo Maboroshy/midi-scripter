@@ -1,5 +1,4 @@
 import time
-from typing import Union
 
 import midiscripter.base.port_base
 import midiscripter.base.shared
@@ -28,7 +27,7 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         self.msg_to_send.source = self
 
         self.attached_passthrough_outs: list[Output] = []
-        """[`Output`][midiscripter.Output] ports attached 
+        """[`Output`][midiscripter.base.port_base.Output] ports attached 
            as pass-through ports to send metronome messages"""
 
     @property
@@ -37,26 +36,26 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         return 60 / self.__interval_sec
 
     @bpm.setter
-    def bpm(self, bpm: float):
+    def bpm(self, bpm: float) -> None:
         self.__interval_sec = 60 / bpm
 
-    def passthrough_out(self, output: Output):
+    def passthrough_out(self, output: Output) -> None:
         """Attach output port as a pass-through port to send metronome messages.
         The output port should be compatible to send messages.
 
         Args:
-            output: [`Output`][midiscripter.Output] port to use for pass-through
+            output: [`Output`][midiscripter.base.port_base.Output] port to use for pass-through
         """
         if output not in self.attached_passthrough_outs:
             self.attached_passthrough_outs.append(output)
             log('{input} input will pass through {output}', input=self, output=output)
 
-    def _open(self):
+    def _open(self) -> None:
         self.is_enabled = True
         midiscripter.base.shared.thread_executor.submit(self.__send_clicks_worker)
         log(f'Started metronome at {self.bpm} bpm')
 
-    def __send_clicks_worker(self):
+    def __send_clicks_worker(self) -> None:
         while self.is_enabled:
             time.sleep(self.__interval_sec)
             self.msg_to_send.ctime = midiscripter.base.shared.precise_epoch_time()
@@ -68,5 +67,5 @@ class MetronomeIn(midiscripter.base.port_base.Input):
 
         log(f'Stopped metronome at {self.bpm} bpm')
 
-    def _close(self):
+    def _close(self) -> None:
         self.is_enabled = False

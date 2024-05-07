@@ -40,7 +40,7 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
     def _close(self) -> None:
         self.is_enabled = False
 
-    def __updater_worker(self):
+    def __updater_worker(self) -> None:
         while self.is_enabled:
             time.sleep(self.REFRESH_RATE_SEC)
 
