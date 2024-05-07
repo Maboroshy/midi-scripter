@@ -11,8 +11,8 @@
 ## Fixed
 
 - MIDI port send issues
-- Sending with closed port behaviour
-- Port re-enabling behaviour
+- Sending with closed port behavior
+- Port re-enabling behavior
 - Running starter from IPython now raises exception.
 
 ## v0.2 - 30.04.2024
