@@ -41,7 +41,7 @@ if __name__ == '__main__':  # combine multiple scripts by importing them
 [Overview and API documentation available.](https://maboroshy.github.io/midi-scripter)
 
 Currently MIDI Scripter is at "beta" development stage. It's fully
-functional but needs more user feedback. It works on Windows and Linx and
+functional but needs more user feedback. It works on Windows and Linux and
 should work on macOS.
 
 ## What it can do
