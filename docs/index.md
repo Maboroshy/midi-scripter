@@ -1,4 +1,4 @@
-MIDI Scripter script has 5 main elements:
+MIDI Scripter scripts has 5 main elements:
 
 ```python
 from midiscripter import *
@@ -10,6 +10,7 @@ proxy_output = MidiOut('To DAW')
 # 2. GUI widgets (optional)
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
 
+
 # 3. Calls
 @midi_keyboard.subscribe
 def transpose(msg: MidiMsg) -> None:
@@ -19,6 +20,7 @@ def transpose(msg: MidiMsg) -> None:
         msg.data1 += 12 * int(octave_selector.selected_item_text)
         proxy_output.send(msg)
 
+
 # 5. Starter
 if __name__ == '__main__':
     start_gui() 
@@ -26,29 +28,28 @@ if __name__ == '__main__':
 
 ## 1. Ports
 
-_Input ports_ are the sources and _output ports_ are a destination for 
+_Input ports_ are a source and _output ports_ are a destination for
 _message_ objects.
 
-_Ports_ are typically declared as `port_class(name_or_adress)`, except some 
-that don't even need a name. Check specific ports description in API 
-documentation.
+_Port_ is typically declared as `port_class(name_or_adress)` or `port_class
+()` for those that don't need a name. Check specific ports description in
+API documentation.
 
-_Port_ declaration line is all you need to use the port, the _starter_ 
+_Port_ declaration line is all you need to use the port, the _starter_
 function does the rest.
 
 _Port_ declaration for unavailable MIDI port name will create a virtual port
 (prepended with `[v]` in GUI) on Linux and macOS. On Windows you'll have to
 use [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) to
-create virtual ports manually. Virtual MIDI ports can be used to write proxy 
+create virtual ports manually. Virtual MIDI ports can be used to write proxy
 scripts, like the one above.
 
-After the _starter_ opens all declared _ports_ the input _ports_ start to 
+The _starter_ opens all declared _ports_ and input _ports_ start to
 send _messages_ to subscribed _calls_.
 
-_Calls_ or other Python code can use `output_port.send(msg)` to send 
-messages.
+_Calls_ or other Python code can use `output_port.send(msg)` to send messages.
 
-Available ports: 
+Available ports:
 [MIDI](api/midi_port.md),
 [OSC](api/osc_port.md),
 [Keyboard](api/key_port.md),
@@ -61,15 +62,15 @@ Available ports:
 _GUI widgets_ declared in the script appear in GUI window opened
 by [`start_gui`][midiscripter.start_gui] _starter_.
 
-Widgets are declared as `widget_class(content, title = None, color = None)`
-where:
+Widgets are declared as `widget_class(content)`, `widget_class(content, title)`
+or `widget_class(content, title, color)` where:
 
-- content - widget's text or tuple of items' text;
-- title - optional widget title, by default the title is set by content;
-- color - optional widget's text color.
+- content - widget's text or tuple of its items' text;
+- title - optional widget title, by default the title is the content;
+- color - optional widget's text color as color name or tuple of RGB values.
 
 Widget's initial state can be set by key value arguments specific for widget
-class (`select`, `toggle_state`, etc.).
+class (`select`, `toggle_state`, etc.) like in the example above.
 
 Widget's current state can be got or set by reading or changing its properties.
 
@@ -77,12 +78,10 @@ Check the widgets description in API documentation for declaration arguments and
 properties of each widget.
 
 _GUI widgets_ can be rearranged inside or even outside of GUI window by dragging
-their titles.
-The initial widget layout can be messy, but it's easy to arrange it as you want.
-The GUI will save the widget layout for each script.
+their titles. The initial widget layout can be messy, but it's easy to
+arrange it as you want. The GUI will save the widget layout for each script.
 
-_GUI widgets_ act like input ports. They follow "one title - one instance" rule
-and can have subscribed _calls_ that will
+_GUI widgets_ act like input ports. They can subscribe _calls_ that will
 receive [`GuiEventMsg`][midiscripter.GuiEventMsg] _messages_.
 
 Custom PySide6 widgets can be added to the GUI by `add_qwidget(qwidget)`.
@@ -96,11 +95,11 @@ Available widgets:
 [GuiListSelector][midiscripter.GuiListSelector],
 [GuiWidgetLayout][midiscripter.GuiWidgetLayout].
 
-
 ## 3. Calls
 
 _Call_ is a function, an object method or anything callable that takes _message_
-as the only argument. _Calls_ are not expected to return anything.
+as the only argument. _Calls_ can have any name and are not expected to return
+anything.
 
 _Calls_ are subscribed to an input _port_ messages
 by `@input_port_obj.subscribe` decorator. A single call can be subscribed to
@@ -113,22 +112,22 @@ def do_something(msg: MidiMsg) -> None:
     log.green('The call receives messages from both ports')
 ```
 
-MIDI Scripter has it's own logger that can be used for _calls_ debugging or
+MIDI Scripter has its own logger that can be used for _calls_ debugging or
 feedback output. Print log messages with `log('message')`
-or `log.red('colored message')`. Color methods
+or `log.red('colored message')`. THe color methods
 are `red`, `yellow`, `green`, `cyan`, `blue` and `magenta`.
 
-Each _call_ runs in its own thread but all _calls_ run in the same process. If a
-_call_ does some heavy computing it can increase latency and jitter for the
-whole script. It's advised to move heavy computing out of the main process with
-Python'
-s [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html)
+Each _call_ runs in its own thread but all _calls_ run in the same process.
+So if a_call_ does some heavy computing it can increase latency and jitter for
+the whole script. It's advised to move heavy computing out of the main
+process with Python's
+[`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html)
 module.
 
 Each _call_ receives its own copy of the input _message_ it can modify without
 affecting other calls' work.
 
-Getting exception in _call_ won't affect other _calls_ or the script's work.
+Getting exception in a _call_ won't affect other _calls_ or the script's work.
 Exception details are printed to log.
 
 You can check _call_ execution time statistics in the Ports GUI widget by
@@ -179,7 +178,7 @@ ChannelMsg(MidiType.CONTROL_CHANGE, 1, 10, 128)
 that complicated. They and other _message_ types are described in API
 documentation.
 
-Available message types: 
+Available message types:
 [MidiMsg][midiscripter.MidiMsg]
 ([ChannelMsg][midiscripter.ChannelMsg],
 [SysexMsg][midiscripter.SysexMsg]),
@@ -199,7 +198,8 @@ There are 3 _starter_ functions:
 
 - [`start_gui`][midiscripter.start_gui] - starts the script with GUI and routes
   log messages to its Log widget. The preferred starter.
-- [`start_silent`][midiscripter.start_silent] - starts the script with no logging
+- [`start_silent`][midiscripter.start_silent] - starts the script with no
+  logging
   or GUI. The fastest.
 - [`start_cli_debug`][midiscripter.start_cli_debug] - starts the script with
   logging to console. That increases latency and jitter. Use only while
@@ -216,6 +216,9 @@ instance (singleton):
 
 ``` python
 >>> MidiIn('Port name') is MidiIn('Port name')
+True
+
+>>> GuiButton('Ok') is GuiButton('Ok')
 True
 ```
 
