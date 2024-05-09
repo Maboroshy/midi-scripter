@@ -2,7 +2,7 @@ import pythonosc.osc_server
 import pythonosc.udp_client
 
 import midiscripter.base.port_base
-import midiscripter.base.shared
+import midiscripter.shared
 import midiscripter.osc.osc_msg
 from midiscripter.logger import log
 from midiscripter.osc.osc_msg import OscMsg
@@ -60,7 +60,7 @@ class OscIn(midiscripter.base.port_base.Input):
             (self.listener_ip_address, self.listener_port), self.__dispatcher
         )
 
-        midiscripter.base.shared.thread_executor.submit(self._osc_server.serve_forever)
+        midiscripter.shared.thread_executor.submit(self._osc_server.serve_forever)
         self.is_enabled = True
         log('Opened {input}', input=self)
 

@@ -10,7 +10,7 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 import midiscripter.base.port_base
-import midiscripter.base.shared
+import midiscripter.shared
 import midiscripter.file_event.file_event_msg
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
@@ -25,8 +25,8 @@ class ScripterGUI(QApplication):
     def __init__(self):
         super().__init__()
         self.setOrganizationName('MIDI Scripter')
-        if midiscripter.base.shared.script_path:
-            self.setApplicationName(pathlib.Path(midiscripter.base.shared.script_path).name)
+        if midiscripter.shared.script_path:
+            self.setApplicationName(pathlib.Path(midiscripter.shared.script_path).name)
 
         icon_path = pathlib.Path(midiscripter.__file__).parent / 'resources' / 'icon.ico'
         self.setWindowIcon(QIcon(str(icon_path)))
@@ -62,7 +62,7 @@ class ScripterGUI(QApplication):
         self.request_restart.emit()
 
     def restart(self) -> NoReturn:
-        if pathlib.Path(midiscripter.base.shared.script_path).is_file():
+        if pathlib.Path(midiscripter.shared.script_path).is_file():
             # These settings saved only for restart
             self.processEvents()  # update win status to get correct status
             QSettings().setValue('restart win minimized', self.main_window.isMinimized())
@@ -93,11 +93,11 @@ def remove_qwidget(qwidget: QWidget) -> None:
 
 
 def start_gui() -> NoReturn:
-    if not midiscripter.base.shared.script_path:
+    if not midiscripter.shared.script_path:
         raise RuntimeError('Starter can only be called from a script')
 
     """Starts the script and runs GUI. Logging goes to GUI Log widget."""
-    midiscripter.base.shared._raise_current_process_cpu_priority()
+    midiscripter.shared._raise_current_process_cpu_priority()
 
     sigint_exit_code = {'Windows': -1073741510, 'Linux': 130, 'Darwin': 2}[platform.system()]
     signal.signal(signal.SIGINT, lambda *_: app_instance.exit(sigint_exit_code))
@@ -113,6 +113,6 @@ def start_gui() -> NoReturn:
         exit_status = app_instance.exec()
 
     if exit_status == 1467:  # exit status for restart request
-        midiscripter.base.shared.restart_script()
+        midiscripter.shared.restart_script()
     else:
         exit(exit_status)

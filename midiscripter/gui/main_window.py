@@ -2,7 +2,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-import midiscripter.base.shared
+import midiscripter.shared
 import midiscripter.gui.log_widget
 import midiscripter.gui.menu_bar
 import midiscripter.gui.ports_widget

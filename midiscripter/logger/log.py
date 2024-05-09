@@ -3,7 +3,7 @@ import threading
 import time
 from typing import TYPE_CHECKING
 
-import midiscripter.base.shared
+import midiscripter.shared
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -99,7 +99,7 @@ class Log:
     @staticmethod
     def _get_current_precise_time_stamp() -> str:
         """Returns current timestamp with microsecond precision as a string"""
-        precise_time = midiscripter.base.shared.precise_epoch_time()
+        precise_time = midiscripter.shared.precise_epoch_time()
         time_string = time.strftime('%H:%M:%S', time.localtime(precise_time))
 
         # >1.5 times faster than datetime

@@ -5,7 +5,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-import midiscripter.base.shared
+import midiscripter.shared
 import midiscripter.file_event
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
@@ -76,7 +76,7 @@ class MenuBar(QMenuBar):
         # Options
         options_menu = self.addMenu('Options')
 
-        self.autostart = midiscripter.base.shared.AutostartManager()
+        self.autostart = midiscripter.shared.AutostartManager()
         toggle_autostart = options_menu.addAction('Run at start up')
         toggle_autostart.setCheckable(True)
         toggle_autostart.setChecked(self.autostart._check_if_enabled())
@@ -130,11 +130,11 @@ class MenuBar(QMenuBar):
         file_path_str = QFileDialog.getOpenFileName(
             self,
             'Select python script',
-            str(pathlib.Path(midiscripter.base.shared.script_path).parent),
+            str(pathlib.Path(midiscripter.shared.script_path).parent),
             'Python script (*.py)',
         )[0]
         if file_path_str:
-            midiscripter.base.shared.script_path = file_path_str
+            midiscripter.shared.script_path = file_path_str
             QApplication.instance().restart()
 
     @Slot(bool)
@@ -162,7 +162,7 @@ class MenuBar(QMenuBar):
     def __set_watching_script_file(self, new_status: bool) -> None:
         if new_status:
             self.file_watcher_port = midiscripter.file_event.FileEventIn(
-                midiscripter.base.shared.script_path
+                midiscripter.shared.script_path
             )
             self.file_watcher_port.subscribe(QApplication.instance().restart_at_file_change)
             self.file_watcher_port._open()

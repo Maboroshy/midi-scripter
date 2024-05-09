@@ -2,7 +2,7 @@ import time
 from typing import NoReturn
 
 import midiscripter.base.port_base
-import midiscripter.base.shared
+import midiscripter.shared
 import midiscripter.logger.console_sink
 import midiscripter.logger.log
 import midiscripter.midi
@@ -32,10 +32,10 @@ def start_silent() -> NoReturn:
 
 def _run_cli_loop() -> NoReturn:
     """Opens the ports and loops until broken by user."""
-    if not midiscripter.base.shared.script_path:
+    if not midiscripter.shared.script_path:
         raise RuntimeError('Starter can only be called from a script')
 
-    midiscripter.base.shared._raise_current_process_cpu_priority()
+    midiscripter.shared._raise_current_process_cpu_priority()
     with midiscripter.base.port_base._all_opened():
         while True:
             try:

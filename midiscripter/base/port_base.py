@@ -5,7 +5,7 @@ import traceback
 from collections.abc import Callable, Hashable
 from typing import TYPE_CHECKING, TypeVar
 
-import midiscripter.base.shared
+import midiscripter.shared
 from midiscripter.logger import log
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ def _all_opened() -> None:
     for port in _PortRegistryMeta.instance_registry.values():
         port._open()
 
-    for call in midiscripter.base.shared.run_after_ports_open_subscribed_calls:
+    for call in midiscripter.shared.run_after_ports_open_subscribed_calls:
 
         def __call_runner() -> None:
             try:
@@ -26,7 +26,7 @@ def _all_opened() -> None:
             except Exception as exc:
                 log.red(''.join(traceback.format_exception(exc)))
 
-        midiscripter.base.shared.thread_executor.submit(__call_runner)
+        midiscripter.shared.thread_executor.submit(__call_runner)
 
     yield
 
@@ -35,7 +35,7 @@ def _all_opened() -> None:
 
     log._flush()
     log._sink = None
-    midiscripter.base.shared.thread_executor.shutdown(wait=False)
+    midiscripter.shared.thread_executor.shutdown(wait=False)
 
 
 class _PortRegistryMeta(type):
@@ -192,7 +192,7 @@ class Input(Port):
         if self.is_enabled:
             # pre-copying messages to reduce jitter a little
             msg_copies = [copy.copy(msg) for _ in range(len(self.subscribed_calls))]
-            midiscripter.base.shared.thread_executor.map(
+            midiscripter.shared.thread_executor.map(
                 self.__call_worker, self.subscribed_calls, msg_copies
             )
 

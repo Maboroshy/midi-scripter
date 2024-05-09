@@ -4,7 +4,7 @@ import rtmidi
 
 import midiscripter.base.msg_base
 import midiscripter.base.port_base
-import midiscripter.base.shared
+import midiscripter.shared
 import midiscripter.logger
 
 
@@ -34,7 +34,7 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
 
     def _open(self) -> None:
         self.is_enabled = True
-        midiscripter.base.shared.thread_executor.submit(self.__updater_worker)
+        midiscripter.shared.thread_executor.submit(self.__updater_worker)
         midiscripter.logger.log('Started MIDI ports change watcher')
 
     def _close(self) -> None:

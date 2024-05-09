@@ -1,7 +1,7 @@
 import enum
 from collections.abc import Container
 
-import midiscripter.base.shared
+import midiscripter.shared
 from midiscripter.base.port_base import Input
 
 
@@ -32,13 +32,13 @@ class Msg:
         """
         self.type = type
         self.source = source
-        self.ctime = midiscripter.base.shared.precise_epoch_time()
+        self.ctime = midiscripter.shared.precise_epoch_time()
 
         self.ctime: float  # workaround for mkdocstrings issue #607
         """Message creation time in epoch format"""
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({", ".join(str(value) for value in self.__as_tuple())})'
+        return f'{self.__class__.__name__}({", ".join(repr(value) for value in self.__as_tuple())})'
 
     def __str__(self):
         return ' | '.join(str(value) for value in self.__as_tuple() if value is not None)
@@ -83,7 +83,7 @@ class Msg:
     @property
     def _age_ms(self) -> float:
         """Time passed since message creation in milliseconds."""
-        return round((midiscripter.base.shared.precise_epoch_time() - self.ctime) * 1000, 3)
+        return round((midiscripter.shared.precise_epoch_time() - self.ctime) * 1000, 3)
 
     def __as_tuple(self) -> tuple:
         """Converts message to a tuple based on message's __match_args__ class attribute

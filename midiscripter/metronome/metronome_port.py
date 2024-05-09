@@ -1,7 +1,7 @@
 import time
 
 import midiscripter.base.port_base
-import midiscripter.base.shared
+import midiscripter.shared
 from midiscripter.base.msg_base import Msg
 from midiscripter.base.port_base import Output
 from midiscripter.logger import log
@@ -52,13 +52,13 @@ class MetronomeIn(midiscripter.base.port_base.Input):
 
     def _open(self) -> None:
         self.is_enabled = True
-        midiscripter.base.shared.thread_executor.submit(self.__send_clicks_worker)
+        midiscripter.shared.thread_executor.submit(self.__send_clicks_worker)
         log(f'Started metronome at {self.bpm} bpm')
 
     def __send_clicks_worker(self) -> None:
         while self.is_enabled:
             time.sleep(self.__interval_sec)
-            self.msg_to_send.ctime = midiscripter.base.shared.precise_epoch_time()
+            self.msg_to_send.ctime = midiscripter.shared.precise_epoch_time()
 
             for output in self.attached_passthrough_outs:
                 output.send(self.msg_to_send)
