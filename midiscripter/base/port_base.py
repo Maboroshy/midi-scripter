@@ -210,9 +210,6 @@ class Input(Port):
         try:
             function(msg)
             self._call_statistics[function].append(msg._age_ms)
-        except TypeError:
-            function()
-            self._call_statistics[function].append(msg._age_ms)
         except Exception as exc:
             log.red(''.join(traceback.format_exception(exc)))
 

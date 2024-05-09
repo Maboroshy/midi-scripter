@@ -82,6 +82,9 @@ class Log:
 
     def _flush(self) -> None:
         """Sends buffered messages to sink"""
+        if not self.__sink:
+            return
+
         output_entries = []
 
         if self.__wait_counter > self.ADD_SPACER_THRESHOLD_SEC:
@@ -93,7 +96,7 @@ class Log:
 
         try:
             self._sink(output_entries)
-        except (TypeError, RuntimeError):  # ignore Qt error on widget destruction at app exit
+        except RuntimeError:  # ignore Qt error on widget destruction at app exit
             pass
 
     @staticmethod
