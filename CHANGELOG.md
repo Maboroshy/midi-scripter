@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4 - __________
+
+### Added
+
+- Reworked GUI log widget. It can exclude entries based on filter now.
+
 ## v0.3 - 07.05.2024
 
 ### Added

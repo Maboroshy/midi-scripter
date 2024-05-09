@@ -53,14 +53,7 @@ class Log:
         if not self.is_enabled:
             return
 
-        precise_time = midiscripter.base.shared.precise_epoch_time()
-        time_string = time.strftime('%H:%M:%S', time.localtime(precise_time))
-
-        # >1.5 times faster than datetime
-        after_dot = repr(precise_time).split('.')[1][:6].ljust(6, '0')
-        milisec_part = after_dot[:3]
-        microsec_part = after_dot[3:]
-        kwargs['_ctime_str'] = f'{time_string}.{milisec_part},{microsec_part}'
+        kwargs['_ctime_str'] = self._get_current_precise_time_stamp()
 
         self.__buffer.append((str(text), kwargs))
 
@@ -102,6 +95,18 @@ class Log:
             self._sink(output_entries)
         except (TypeError, RuntimeError):  # ignore Qt error on widget destruction at app exit
             pass
+
+    @staticmethod
+    def _get_current_precise_time_stamp() -> str:
+        """Returns current timestamp with microsecond precision as a string"""
+        precise_time = midiscripter.base.shared.precise_epoch_time()
+        time_string = time.strftime('%H:%M:%S', time.localtime(precise_time))
+
+        # >1.5 times faster than datetime
+        after_dot = repr(precise_time).split('.')[1][:6].ljust(6, '0')
+        milisec_part = after_dot[:3]
+        microsec_part = after_dot[3:]
+        return f'{time_string}.{milisec_part},{microsec_part}'
 
     def red(self, text: str, **kwargs) -> None:
         """Print red log message."""

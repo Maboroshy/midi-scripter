@@ -30,7 +30,6 @@ class HtmlSink:
             kwargs = entry[1]
 
             text = text.replace('\n', '<br>')
-            text = text.replace(' ', '&nbsp;')
 
             if '_color' in kwargs:
                 text = to_html_colored_text(text, f'dark{kwargs["_color"]}')
