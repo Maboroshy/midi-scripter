@@ -18,24 +18,24 @@ class LogWidget(QWidget):
         layout = QGridLayout()
         self.setLayout(layout)
 
-        layout.addWidget(QLabel(self.TOP_LABEL_TEXT), 1, 1, 1, 2)
+        layout.addWidget(QLabel(self.TOP_LABEL_TEXT), 1, 1, 1, 4)
 
         log_view = LogView()
-        layout.addWidget(log_view, 2, 1, 1, 2)
+        layout.addWidget(log_view, 2, 1, 1, 4)
 
         exclude_line = QLineEdit()
-        exclude_line.setPlaceholderText('Substring of entries to exclude divided by ";"')
+        exclude_line.setPlaceholderText('Substrings divided by ";"')
         exclude_line.setClearButtonEnabled(True)
         exclude_line.textChanged.connect(log_view.set_exclude)
         layout.addWidget(QLabel('Exclude:'), 3, 1, 1, 1)
         layout.addWidget(exclude_line, 3, 2, 1, 1)
 
         filter_line = QLineEdit()
-        filter_line.setPlaceholderText('Substring of entries to show divided by ";"')
+        filter_line.setPlaceholderText('Substrings divided by ";"')
         filter_line.setClearButtonEnabled(True)
         filter_line.textChanged.connect(log_view.set_filter)
-        layout.addWidget(QLabel('Filter:'), 4, 1, 1, 1)
-        layout.addWidget(filter_line, 4, 2, 1, 1)
+        layout.addWidget(QLabel('Filter:'), 3, 3, 1, 1)
+        layout.addWidget(filter_line, 3, 4, 1, 1)
 
 
 class LogView(QPlainTextEdit):
