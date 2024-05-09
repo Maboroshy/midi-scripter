@@ -35,7 +35,7 @@ def _all_opened() -> None:
 
     log._flush()
     log._sink = None
-    midiscripter.base.shared.thread_executor.shutdown(wait=True)
+    midiscripter.base.shared.thread_executor.shutdown(wait=False)
 
 
 class _PortRegistryMeta(type):
