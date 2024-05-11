@@ -93,10 +93,10 @@ def remove_qwidget(qwidget: QWidget) -> None:
 
 
 def start_gui() -> NoReturn:
+    """Starts the script and runs GUI. Logging goes to GUI Log widget."""
     if not midiscripter.shared.script_path:
         raise RuntimeError('Starter can only be called from a script')
 
-    """Starts the script and runs GUI. Logging goes to GUI Log widget."""
     midiscripter.shared._raise_current_process_cpu_priority()
 
     sigint_exit_code = {'Windows': -1073741510, 'Linux': 130, 'Darwin': 2}[platform.system()]
