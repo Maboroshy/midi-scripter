@@ -25,6 +25,7 @@ class SavedCheckedStateAction(QAction):
         unchecked_func: 'Callable | None' = None,
         default_state: bool = False,
         key_shortcut: 'QKeySequence | None' = None,
+        is_shared_setting: bool = False,
     ):
         super().__init__(name)
         self.__func_for_state = func_for_state
@@ -36,6 +37,11 @@ class SavedCheckedStateAction(QAction):
         if key_shortcut:
             self.setShortcut(key_shortcut)
 
+        if is_shared_setting:
+            self.__qsettings_args = (QApplication.instance().organizationName(), 'Shared')
+        else:
+            self.__qsettings_args = (None,)
+
         self.setCheckable(True)
         # replaces force _state_changed that causes widgets toggled by action to pop up
         self.setChecked(default_state)
@@ -43,10 +49,12 @@ class SavedCheckedStateAction(QAction):
         self.setChecked(bool(self))
 
     def __bool__(self):
-        return bool(QSettings().value(self.__setting_name, self.__default_state, type=bool))
+        return QSettings(*self.__qsettings_args).value(
+            self.__setting_name, self.__default_state, type=bool
+        )
 
     def __state_changed(self, state: bool) -> None:
-        QSettings().setValue(self.__setting_name, state)
+        QSettings(*self.__qsettings_args).setValue(self.__setting_name, state)
 
         if self.__func_for_state:
             self.__func_for_state(state)
