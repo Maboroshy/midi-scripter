@@ -9,15 +9,28 @@ from midiscripter.logger import log
 class KeyIn(midiscripter.base.port_base.Input):
     """Keyboard input port. Produces [`KeyMsg`][midiscripter.KeyMsg] objects."""
 
+    supress_input: bool
+    """Prevent the input events from being passed to the rest of the system
+    
+    Warning: Enable with caution!
+        You'll loose the keyboard input unless you're proxying it to [KeyOut][midiscripter.KeyOut]
+    """
+
     pressed_keys: list[pynput.keyboard.Key]
     """Currently pressed keys"""
 
     _force_uid = 'Keyboard In'
 
-    def __init__(self):
-        """ """  # to override Input docstring
-        super().__init__(self._force_uid)
+    def __init__(self, *, supress_input: bool = False):
+        """
+        Args:
+            supress_input: Prevent the input events from being passed to the rest of the system
+        """
+        super().__init__(
+            self._force_uid,
+        )
         self.__pynput_listener = None
+        self.supress_input = supress_input
         self.pressed_keys = []
 
     def __on_press(self, key: pynput.keyboard.Key) -> None:
@@ -54,7 +67,9 @@ class KeyIn(midiscripter.base.port_base.Input):
             self.is_enabled = True
             return
 
-        self.__pynput_listener = pynput.keyboard.Listener(self.__on_press, self.__on_release)
+        self.__pynput_listener = pynput.keyboard.Listener(
+            self.__on_press, self.__on_release, suppress=self.supress_input
+        )
         self.__pynput_listener.start()
         self.__pynput_listener.wait()
         self.is_enabled = True
