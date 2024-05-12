@@ -27,6 +27,7 @@ class LogWidget(QWidget):
         exclude_line.setPlaceholderText('Substrings divided by ";"')
         exclude_line.setClearButtonEnabled(True)
         exclude_line.textChanged.connect(log_view.set_exclude)
+        exclude_line.setText(QSettings().value('log exclude', ''))
         layout.addWidget(QLabel('Exclude:'), 3, 1, 1, 1)
         layout.addWidget(exclude_line, 3, 2, 1, 1)
 
@@ -34,6 +35,7 @@ class LogWidget(QWidget):
         filter_line.setPlaceholderText('Substrings divided by ";"')
         filter_line.setClearButtonEnabled(True)
         filter_line.textChanged.connect(log_view.set_filter)
+        filter_line.setText(QSettings().value('log filter', ''))
         layout.addWidget(QLabel('Filter:'), 3, 3, 1, 1)
         layout.addWidget(filter_line, 3, 4, 1, 1)
 
@@ -61,6 +63,7 @@ class LogView(QPlainTextEdit):
     def set_filter(self, filter_text: str) -> None:
         self.__filter_text_parts = [text.lower().strip() for text in filter_text.split(';') if text]
         self.__apply_filter()
+        QSettings().setValue('log filter', filter_text)
 
     @Slot(str)
     def set_exclude(self, exclude_text: str) -> None:
@@ -68,6 +71,7 @@ class LogView(QPlainTextEdit):
             text.lower().strip() for text in exclude_text.split(';') if text
         ]
         self.__apply_filter()
+        QSettings().setValue('log exclude', exclude_text)
 
     def __apply_filter(self, to_last_n_blocks: int = 0) -> None:
         self.__set_lines_visibility(to_last_n_blocks)
