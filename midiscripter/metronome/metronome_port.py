@@ -13,9 +13,9 @@ class MetronomeIn(midiscripter.base.port_base.Input):
     def __init__(self, name_or_bpm: str | float, bpm: float = 60, msg_to_send: Msg = Msg('Click')):  # noqa: B008
         """
         Args:
-            name_or_bpm: Metronome name, if it's a number it will also set bpm interval
+            name_or_bpm: Metronome name, if it's a number it will also set the bpm interval
             bpm: Message sending interval in beats per minute
-            msg_to_send: Message that the port will send
+            msg_to_send: Message the port will send
         """
         super().__init__(name_or_bpm)
         try:
@@ -41,7 +41,7 @@ class MetronomeIn(midiscripter.base.port_base.Input):
 
     def passthrough_out(self, output: Output) -> None:
         """Attach output port as a pass-through port to send metronome messages.
-        The output port should be compatible to send messages.
+        The output port should be compatible to send `msg_to_send` messages.
 
         Args:
             output: [`Output`][midiscripter.base.port_base.Output] port to use for pass-through
