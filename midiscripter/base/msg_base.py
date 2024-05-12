@@ -48,9 +48,12 @@ class Msg:
 
     def matches(self, *args_conditions, **kwargs_conditions) -> bool:
         """Checks if message's attributes match all provided attribute conditions:
+
         1. If condition is `None` or omitted it matches anything.
+
         2. If condition equals attribute it matches the attribute.
-        3. If condition is a container and contains the message attribute it matches the attribute.
+
+        3. If condition is a container and contains the attribute it matches the attribute.
 
         Returns:
             True if all attribute match, False if any are not
@@ -58,12 +61,13 @@ class Msg:
         attr_conditions = dict(zip(self.__match_args__, args_conditions, strict=False))
         attr_conditions.update(kwargs_conditions)
 
-        for parameter, condition in attr_conditions.items():
+        for parameter_name, condition in attr_conditions.items():
             if condition is None:
                 continue
 
             try:
-                attr = getattr(self, parameter)
+                attr = getattr(self, parameter_name)
+
             except AttributeError:
                 continue
 
