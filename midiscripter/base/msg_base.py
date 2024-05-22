@@ -56,10 +56,10 @@ class Msg:
         3. If condition is a container and contains the attribute it matches the attribute.
 
         Returns:
-            True if all attribute match, False if any are not
+            `True` if all attributes match, `False` if any does not match
         """
-        attr_conditions = dict(zip(self.__match_args__, args_conditions, strict=False))
-        attr_conditions.update(kwargs_conditions)
+        attr_conditions = dict(zip(self.__match_args__, conditions_args, strict=False))
+        attr_conditions.update(conditions_kwargs)
 
         for parameter_name, condition in attr_conditions.items():
             if condition is None:
@@ -67,19 +67,17 @@ class Msg:
 
             try:
                 attr = getattr(self, parameter_name)
-
             except AttributeError:
-                continue
+                return False
 
             if attr == condition:
                 continue
 
-            if (
-                isinstance(condition, Container)
-                and not isinstance(condition, str)
-                and attr in condition
-            ):
-                continue
+            try:
+                if attr in condition:
+                    continue
+            except TypeError:
+                pass
 
             return False
         return True
