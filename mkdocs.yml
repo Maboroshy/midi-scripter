@@ -8,16 +8,16 @@ nav:
     - API Documentation:
         - Midi:
             - Ports: api/midi_port.md
-            - Messages: api/midi_msg.md
+            - Message: api/midi_msg.md
             - Utils: api/midi_note_data.md  
         
         - Open Sound Control:
             - Ports: api/osc_port.md
-            - Messages: api/osc_msg.md
+            - Message: api/osc_msg.md
         
         - Keyboard:
             - Ports: api/key_port.md
-            - Messages: api/key_msg.md
+            - Message: api/key_msg.md
         
         - Metronome: api/metronome_port.md
 
@@ -26,7 +26,7 @@ nav:
             - Buttons: api/gui_buttons.md
             - List Selector: api/gui_list.md
             - Layout: api/gui_layout.md
-            - GUI Event Messages: api/gui_msg.md
+            - GUI Event Message: api/gui_msg.md
 
         - Starters: api/starters.md
         
