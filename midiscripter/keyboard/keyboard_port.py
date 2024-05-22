@@ -1,9 +1,13 @@
 import pynput.keyboard
+from typing import TYPE_CHECKING, overload
 
 import midiscripter.base.port_base
 import midiscripter.osc.osc_msg
 from midiscripter.keyboard.keyboard_msg import KeyEventType, KeyMsg
 from midiscripter.logger import log
+
+if TYPE_CHECKING:
+    from collections.abc import Container, Callable
 
 
 class KeyIn(midiscripter.base.port_base.Input):
@@ -12,7 +16,8 @@ class KeyIn(midiscripter.base.port_base.Input):
     supress_input: bool
     """Prevent the input events from being passed to the rest of the system
     
-    Warning: Enable with caution!
+    Warning: 
+        Enable with caution! 
         You'll loose the keyboard input unless you're proxying it to [KeyOut][midiscripter.KeyOut]
     """
 
@@ -79,6 +84,23 @@ class KeyIn(midiscripter.base.port_base.Input):
         self.__pynput_listener.stop()
         self.is_enabled = False
         log('Stopped keyboard input listener')
+
+    @overload
+    def subscribe(self, call: 'Callable[[KeyMsg], None]') -> 'Callable': ...
+
+    @overload
+    def subscribe(
+        self,
+        type: 'None | Container[KeyEventType] | KeyEventType' = None,
+        shortcut: 'None | Container[str] | str' = None,
+    ) -> 'Callable': ...
+
+    def subscribe(
+        self,
+        type: 'None | Container[KeyEventType] | KeyEventType' = None,
+        shortcut: 'None | Container[str] | str' = None,
+    ) -> 'Callable':
+        return super().subscribe(type, shortcut)
 
 
 class KeyOut(midiscripter.base.port_base.Output):

@@ -1,6 +1,5 @@
 import platform
-from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 import rtmidi
 import rtmidi.midiconstants
@@ -10,7 +9,9 @@ from midiscripter.logger import log
 from midiscripter.midi.midi_msg import MidiType
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Container
     from midiscripter.midi.midi_msg import MidiMsg
+
 
 BYTE_TO_TYPE_MAP = {
     rtmidi.midiconstants.NOTE_ON: MidiType.NOTE_ON,
@@ -57,7 +58,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
     _is_virtual = False
 
     # noinspection PyMissingConstructor
-    def __init__(self, port_name: str, input_callback: Callable | None = None):
+    def __init__(self, port_name: str, input_callback: 'Callable | None' = None):
         self.__port_name = port_name
 
         if input_callback:
@@ -134,6 +135,27 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         if midi_output not in self.attached_passthrough_outs:
             self.attached_passthrough_outs.append(midi_output)
             log('{input} input will pass through {output}', input=self, output=midi_output)
+
+    @overload
+    def subscribe(self, call: 'Callable[[MidiMsg], None]') -> 'Callable': ...
+
+    @overload
+    def subscribe(
+        self,
+        type: 'None | Container | MidiType' = None,
+        channel: 'None | Container | int | tuple[int, ...]' = None,
+        data1: 'None | Container | int | tuple[int, ...]' = None,
+        data2: 'None | Container | int | tuple[int, ...]' = None,
+    ) -> 'Callable': ...
+
+    def subscribe(
+        self,
+        type: 'None | Container | MidiType' = None,
+        channel: 'None | Container | int | tuple[int, ...]' = None,
+        data1: 'None | Container | int | tuple[int, ...]' = None,
+        data2: 'None | Container | int | tuple[int, ...]' = None,
+    ) -> 'Callable':
+        return super().subscribe(type, channel, data1, data2)
 
     def __callback(self, rt_midi_input: tuple[tuple[hex, ...], float], _: list) -> None:
         if not self.is_enabled:

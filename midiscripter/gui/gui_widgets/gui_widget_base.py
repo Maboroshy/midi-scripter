@@ -1,6 +1,5 @@
 import types
-from typing import TYPE_CHECKING
-from collections.abc import Sequence
+from typing import TYPE_CHECKING, overload
 
 from PySide6.QtWidgets import *
 
@@ -171,3 +170,20 @@ class GuiWidget(midiscripter.base.port_base.Input):
     def is_visible(self) -> bool:
         """Widget is currently visible."""
         return self.qt_widget.isVisible()
+
+    @overload
+    def subscribe(self, call: 'Callable[[GuiEventMsg], None]') -> 'Callable': ...
+
+    @overload
+    def subscribe(
+        self,
+        type: 'None | Container[GuiEventType] | GuiEventType' = None,
+        data: 'None | Container | str | int | bool | Sequence' = None,
+    ) -> 'Callable': ...
+
+    def subscribe(
+        self,
+        type: 'None | Container[GuiEventType] | GuiEventType' = None,
+        data: 'None | Container | str | int | bool | Sequence | None' = None,
+    ) -> 'Callable':
+        return super().subscribe(type, data)

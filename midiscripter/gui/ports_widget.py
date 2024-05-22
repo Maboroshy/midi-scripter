@@ -9,17 +9,206 @@ import midiscripter.logger.html_sink
 from midiscripter.base.port_base import Input, Output
 from midiscripter.logger import log
 from midiscripter.midi import MidiIn, MidiOut
+from midiscripter.keyboard import KeyIn
+
+
+class PortWidgetItem(QTreeWidgetItem):
+    def request_state_change(self, new_state: bool) -> bool:
+        raise NotImplementedError
+
+
+class PortItemMixin:
+    port_instance: Input | Output
+
+    def set_color_by_port_type(
+        self: 'GeneralPortItem | MidiPortItem', port_type: type[Input | Output]
+    ) -> None:
+        if issubclass(port_type, Input):
+            item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input]
+        else:
+            item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Output]
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
+
+    def request_state_change(
+        self: 'GeneralPortItem | MidiPortItem | KeyInputPortItem', new_state: bool
+    ) -> bool:
+        if new_state:
+            if not self.port_instance.is_enabled:
+                self.port_instance._open()
+
+                if self.port_instance.is_enabled:
+                    log('Enabled {port}', port=self.port_instance)
+                    return True
+                else:
+                    # Set "broken port" background
+                    self.setData(
+                        0,
+                        Qt.ItemDataRole.BackgroundRole,
+                        QBrush(QColor().fromRgb(255, 0, 0, 20)),
+                    )
+                    log.red("Can't enable {port}", port=self.port_instance)
+                    return False
+            else:
+                # Clear possible "broken port" background
+                self.setData(
+                    0,
+                    Qt.ItemDataRole.BackgroundRole,
+                    QBrush(QColor(Qt.GlobalColor.transparent)),
+                )
+                return True
+        else:
+            self.port_instance.is_enabled = False
+            log('Disabled {port}', port=self.port_instance)
+            return False
+
+    def add_calls(self: 'GeneralPortItem | MidiPortItem') -> None:
+        for _, call_list in self.port_instance.calls:
+            for call in call_list:
+                CallItem(self, self.port_instance, call_list, call)
+
+
+class GeneralPortItem(PortItemMixin, PortWidgetItem):
+    port_instance: Input | Output
+
+    def __init__(self, parent_item: QTreeWidgetItem, port_instance: Input | Output):
+        self.port_instance = port_instance
+        self.repr = self.port_instance.__repr__()
+
+        item_text = self.port_instance._force_uid or str(self.port_instance._uid)
+        super().__init__(parent_item, (item_text,))
+
+        self.set_color_by_port_type(type(self.port_instance))
+        self.setCheckState(0, Qt.CheckState.Checked)
+
+        if issubclass(type(self.port_instance), Input):
+            self.add_calls()
+
+
+class KeyInputPortItem(PortItemMixin, PortWidgetItem):
+    port_instance: None | KeyIn
+
+    def __init__(self, parent_item: QTreeWidgetItem):
+        super().__init__(parent_item, ('Keyboard Input',))
+        self.repr = f'{midiscripter.KeyIn.__name__}()'
+
+        item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input]
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
+
+        try:
+            port_index = (midiscripter.KeyIn.__name__, midiscripter.KeyIn._force_uid)
+            self.port_instance = midiscripter.KeyIn.instance_registry[port_index]
+            self.setCheckState(0, Qt.CheckState.Checked)
+        except KeyError:
+            self.port_instance = None
+            self.setCheckState(0, Qt.CheckState.Unchecked)
+
+    def request_state_change(self, new_state: bool) -> bool:
+        if not self.port_instance:
+            self.port_instance = midiscripter.KeyIn()
+        return PortItemMixin.request_state_change(self, new_state)
+
+
+class AbsentMidiPortItem(QTreeWidgetItem):
+    def __init__(self, parent_item: QTreeWidgetItem, port_name: str):
+        super().__init__(parent_item, (port_name,))
+        self.setDisabled(True)
+        self.setCheckState(0, Qt.CheckState.Unchecked)
+
+
+class MidiPortItem(PortItemMixin, PortWidgetItem):
+    port_instance: MidiIn | MidiOut
+    PORT_CLASS: type[MidiIn | MidiOut]
+    VIRTUAL_PORT_PREFIX = '[v]'
+
+    def __init__(self, parent_item: QTreeWidgetItem, port_name: str):
+        self.port_name = port_name
+        port_key = (self.PORT_CLASS.__name__, self.port_name)
+        self.port_instance = self.PORT_CLASS.instance_registry.get(port_key, None)
+        self.repr = f"{self.PORT_CLASS.__name__}('{self.port_name}')"
+
+        if self.port_instance and self.port_instance._is_virtual:
+            item_name = f'{self.VIRTUAL_PORT_PREFIX} {self.port_name}'
+        else:
+            item_name = self.port_name
+
+        super().__init__(parent_item, (item_name,))
+
+        self.set_color_by_port_type(self.PORT_CLASS)
+
+        if not self.port_instance:
+            self.setCheckState(0, Qt.CheckState.Unchecked)
+        elif self.port_instance.is_enabled:
+            self.setCheckState(0, Qt.CheckState.Checked)
+        else:
+            self.setCheckState(0, Qt.CheckState.Unchecked)
+            self.setData(0, Qt.ItemDataRole.BackgroundRole, QBrush(QColor().fromRgb(255, 0, 0, 20)))
+
+    def request_state_change(self, new_state: bool) -> bool:
+        if not self.port_instance:
+            self.port_instance = self.PORT_CLASS(self.port_name)
+        return PortItemMixin.request_state_change(self, new_state)
+
+
+class InputMidiPortItem(MidiPortItem):
+    PORT_CLASS = MidiIn
+
+    def __init__(self, parent_item: QTreeWidgetItem, port_name: str):
+        super().__init__(parent_item, port_name)
+
+        if self.port_instance:
+            for passthrough_out_port in self.port_instance.attached_passthrough_outs:
+                PassthroughOutputMidiPortItem(self, passthrough_out_port._uid)
+
+            self.add_calls()
+
+
+class OutputMidiPortItem(MidiPortItem):
+    PORT_CLASS = MidiOut
+
+
+class PassthroughOutputMidiPortItem(OutputMidiPortItem):
+    def request_state_change(self, new_state: bool) -> bool:
+        parent_port = self.parent().port_instance
+        if new_state:
+            parent_port.attached_passthrough_outs.append(self.port_instance)
+        else:
+            parent_port.attached_passthrough_outs.remove(self.port_instance)
+        return new_state
+
+
+class CallItem(PortWidgetItem):
+    MATCH_CALL_PREFIX = '[m]'
+
+    def __init__(
+        self,
+        parent_item: QTreeWidgetItem,
+        port_instance: Input,
+        origin_call_list: list['Callable'],
+        call: 'Callable',
+    ):
+        if call.conditions:
+            item_name = f'{self.MATCH_CALL_PREFIX} {call.__name__}'
+        else:
+            item_name = call.__name__
+
+        super().__init__(parent_item, (item_name,))
+        self.port_instance = port_instance
+        self.origin_call_list = origin_call_list
+        self.call = call
+
+        item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Callable]
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
+        self.setCheckState(0, Qt.CheckState.Checked)
+
+    def request_state_change(self, new_state: bool) -> bool:
+        if new_state:
+            self.origin_call_list.append(self.call)
+        else:
+            self.origin_call_list.remove(self.call)
+        return new_state
 
 
 class PortsWidget(QTreeWidget):
-    PORT_CLASS_ROLE = 100
-    PORT_UID_ROLE = 101
-    PORT_REPR_ROLE = 103
-    CALLBACK_FUNCTION_ROLE = 104
-    PASSTHROUGH_OUT_PORT_ROLE = 105
-
-    VIRTUAL_PORT_PREFIX = '[v]'
-
     def __init__(self):
         super().__init__()
         self.setObjectName('Ports')
@@ -30,7 +219,27 @@ class PortsWidget(QTreeWidget):
         self.itemEntered.connect(self.__update_item_tooltip)
         self.__populate()
 
-    def __add_top_level_item(self, item_text: str) -> None:
+    def __populate(self) -> None:
+        """Populates the widget with items"""
+        self.clear()
+
+        self.__add_midi_ports()
+
+        self.__add_declared_ports('OSC Inputs', midiscripter.OscIn)
+        self.__add_declared_ports('OSC Outputs', midiscripter.OscOut)
+
+        KeyInputPortItem(self.__add_top_level_item('Keyboard Input'))
+        self.__add_declared_ports('Keyboard Output', midiscripter.KeyOut)
+
+        self.__add_declared_ports('Metronome', midiscripter.MetronomeIn)
+        self.__add_declared_ports('File Event Watcher', midiscripter.FileEventIn)
+        self.__add_declared_ports('MIDI Port Changes Watcher', midiscripter.MidiPortsChangedIn)
+
+        self.itemSelectionChanged.connect(self.__item_selected)
+        # with set blocks on data change itemChanged is emitted only on check state change
+        self.itemChanged.connect(self.__item_state_changed)
+
+    def __add_top_level_item(self, item_text: str) -> QTreeWidgetItem:
         bold_font = self.font()
         bold_font.setBold(True)
 
@@ -40,119 +249,29 @@ class PortsWidget(QTreeWidget):
 
         return top_item
 
-    def __populate(self) -> None:
-        """Populates the widget with items"""
-        self.clear()
-        self.__add_midi_port_class(
-            'MIDI Inputs', MidiIn, midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input], True
-        )
-        self.__add_midi_port_class(
-            'MIDI Outputs', MidiOut, midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Output], False
-        )
-        self.__add_ports_if_declared('OSC Inputs', midiscripter.OscIn)
-        self.__add_ports_if_declared('OSC Outputs', midiscripter.OscOut)
-        self.__add_keyboard_in()
-        self.__add_ports_if_declared('Keyboard Output', midiscripter.KeyOut)
-        self.__add_ports_if_declared('Metronome', midiscripter.MetronomeIn)
-        self.__add_ports_if_declared('File Event Watcher', midiscripter.FileEventIn)
-        self.__add_ports_if_declared('MIDI Port Changes Watcher', midiscripter.MidiPortsChangedIn)
+    def __add_midi_ports(self) -> None:
+        for title, _item_class in [
+            ('MIDI Inputs', InputMidiPortItem),
+            ('MIDI Outputs', OutputMidiPortItem),
+        ]:
+            top_item = self.__add_top_level_item(title)
+            port_class = _item_class.PORT_CLASS
 
-        self.itemChanged.connect(self.__item_state_changed)
-        self.itemSelectionChanged.connect(self.__item_selected)
+            port_instance_list = [
+                port
+                for port in port_class.instance_registry.values()
+                if isinstance(port, port_class)
+            ]
+            virtual_port_names = [port._uid for port in port_instance_list if port._is_virtual]
 
-    def __add_midi_port_class(
-        self,
-        title: str,
-        port_class: type[MidiIn | MidiOut],
-        item_color: QColor,
-        add_attached: bool,
-    ) -> None:
-        if not port_class._available_names:
-            return
+            for port_name in itertools.chain(port_class._available_names, virtual_port_names):
+                _item_class(top_item, port_name)
 
-        top_item = self.__add_top_level_item(title)
+            for port_instance in port_instance_list:
+                if not port_instance._is_available and port_instance._uid not in virtual_port_names:
+                    AbsentMidiPortItem(top_item, port_instance._uid)
 
-        virtual_port_names = [
-            port._uid
-            for port in port_class.instance_registry.values()
-            if isinstance(port, port_class) and port._is_virtual
-        ]
-
-        for port_name in itertools.chain(port_class._available_names, virtual_port_names):
-            port_key = (port_class.__name__, port_name)
-            port_instance = port_class.instance_registry.get(port_key, None)
-
-            port_item_name = (
-                f'{self.VIRTUAL_PORT_PREFIX} {port_name}'
-                if port_instance and port_instance._is_virtual
-                else port_name
-            )
-            port_item = QTreeWidgetItem(top_item, (port_item_name,))
-
-            if not port_instance:
-                port_item.setCheckState(0, Qt.CheckState.Unchecked)
-            elif port_instance.is_enabled:
-                port_item.setCheckState(0, Qt.CheckState.Checked)
-            else:
-                port_item.setCheckState(0, Qt.CheckState.Unchecked)
-                port_item.setData(
-                    0, Qt.ItemDataRole.BackgroundRole, QBrush(QColor().fromRgb(255, 0, 0, 20))
-                )
-
-            port_item.setData(0, self.PORT_CLASS_ROLE, port_class)
-            port_item.setData(0, self.PORT_UID_ROLE, port_name)
-
-            port_repr = f"{port_class.__name__}('{port_name}')"
-            port_item.setData(0, self.PORT_REPR_ROLE, port_repr)
-            port_item.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
-
-            if add_attached and port_instance:
-                for passthrough_out_port in port_instance.attached_passthrough_outs:
-                    sub_item = QTreeWidgetItem(port_item, (passthrough_out_port._uid,))
-                    sub_item.setCheckState(0, Qt.CheckState.Checked)
-
-                    sub_item.setData(
-                        0,
-                        Qt.ItemDataRole.ForegroundRole,
-                        QBrush(midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Output]),
-                    )
-                    sub_item.setData(0, self.PORT_CLASS_ROLE, MidiIn)
-                    sub_item.setData(0, self.PORT_UID_ROLE, port_name)
-                    sub_item.setData(0, self.PASSTHROUGH_OUT_PORT_ROLE, passthrough_out_port)
-                    sub_item.setData(0, self.PORT_REPR_ROLE, passthrough_out_port.__repr__())
-
-                self.__add_inputs_subscribed_calls(port_item)
-
-        for port_instance in port_class.instance_registry.values():
-            if (
-                isinstance(port_instance, port_class)
-                and not port_instance._is_available
-                and port_instance._uid not in virtual_port_names
-            ):
-                absent_input_item = QTreeWidgetItem(top_item, (str(port_instance),))
-                absent_input_item.setCheckState(0, Qt.CheckState.Unchecked)
-                absent_input_item.setDisabled(True)
-
-    def __add_inputs_subscribed_calls(self, input_item: QTreeWidgetItem) -> None:
-        port_class = input_item.data(0, self.PORT_CLASS_ROLE)
-        port_name = input_item.data(0, self.PORT_UID_ROLE)
-
-        port_instance = port_class(port_name) if port_name else port_class()
-
-        for callback_function in port_instance.subscribed_calls:
-            sub_item = QTreeWidgetItem(input_item, (callback_function.__name__,))
-            sub_item.setCheckState(0, Qt.CheckState.Checked)
-
-            sub_item.setData(
-                0,
-                Qt.ItemDataRole.ForegroundRole,
-                QBrush(midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Callable]),
-            )
-            sub_item.setData(0, self.PORT_CLASS_ROLE, MidiIn)
-            sub_item.setData(0, self.PORT_UID_ROLE, port_name)
-            sub_item.setData(0, self.CALLBACK_FUNCTION_ROLE, callback_function)
-
-    def __add_ports_if_declared(self, title: str, port_type: type[Input | Output]) -> None:
+    def __add_declared_ports(self, title: str, port_type: type[Input | Output]) -> None:
         port_instances_to_add = []
         for port_key, port_instance in port_type.instance_registry.items():
             if port_key[0] is port_type.__name__:
@@ -164,53 +283,17 @@ class PortsWidget(QTreeWidget):
         port_top = self.__add_top_level_item(title)
 
         for port in port_instances_to_add:
-            port_item = QTreeWidgetItem(port_top, (str(port._uid),))
-            port_item.setCheckState(0, Qt.CheckState.Checked)
-
-            port_item.setData(0, self.PORT_CLASS_ROLE, port_type)
-            port_item.setData(0, self.PORT_REPR_ROLE, port.__repr__())
-
-            if port._force_uid:
-                port_item.setData(0, self.PORT_UID_ROLE, None)
-            else:
-                port_item.setData(0, self.PORT_UID_ROLE, port._uid)
-
-            if issubclass(port_type, Input):
-                item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input]
-                self.__add_inputs_subscribed_calls(port_item)
-            else:
-                item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Output]
-
-            port_item.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
-
-    def __add_keyboard_in(self) -> None:
-        port_top = self.__add_top_level_item('Keyboard Input')
-        port_item = QTreeWidgetItem(port_top, ('Keyboard Input',))
-        if (
-            midiscripter.KeyIn.__name__,
-            midiscripter.KeyIn._force_uid,
-        ) in midiscripter.KeyIn.instance_registry:
-            port_item.setCheckState(0, Qt.CheckState.Checked)
-        else:
-            port_item.setCheckState(0, Qt.CheckState.Unchecked)
-
-        port_item.setData(0, self.PORT_CLASS_ROLE, midiscripter.KeyIn)
-        port_item.setData(0, self.PORT_UID_ROLE, None)
-        port_item.setData(0, self.PORT_REPR_ROLE, f'{midiscripter.KeyIn.__name__}()')
-        port_item.setData(
-            0,
-            Qt.ItemDataRole.ForegroundRole,
-            QBrush(midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input]),
-        )
+            GeneralPortItem(port_top, port)
 
     def __item_selected(self) -> None:
         """Sends selected item text to the clipboard and shows a "copied" tooltip"""
         if not self.selectedItems():
             return
 
-        selected_item: QTreeWidgetItem = self.selectedItems()[0]
-        port_repr = selected_item.data(0, self.PORT_REPR_ROLE)
-        if port_repr:
+        selected_item: MidiPortItem | GeneralPortItem | CallItem = self.selectedItems()[0]
+
+        try:
+            port_repr = selected_item.repr
             QGuiApplication.clipboard().setText(port_repr)
             QTimer.singleShot(
                 200,
@@ -218,80 +301,43 @@ class PortsWidget(QTreeWidget):
                     self.cursor().pos(), f'Copied {port_repr}', self, msecShowTime=2000
                 ),
             )  # Don't hide on mouse button release
+        except AttributeError:
+            pass
+
         selected_item.setSelected(False)
 
-    def __item_state_changed(self, item: QTreeWidgetItem, _: int) -> None:
+    def __item_state_changed(self, item: PortWidgetItem, _: int) -> None:
         """Enabled or disables the MIDI port / passthrough out / call according to the checked
         state change"""
-        new_checked_state = item.checkState(0) == Qt.CheckState.Checked
-
-        port_class = item.data(0, self.PORT_CLASS_ROLE)
-        port_name = item.data(0, self.PORT_UID_ROLE)
-
-        callback_function = item.data(0, self.CALLBACK_FUNCTION_ROLE)
-        passthrough_out_port: MidiOut = item.data(0, self.PASSTHROUGH_OUT_PORT_ROLE)
-
-        port_instance = port_class(port_name) if port_name else port_class()
-
-        if callback_function:
-            if new_checked_state:
-                port_instance.subscribed_calls.append(callback_function)
-            else:
-                port_instance.subscribed_calls.remove(callback_function)
-
-        elif passthrough_out_port:
-            if new_checked_state:
-                port_instance.attached_passthrough_outs.append(passthrough_out_port)
-            else:
-                port_instance.attached_passthrough_outs.remove(passthrough_out_port)
-
-        else:
-            if new_checked_state:
-                if not port_instance.is_enabled:
-                    port_instance._open()
-
-                    if port_instance.is_enabled:
-                        log('Enabled {port}', port=port_instance)
-                    else:
-                        item.setData(
-                            0,
-                            Qt.ItemDataRole.BackgroundRole,
-                            QBrush(QColor().fromRgb(255, 0, 0, 20)),
-                        )
-                        log.red("Can't enable {port}", port=port_instance)
-                else:
-                    item.setData(
-                        0,
-                        Qt.ItemDataRole.BackgroundRole,
-                        QBrush(QColor(Qt.GlobalColor.transparent)),
-                    )
-
-            else:
-                port_instance.is_enabled = False
-                log('Disabled {port}', port=port_instance)
-
-            self.blockSignals(True)
-            item.setCheckState(
-                0, (Qt.CheckState.Unchecked, Qt.CheckState.Checked)[port_instance.is_enabled]
-            )
-            self.blockSignals(False)
+        self.blockSignals(True)
+        target_state: bool = item.checkState(0) == Qt.CheckState.Checked
+        new_item_state = item.request_state_change(target_state)
+        item.setCheckState(0, (Qt.CheckState.Unchecked, Qt.CheckState.Checked)[new_item_state])
+        self.blockSignals(False)
 
     def __update_item_tooltip(self, item: QTreeWidgetItem) -> None:
         """Updates items tooltip on hover"""
-        call_function = item.data(0, self.CALLBACK_FUNCTION_ROLE)
-        if call_function:
-            port_class = item.data(0, self.PORT_CLASS_ROLE)
-            call_statistics = list(port_class._call_statistics[call_function])
+        if not isinstance(item, CallItem):
+            return
 
-            if not call_statistics:
-                tooltip_text = 'No calls made yet'
-            else:
-                call_statistics.sort()
-                tooltip_text = (
-                    'Execution time for last 20 calls:\n'
-                    f'Min: {call_statistics[0]} ms; '
-                    f'Med: {call_statistics[int(len(call_statistics) / 2)]} ms; '
-                    f'Max: {call_statistics[-1]} ms'
-                )
+        call_statistics = list(item.call.statistics)
 
-            item.setData(0, Qt.ItemDataRole.ToolTipRole, tooltip_text)
+        if not call_statistics:
+            tooltip_text = 'No calls made yet'
+        else:
+            call_statistics.sort()
+            tooltip_text = (
+                f'Execution time for last {len(call_statistics)} calls:\n'
+                f'Min: {call_statistics[0]} ms; '
+                f'Med: {call_statistics[int(len(call_statistics) / 2)]} ms; '
+                f'Max: {call_statistics[-1]} ms'
+            )
+
+        if item.call.conditions:
+            tooltip_text = (
+                f'Conditions: {item.call.conditions[0]} {item.call.conditions[1]}\n{tooltip_text}'
+            )
+
+        self.blockSignals(True)
+        item.setData(0, Qt.ItemDataRole.ToolTipRole, tooltip_text)
+        self.blockSignals(False)

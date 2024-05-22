@@ -20,7 +20,7 @@ root_alteration_selector = GuiButtonSelectorV(
 mode_selector = GuiButtonSelectorV(('Major', 'Minor'), 'Mode Selector', select='Major')
 
 
-@midi_input_from_daw.subscribe
+@midi_input_from_daw.subscribe((MidiType.NOTE_ON, MidiType.NOTE_OFF))
 def show_chord_info(msg: MidiMsg) -> None:
     """Gathers pressed notes and prints chord info to GUI widgets"""
     global pressed_notes_midi_data

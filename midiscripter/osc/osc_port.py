@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, overload
+
 import pythonosc.osc_server
 import pythonosc.udp_client
 
@@ -6,6 +8,9 @@ import midiscripter.shared
 import midiscripter.osc.osc_msg
 from midiscripter.logger import log
 from midiscripter.osc.osc_msg import OscMsg
+
+if TYPE_CHECKING:
+    from collections.abc import Container, Callable
 
 
 def _parse_ip_port(ip_port: str | int) -> (str, int):
@@ -68,6 +73,23 @@ class OscIn(midiscripter.base.port_base.Input):
         self._osc_server.shutdown()
         self.is_enabled = False
         log('Stopped {input}', input=self)
+
+    @overload
+    def subscribe(self, call: 'Callable[[OscMsg], None]') -> 'Callable': ...
+
+    @overload
+    def subscribe(
+        self,
+        address: 'None | Container | str' = None,
+        data: 'None | Container | str | bytes | bool | int | float | list | tuple' = None,
+    ) -> 'Callable': ...
+
+    def subscribe(
+        self,
+        address: 'None | Container | str' = None,
+        data: 'None | Container | str | bytes | bool | int | float | list | tuple' = None,
+    ) -> 'Callable':
+        return super().subscribe(address, data)
 
 
 class OscOut(midiscripter.base.port_base.Output):

@@ -34,11 +34,8 @@ def send_saved_feedback_values() -> None:
         to_midi_controller.send(feedback_msg)
 
 
-@layer_selector_widget.subscribe
+@layer_selector_widget.subscribe(type=GuiEventType.SELECTED)
 def gui_layer_selector(msg: GuiEventMsg) -> None:
-    if not msg.matches(GuiEventType.SELECTED):
-        return
-
     global current_layer_index
     current_layer_index = int(msg.data) - 1
     log.blue(f'Selected layer #{msg.data}')
@@ -52,11 +49,8 @@ def gui_layer_selector(msg: GuiEventMsg) -> None:
     send_saved_feedback_values()
 
 
-@from_midi_controller.subscribe
+@from_midi_controller.subscribe(*LAYER_SELECTOR_ATTRS)
 def cc_layer_selector(msg: MidiMsg) -> None:
-    if not msg.matches(*LAYER_SELECTOR_ATTRS):
-        return
-
     global current_layer_index
     new_layer_index = int(msg.data2 / 128 * NUMBER_OF_LAYERS)
 

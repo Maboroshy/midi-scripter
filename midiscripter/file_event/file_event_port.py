@@ -1,4 +1,5 @@
 import pathlib
+from typing import TYPE_CHECKING, overload
 
 import watchdog.events
 import watchdog.observers
@@ -6,6 +7,10 @@ import watchdog.observers
 import midiscripter.base.port_base
 import midiscripter.file_event
 import midiscripter.logger
+
+if TYPE_CHECKING:
+    from collections.abc import Container, Callable
+    from midiscripter.file_event.file_event_msg import FileEventType, FileEventMsg
 
 shared_observer = watchdog.observers.Observer()
 shared_observer.daemon = True
@@ -73,3 +78,20 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
                 event.event_type.upper(), self.__path, source=self
             )
             self._send_input_msg_to_calls(msg)
+
+    @overload
+    def subscribe(self, call: 'Callable[[FileEventMsg], None]') -> 'Callable': ...
+
+    @overload
+    def subscribe(
+        self,
+        type: 'None | Container[FileEventType] | FileEventType | str' = None,
+        path: 'None | Container[pathlib.Path] | pathlib.Path' = None,
+    ) -> 'Callable': ...
+
+    def subscribe(
+        self,
+        type: 'None | Container[FileEventType] | FileEventType | str' = None,
+        path: 'None | Container[pathlib.Path] | pathlib.Path' = None,
+    ) -> 'Callable':
+        return super().subscribe(type, path)

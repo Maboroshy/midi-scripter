@@ -2,13 +2,13 @@ import collections
 import contextlib
 import copy
 import traceback
-from collections.abc import Callable, Hashable
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, TypeVar, ClassVar, Any
 
 import midiscripter.shared
 from midiscripter.logger import log
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Hashable, Container
     from midiscripter.base.msg_base import Msg
 
 
@@ -44,7 +44,7 @@ class _PortRegistryMeta(type):
     __singleton_instance_type = TypeVar('__singleton_instance_type', bound='Port')
     """Type for correct IDE recognition and code completion for returned port subclasses"""
 
-    instance_registry: dict[tuple[str, Hashable], __singleton_instance_type] = {}
+    instance_registry: dict[tuple[str, 'Hashable'], __singleton_instance_type] = {}
     """Declared ports register as port class name and port uid to port instance map"""
 
     def __call__(
@@ -137,44 +137,83 @@ class Input(Port):
     is_enabled: bool
     """`True` if port is listening and generating messages."""
 
-    subscribed_calls: list[Callable]
-    """Callables that will be called with incoming messages. Can be modified."""
+    calls: list[None | tuple[tuple, dict], list['Callable']]
+    """Message conditions and callables that will be called with matching incoming messages.
+    `None` conditions matches all messages."""
 
-    _call_statistics: dict[Callable, collections.deque[float]] = {}
-    """Statistics for each call's execution time in milliseconds for the last 20 runs."""
-
-    def __init__(self, uid: Hashable):
+    def __init__(self, uid: 'Hashable'):
         super().__init__(uid)
-        self.subscribed_calls: list[Callable] = []
+        self.calls: list[None | tuple[tuple, dict], list['Callable']] = []
 
-        self.subscribed_calls: list[Callable]  # workaround for mkdocstrings issue #607
-        """Callables that will be called with incoming messages. Can be modified."""
+        # workarounds for mkdocstrings issue #607
+        self.calls: list[None | tuple[tuple, dict], list['Callable']]
+        """Message conditions and callables that will be called with matching incoming messages.
+           `None` conditions matches all messages."""
 
-    # A Decorator
-    def subscribe(self, function: Callable[['Msg'], None]) -> Callable:
-        """Decorator to subscribe a callable to the input's messages
+    def subscribe(
+        self,
+        *msg_matches_args: 'tuple[None | Container | Any]',
+        **msg_matches_kwargs: 'dict[str, None | Container | Any]',
+    ) -> 'Callable':
+        """Decorator to subscribe a callable to the input's messages.
 
-        ??? Example
+        Decorator without arguments subscribes a callable to all the input's messages.
+
+        Decorator with arguments subscribes a callable to the input's messages
+        that match conditions set by arguments.
+        It works the same way as message's [`matches`][midiscripter.base.msg_base.Msg.matches] method:
+
+        1. If condition is `None` or omitted it matches anything.
+
+        2. If condition equals attribute it matches the attribute.
+
+        3. If condition is a container and contains the attribute it matches the attribute.
+
+        ??? Examples
+            1. Calls function for all MIDI port's messages:
             ``` python
-            @input_instance.subscribe
-            def function(msg: Msg) -> None:
+            @midi_input_instance.subscribe
+            def function(msg: MidiMsg) -> None:
                 pass
             ```
+            2. Calls function for OSC messages from specific address:
             ``` python
-            input_instance.subscribe(object.method)
+            @osc_input_instance.subscribe(address='/live/song/get/track_data')
+            def function(msg: OscMsg) -> None:
+                pass
             ```
-
-        Args:
-            function: A callable that takes the input port's message as the only argument.
+            3. Call object instance method for MIDI port's "note on" and "note off" messages:
+            ``` python
+            midi_input_instance.subscribe((MidiType.NOTE_ON, MidiType.NOTE_OFF))(object.method)
+            ```
 
         Returns:
             Subscribed callable.
         """
-        if function not in self.subscribed_calls:
-            self._call_statistics[function] = collections.deque(maxlen=20)
-            self.subscribed_calls.append(function)
-            log('{input} subscribed {call}', input=self, call=function)
-        return function
+
+        def wrapped_subscribe(call: 'Callable[[Msg], None]') -> 'Callable':
+            if msg_matches_args[0] is call or not msg_matches_args and not msg_matches_kwargs:  # noqa: SIM108
+                conditions = None
+            else:
+                conditions = (msg_matches_args, msg_matches_kwargs)
+
+            try:
+                call_list_for_conditions = next(
+                    entry[1] for entry in self.calls if entry[0] == conditions
+                )
+                call_list_for_conditions.append(call)
+            except StopIteration:
+                self.calls.append((conditions, [call]))
+
+            call.conditions = conditions
+            call.statistics = collections.deque(maxlen=20)
+
+            return call
+
+        if callable(msg_matches_args[0]):
+            return wrapped_subscribe(msg_matches_args[0])
+
+        return wrapped_subscribe
 
     def _send_input_msg_to_calls(self, msg: 'Msg') -> None:
         """Sends the message received by the input port to subscribed calls.
@@ -189,14 +228,19 @@ class Input(Port):
         """
         log('{input} got message {msg}', input=self, msg=msg)
 
-        if self.is_enabled:
-            # pre-copying messages to reduce jitter a little
-            msg_copies = [copy.copy(msg) for _ in range(len(self.subscribed_calls))]
-            midiscripter.shared.thread_executor.map(
-                self.__call_worker, self.subscribed_calls, msg_copies
-            )
+        if not self.is_enabled:
+            return
 
-    def __call_worker(self, function: Callable, msg: 'Msg') -> None:
+        calls = []
+        for conditions, call_list in self.calls:
+            if conditions is None or msg.matches(*conditions[0], **conditions[1]):
+                calls.extend(call_list)
+
+        msg_copies = [copy.copy(msg) for _ in range(len(calls))]
+        midiscripter.shared.thread_executor.map(self.__call_worker, calls, msg_copies)
+
+    @staticmethod
+    def __call_worker(call: 'Callable', msg: 'Msg') -> None:
         """Function called in thread for each subscribed call and each received message.
 
         Notes:
@@ -204,12 +248,12 @@ class Input(Port):
             Supposed to be called from `_send_input_msg_to_calls` method.
 
         Args:
-            function: Subscribed callable.
+            call: Subscribed callable.
             msg: Received message to use as callable only argument.
         """
         try:
-            function(msg)
-            self._call_statistics[function].append(msg._age_ms)
+            call(msg)
+            call.statistics.append(msg._age_ms)
         except Exception as exc:
             log.red(''.join(traceback.format_exception(exc)))
 
