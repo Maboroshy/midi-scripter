@@ -46,7 +46,7 @@ class Msg:
     def __eq__(self, other_msg: 'Msg'):
         return type(self) is type(other_msg) and self.__as_tuple() == other_msg.__as_tuple()
 
-    def matches(self, *args_conditions, **kwargs_conditions) -> bool:
+    def matches(self, *conditions_args, **conditions_kwargs) -> bool:
         """Checks if message's attributes match all provided attribute conditions:
 
         1. If condition is `None` or omitted it matches anything.
@@ -85,7 +85,8 @@ class Msg:
     @property
     def _age_ms(self) -> float:
         """Time passed since message creation in milliseconds."""
-        return round((midiscripter.shared.precise_epoch_time() - self.ctime) * 1000, 3)
+        # Using faster rounding
+        return int((midiscripter.shared.precise_epoch_time() - self.ctime) * 1000000) / 1000
 
     def __as_tuple(self) -> tuple:
         """Converts message to a tuple based on message's __match_args__ class attribute

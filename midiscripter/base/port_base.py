@@ -80,13 +80,12 @@ class Port(metaclass=_PortRegistryMeta):
     is_enabled: bool
     """`True` if port is listening messages / ready to send messages"""
 
-    _force_uid = None
+    _force_uid: ClassVar[None | str] = None
     """UID override for classes that have can have only one instance per whole class,
-       like keyboard port class which can have only one instance for the system.
-       Object for these classe are declared without arguments.
+       like keyboard port classes. Object for these classes are declared without arguments.
     """
 
-    def __init__(self, uid: Hashable):
+    def __init__(self, uid: 'Hashable'):
         """
         Args:
             uid: Port's unique ID that will always lead to the same port instance
@@ -135,7 +134,7 @@ class Input(Port):
     """Input port base class"""
 
     is_enabled: bool
-    """`True` if port is listening and generating messages."""
+    """`True` if port is listening and generating messages"""
 
     calls: list[None | tuple[tuple, dict], list['Callable']]
     """Message conditions and callables that will be called with matching incoming messages.

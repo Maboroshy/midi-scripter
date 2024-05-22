@@ -41,8 +41,7 @@ class OscMsg(midiscripter.base.msg_base.Msg):
 
     def matches(
         self,
-        address: 'None | Container[str] | str' = None,
-        data: 'None | Container[str | bytes | bool | int | float | list | tuple] | \
-               str | bytes | bool | int | float | list | tuple' = None,
+        address: 'None | Container | str' = None,
+        data: 'None | Container | str | bytes | bool | int | float | list | tuple' = None,
     ) -> bool:
         return super().matches(self.type, address, data)

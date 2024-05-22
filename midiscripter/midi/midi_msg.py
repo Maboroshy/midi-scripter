@@ -52,11 +52,10 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
 
     def matches(
         self,
-        type: 'None | Container[MidiType] | MidiType' = None,
-        channel: 'None | Container[ int | tuple[int] | tuple[int, int, int] ] | \
-                 int | tuple[int] | tuple[int, int, int]' = None,
-        data1: 'None | Container[int | tuple[int, int]] | int | tuple[int, int]' = None,
-        data2: 'None | Container[int | tuple[int, ...]] | int | tuple[int, ...]' = None,
+        type: 'None | Container | MidiType' = None,
+        channel: 'None | Container | int | tuple[int, ...]' = None,
+        data1: 'None | Container | int | tuple[int, ...]' = None,
+        data2: 'None | Container | int | tuple[int, ...]' = None,
     ) -> bool:
         return super().matches(type, channel, data1, data2)
 
@@ -114,6 +113,15 @@ class ChannelMsg(MidiMsg):
     def combined_data(self, combined_data_value: int | Sequence[int]) -> None:
         self.data1 = combined_data_value & 0x7F
         self.data2 = combined_data_value >> 7
+
+    def matches(
+        self,
+        type: 'None | Container | MidiType' = None,
+        channel: 'None | Container | int' = None,
+        data1: 'None | Container | int' = None,
+        data2: 'None | Container | int' = None,
+    ) -> bool:
+        return super().matches(type, channel, data1, data2)
 
 
 class SysexMsg(MidiMsg):
@@ -194,3 +202,12 @@ class SysexMsg(MidiMsg):
         self.channel = tuple(payload_data[0:channel_len])
         self.data1 = tuple(payload_data[channel_len : channel_len + sub_id_len])
         self.data2 = tuple(payload_data[channel_len + sub_id_len :])
+
+    def matches(
+        self,
+        type: 'None | Container | MidiType' = None,
+        channel: 'None | Container | tuple[int, ...]' = None,
+        data1: 'None | Container | tuple[int, ...]' = None,
+        data2: 'None | Container | tuple[int, ...]' = None,
+    ) -> bool:
+        return super().matches(type, channel, data1, data2)
