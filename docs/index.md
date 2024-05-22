@@ -10,7 +10,6 @@ proxy_output = MidiOut('To DAW')
 # 2. GUI widgets (optional)
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
 
-
 # 3. Calls
 @midi_keyboard.subscribe
 def transpose(msg: MidiMsg) -> None:
@@ -18,8 +17,7 @@ def transpose(msg: MidiMsg) -> None:
 # 4. Messages
     if msg.type == MidiType.NOTE_ON or msg.type == MidiType.NOTE_OFF:
         msg.data1 += 12 * int(octave_selector.selected_item_text)
-        proxy_output.send(msg)
-
+    proxy_output.send(msg)
 
 # 5. Starter
 if __name__ == '__main__':

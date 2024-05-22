@@ -11,7 +11,7 @@ octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
 def transpose(msg: MidiMsg) -> None:
     if msg.type == MidiType.NOTE_ON or msg.type == MidiType.NOTE_OFF:  # filter
         msg.data1 += 12 * int(octave_selector.selected_item_text)  # modify
-        proxy_output.send(msg)  # route
+    proxy_output.send(msg)  # route
 
 
 if __name__ == '__main__':  # combine multiple scripts by importing them
