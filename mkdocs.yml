@@ -19,7 +19,9 @@ nav:
             - Ports: api/key_port.md
             - Message: api/key_msg.md
         
-        - Metronome: api/metronome_port.md
+        - Metronome: 
+            - Port: api/metronome_port.md
+            - Message: api/click_msg.md
 
         - GUI Widgets:
             - Text: api/gui_text.md
