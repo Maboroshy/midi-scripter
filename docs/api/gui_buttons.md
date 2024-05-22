@@ -7,7 +7,7 @@
         - is_visible
         - qt_widget
         - is_enabled
-        - subscribed_calls
+        - calls
         - subscribe
 
 ## :::midiscripter.GuiToggleButton
@@ -20,7 +20,7 @@
         - is_visible
         - qt_widget
         - is_enabled
-        - subscribed_calls
+        - calls
         - subscribe
 
 ## :::midiscripter.GuiButtonSelectorH
@@ -34,7 +34,7 @@
         - is_visible
         - qt_widget
         - is_enabled
-        - subscribed_calls
+        - calls
         - subscribe
 
 ## :::midiscripter.GuiButtonSelectorV
@@ -48,5 +48,5 @@
         - is_visible
         - qt_widget
         - is_enabled
-        - subscribed_calls
+        - calls
         - subscribe

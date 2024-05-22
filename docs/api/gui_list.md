@@ -9,5 +9,5 @@
         - is_visible
         - qt_widget
         - is_enabled
-        - subscribed_calls
+        - calls
         - subscribe
