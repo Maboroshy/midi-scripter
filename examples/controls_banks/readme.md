@@ -1,10 +1,10 @@
-# Controls Layers
+# Controls Banks
 
-This script adds extra layers for the MIDI continuous controllers. Layers 
+This script adds extra banks for the MIDI continuous controllers. Banks 
 can be switched by a dedicated continuous controller and a GUI widget. 
 
-The script also saves received feedback for each layer and sends it to 
-controller on layer selection.
+The script also saves received feedback for each bank and sends it to 
+controller on bank selection.
 
 ## Prerequisites
 
