@@ -8,7 +8,7 @@ nav:
     - API Documentation:
         - Midi:
             - Ports: api/midi_port.md
-            - Message: api/midi_msg.md
+            - Messages: api/midi_msg.md
             - Utils: api/midi_note_data.md  
         
         - Open Sound Control:
@@ -18,10 +18,10 @@ nav:
         - Keyboard:
             - Ports: api/key_port.md
             - Message: api/key_msg.md
-        
-        - Metronome: 
-            - Port: api/metronome_port.md
-            - Message: api/click_msg.md
+
+        - Mouse:
+            - Ports: api/mouse_port.md
+            - Message: api/mouse_msg.md
 
         - GUI Widgets:
             - Text: api/gui_text.md
@@ -34,12 +34,12 @@ nav:
         
         - Logging: api/logging.md
         
-        - Util:
+        - Extra ports:
+            - Metronome: api/metronome_port.md
             - File System Events:
                 - Port: api/fs_port.md
                 - Message: api/fs_event_msg.md
             - Midi Ports Changes: api/midi_ports_changed.md
-            - Restart Script: api/restart_script.md
         
         - Base Classes:
             - Ports: api/base_ports.md
@@ -102,9 +102,11 @@ plugins:
             docstring_section_style: 'list'
             merge_init_into_class: true
             line_length: 80
-
+            
             inherited_members: true
             members_order: source
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
             
             filters:
               - "!^_"
