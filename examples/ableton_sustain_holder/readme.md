@@ -14,4 +14,4 @@ to detect session record status.
 - Set `To DAW` virtual port as an input in Ableton Live.
 - Set `From DAW` virtual port as an output in Ableton Live.
 - Put the virtual instrument you use to Instrument Rack 
-and add External Instrument to the rack. Set it's MIDI To `From DAW`.
+and add External Instrument to the rack. Set its MIDI To `From DAW`.

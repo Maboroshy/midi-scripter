@@ -6,6 +6,7 @@ output_port = MidiOut('loopMIDI')
 
 @input_port.subscribe
 def proxy(msg: MidiMsg) -> None:
+    log('Your actions here')
     output_port.send(msg)
 
 
