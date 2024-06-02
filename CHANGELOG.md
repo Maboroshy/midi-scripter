@@ -1,5 +1,10 @@
 # Changelog
 
+## **v0.4.1** - 03.06.2024
+
+### Fixed
+- Greatly increased performance of GUI widgets text autoresize
+
 ## **v0.4** - 02.06.2024
 
 ### Added

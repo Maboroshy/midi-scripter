@@ -74,12 +74,12 @@ class WrappedQWidgetMixin:
 
 # noinspection PyUnresolvedReferences, PyPep8Naming
 class AdaptiveTextSizeMixin:
-    def __init__(self):
+    def __init__(self: QWidget):
         self.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored))
         self.setContentsMargins(10, 5, 10, 5)
         self.__longest_text_rect_size = QFontMetrics(self.font()).boundingRect(self.text()).size()
 
-    def setText(self, text: str) -> None:
+    def setText(self: QWidget, text: str) -> None:
         super().setText(text)
 
         text_rect = QFontMetrics(self.font()).boundingRect(self.text())
@@ -90,24 +90,25 @@ class AdaptiveTextSizeMixin:
             self.__make_text_size_fit_widget_size()
             self.__longest_text_rect_size = text_rect
 
-    def resizeEvent(self, event: QResizeEvent) -> None:
+    def resizeEvent(self: QWidget, event: QResizeEvent) -> None:
         super().resizeEvent(event)
         self.__make_text_size_fit_widget_size()
 
-    def __make_text_size_fit_widget_size(self) -> None:
+    def __make_text_size_fit_widget_size(self: QWidget) -> None:
         if not self.text():
             return
 
         font = self.font()
         content_rect = self.contentsRect()
 
-        font_size = 0
+        font_size = 1
         text_rect = QSize()
         while (
             text_rect.height() < content_rect.height() and text_rect.width() < content_rect.width()
         ):
-            font_size += 1
+            font_size += 2
             font.setPixelSize(font_size)
             text_rect = QFontMetrics(font).boundingRect(self.text())
 
+        font.setPixelSize(font_size - 2)
         self.setFont(font)
