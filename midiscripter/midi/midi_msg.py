@@ -56,8 +56,10 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
         channel: 'None | Container | int | tuple[int, ...]' = None,
         data1: 'None | Container | int | tuple[int, ...]' = None,
         data2: 'None | Container | int | tuple[int, ...]' = None,
+        *,
+        combined_data: 'None | Container[int] | int' = None,
     ) -> bool:
-        return super().matches(type, channel, data1, data2)
+        return super().matches(type, channel, data1, data2, combined_data=combined_data)
 
 
 class ChannelMsg(MidiMsg):
@@ -87,6 +89,7 @@ class ChannelMsg(MidiMsg):
         data1: int = 0,
         data2: int = 127,
         *,
+        combined_data: None | int = None,
         source: 'None | MidiIn' = None,
     ):
         """
@@ -94,14 +97,28 @@ class ChannelMsg(MidiMsg):
             type: MIDI message type.
             channel: MIDI message channel
             data1: First data byte: note, control, program or aftertouch value
-                   depending on MIDI message type
-            data2: Second data byte: velocity, value depending on MIDI message type
-            source (MidiIn): The [`MidiIn`][midiscripter.MidiIn] instance that generated the message
+                   depending on MIDI message type (0-127)
+            data2: Second data byte: velocity, value depending on MIDI message type (0-127)
+            combined_data: Both data bytes combined to 14-bit number -
+                           pitch value for pitch bend MIDI message (0-16383)
+            source: The [`MidiIn`][midiscripter.MidiIn] instance that generated the message
         """
         super().__init__(type, source)
         self.channel = channel
-        self.data1 = data1
-        self.data2 = data2
+        if combined_data:
+            self.combined_data = combined_data
+        else:
+            self.data1 = data1
+            self.data2 = data2
+
+    def __repr__(self):
+        if self.type == MidiType.PITCH_BEND:
+            return (
+                f'{self.__class__.__name__}({repr(self.type)}, {repr(self.channel)}, '
+                f'combined_data={repr(self.combined_data)})'
+            )
+        else:
+            return super().__repr__()
 
     @property
     def combined_data(self) -> int | tuple[int, ...]:
@@ -116,12 +133,14 @@ class ChannelMsg(MidiMsg):
 
     def matches(
         self,
-        type: 'None | Container | MidiType' = None,
-        channel: 'None | Container | int' = None,
-        data1: 'None | Container | int' = None,
-        data2: 'None | Container | int' = None,
+        type: 'None | Container[MidiType] | MidiType' = None,
+        channel: 'None | Container[int] | int' = None,
+        data1: 'None | Container[int] | int' = None,
+        data2: 'None | Container[int] | int' = None,
+        *,
+        combined_data: 'None | Container[int] | int' = None,
     ) -> bool:
-        return super().matches(type, channel, data1, data2)
+        return super().matches(type, channel, data1, data2, combined_data=combined_data)
 
 
 class SysexMsg(MidiMsg):
@@ -205,9 +224,11 @@ class SysexMsg(MidiMsg):
 
     def matches(
         self,
-        type: 'None | Container | MidiType' = None,
-        channel: 'None | Container | tuple[int, ...]' = None,
-        data1: 'None | Container | tuple[int, ...]' = None,
-        data2: 'None | Container | tuple[int, ...]' = None,
+        type: 'None | Container[MidiType] | MidiType' = None,
+        channel: 'None | Container[tuple[int, ...]] | tuple[int, ...]' = None,
+        data1: 'None | Container[tuple[int, ...]] | tuple[int, ...]' = None,
+        data2: 'None | Container[tuple[int, ...]] | tuple[int, ...]' = None,
+        *,
+        combined_data: 'None | Container[tuple[int, ...]] | tuple[int, ...]' = None,
     ) -> bool:
-        return super().matches(type, channel, data1, data2)
+        return super().matches(type, channel, data1, data2, combined_data=combined_data)
