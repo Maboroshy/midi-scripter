@@ -5,19 +5,21 @@ import music21.roman
 
 from midiscripter import *
 
+
 midi_input_from_daw = MidiIn('From DAW')  # MIDI input from (after) DAW
 
 pressed_notes_midi_data = []  # A global variable
 
 # Setting GUI widgets
-chord_name_label = GuiText('Chord Name')
+root_selector = GuiButtonSelectorV(('C', 'D', 'E', 'F', 'G', 'A', 'B'), select='C')
+root_alteration_selector = GuiButtonSelectorV(('b', '♮', '#'), select='♮')
+mode_selector = GuiButtonSelectorV(('Major', 'Minor'), select='Major')
+buttons_layout = GuiWidgetLayout('Settings', [root_selector, [root_alteration_selector, 
+                                                              mode_selector]])  # fmt: skip
 chord_degree_label = GuiText('Degree')
-
-root_selector = GuiButtonSelectorV(('C', 'D', 'E', 'F', 'G', 'A', 'B'), 'Root Selector', select='C')
-root_alteration_selector = GuiButtonSelectorV(
-    ('b', '♮', '#'), 'Root Alteration Selector', select='♮'
-)
-mode_selector = GuiButtonSelectorV(('Major', 'Minor'), 'Mode Selector', select='Major')
+chord_name_label = GuiText('Chord Name')
+labels_layout = GuiWidgetLayout('Info', chord_degree_label, 
+                                        chord_name_label)  # fmt: skip
 
 
 @midi_input_from_daw.subscribe((MidiType.NOTE_ON, MidiType.NOTE_OFF))
@@ -25,7 +27,7 @@ def show_chord_info(msg: MidiMsg) -> None:
     """Gathers pressed notes and prints chord info to GUI widgets"""
     global pressed_notes_midi_data
 
-    # Clear chord of first note off
+    # Clear chord on first note off
     if msg.type == MidiType.NOTE_OFF:
         pressed_notes_midi_data = []
 
@@ -49,7 +51,7 @@ def show_chord_info(msg: MidiMsg) -> None:
         chord_name_label.content = chord.pitchedCommonName
         chord_degree_label.content = music21.roman.romanNumeralFromChord(chord, key).figure.upper()
 
-        # If the chord is out of key it's degree will be printed red
+        # If the chord is out of key its degree will be printed red
         if not all(key.getScaleDegreeFromPitch(pitch) for pitch in chord.pitches):
             chord_degree_label.color = 'red'
         else:

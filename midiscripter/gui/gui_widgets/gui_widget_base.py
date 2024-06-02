@@ -10,6 +10,7 @@ import midiscripter.gui.app
 from .gui_msg import GuiEventMsg, GuiEvent
 
 if TYPE_CHECKING:
+    from collections.abc import Container, Callable
     from .mixins import WrappedQWidgetMixin
 
 
@@ -20,27 +21,29 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     def __init__(
         self,
-        content: str | tuple[str, ...],
-        title: str | None = None,
-        color: str | tuple[int, int, int] | None = None,
+        title_and_content: str | tuple[str, ...],
+        content: str | tuple[str, ...] | None = None,
         *,
+        color: str | tuple[int, int, int] | None = None,
         value: str | None = None,
         select: int | str | None = None,
         toggle_state: bool | None = None,
     ):
         """
         Args:
+            title (str): Widget's title
             content: Widget's text or text for its items
-            title: Widget's title, `None` for same as content
-            color: Preset text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
-            value: Preset value
-            select: Preset item text / index to select
-            toggle_state: Preset toggle state
+            color: Content color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
+            value: Initial value
+            select: Preselected item
+            toggle_state: Initial toggle state
         """
+        if isinstance(title_and_content, types.GeneratorType):
+            title_and_content = tuple(title_and_content)
         if isinstance(content, types.GeneratorType):
             content = tuple(content)
 
-        self.title = title or str(content)
+        self.title = str(title_and_content)
         """Widget's title."""
         super().__init__(self.title)
 
@@ -52,7 +55,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
         self.qt_widget.setObjectName(self.title)
         midiscripter.gui.app.add_qwidget(self.qt_widget)
 
-        self.content = content
+        self.content = content if content else title_and_content
 
         if value:
             self.value = value

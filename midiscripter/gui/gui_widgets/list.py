@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from typing import overload
 
 from PySide6.QtWidgets import *
 
@@ -48,19 +48,57 @@ class GuiListSelector(GuiWidget):
 
     _qt_widget_class = ListSelectorWidget
 
+    @overload
+    def __init__(
+        self,
+        title: str,
+        content: tuple[str, ...],
+        *,
+        color: str | tuple[int, int, int] | None = None,
+        select: int | str | None = None,
+    ): ...
+
+    @overload
     def __init__(
         self,
         content: tuple[str, ...],
-        title: str | None = None,
-        color: str | tuple[int, int, int] | None = None,
         *,
+        color: str | tuple[int, int, int] | None = None,
+        select: int | str | None = None,
+    ): ...
+
+    def __init__(
+        self,
+        title_and_content: str | tuple[str, ...],
+        content: tuple[str, ...] | None = None,
+        *,
+        color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
     ):
         """
+        **Overloads:**
+            ``` python
+            GuiListSelector(
+                title: str,
+                content: tuple[str, ...],
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                select: int | str | None = None
+            )
+            ```
+            ``` python
+            GuiListSelector(
+                content: tuple[str, ...],
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                select: int | str | None = None
+            )
+            ```
+
         Args:
-            content: Text items
-            title: Widget's title, `None` for same as content
+            title (str): Widget's title
+            content: Items' texts
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
-            select: text or index of item to select initially
+            select: Text or index of item to select initially
         """
-        super().__init__(content, title, select=select, color=color)
+        super().__init__(title_and_content, content, color=color, select=select)

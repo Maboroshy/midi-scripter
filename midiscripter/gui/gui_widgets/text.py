@@ -1,3 +1,5 @@
+from typing import overload
+
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
@@ -32,19 +34,57 @@ class GuiText(GuiWidget):
 
     _qt_widget_class = AdaptableLabelWidget
 
+    @overload
+    def __init__(
+        self,
+        title: str,
+        content: str,
+        *,
+        color: str | tuple[int, int, int] | None = None,
+        toggle_state: bool | None = None,
+    ): ...
+
+    @overload
     def __init__(
         self,
         content: str,
-        title: str | None = None,
-        color: str | tuple[int, int, int] | None = None,
         *,
+        color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
+    ): ...
+
+    def __init__(
+        self,
+        title_and_content: str,
+        content: str | None = None,
+        *,
+        color: str | tuple[int, int, int] | None = None,
+        toggle_state: bool = False,
     ):
         """
+        **Overloads:**
+            ``` python
+            GuiText(
+                title: str,
+                content: str,
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                toggle_state: bool = False
+            )
+            ```
+            ``` python
+            GuiText(
+                content: str,
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                toggle_state: bool = False
+            )
+            ```
+
         Args:
-            content: Text
-            title: Widget's title, `None` for same as content
+            title (str): Widget's title
+            content: Widget's text
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             toggle_state: Text "grey out" state
         """
-        super().__init__(content, title, color, toggle_state=toggle_state)
+        super().__init__(title_and_content, content, color=color, toggle_state=toggle_state)

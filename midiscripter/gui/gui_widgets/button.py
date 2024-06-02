@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from typing import overload
 
 from PySide6.QtWidgets import *
 
@@ -29,17 +29,17 @@ class GuiButton(GuiWidget):
 
     def __init__(
         self,
-        content: str,
-        title: str | None = None,
+        title_and_content: str,
+        content: str | None = None,
         color: str | tuple[int, int, int] | None = None,
     ):
         """
         Args:
-            content: Button text
-            title: Widget's title, `None` for same as content
+            title_and_content: Widget's title and button text, should be unique among all widgets.
+            content: Button text, if set `title_and_content` is used only for title
             color: Button text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
         """
-        super().__init__(content, title, color)
+        super().__init__(title_and_content, content, color=color)
 
 
 class ToggleButtonWidget(AdaptablePushButtonWidget):
@@ -57,22 +57,60 @@ class GuiToggleButton(GuiWidget):
 
     _qt_widget_class = ToggleButtonWidget
 
+    @overload
+    def __init__(
+        self,
+        title: str,
+        content: str,
+        *,
+        color: str | tuple[int, int, int] | None = None,
+        toggle_state: bool | None = None,
+    ): ...
+
+    @overload
     def __init__(
         self,
         content: str,
-        title: str | None = None,
-        color: str | tuple[int, int, int] | None = None,
         *,
+        color: str | tuple[int, int, int] | None = None,
+        toggle_state: bool | None = None,
+    ): ...
+
+    def __init__(
+        self,
+        title_and_content: str,
+        content: str | None = None,
+        *,
+        color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
     ):
         """
+        **Overloads:**
+            ``` python
+            GuiToggleButton(
+                title: str,
+                content: str,
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                toggle_state: bool = False
+            )
+            ```
+            ``` python
+            GuiToggleButton(
+                content: str,
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                toggle_state: bool = False
+            )
+            ```
+
         Args:
+            title (str): Widget's title
             content: Button text
-            title: Widget's title, `None` for same as content
             color: Button text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
-            toggle_state: Button toggle state
+            toggle_state: Button initial toggle state
         """
-        super().__init__(content, title, color, toggle_state=toggle_state)
+        super().__init__(title_and_content, content, color=color, toggle_state=toggle_state)
 
 
 class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
@@ -131,22 +169,60 @@ class GuiButtonSelectorH(GuiWidget):
 
     _qt_widget_class = ButtonGroupWidgetHorizontal
 
+    @overload
+    def __init__(
+        self,
+        title: str,
+        content: tuple[str, ...],
+        *,
+        color: str | tuple[int, int, int] | None = None,
+        select: int | str | None = None,
+    ): ...
+
+    @overload
     def __init__(
         self,
         content: tuple[str, ...],
-        title: str | None = None,
-        color: str | tuple[int, int, int] | None = None,
         *,
+        color: str | tuple[int, int, int] | None = None,
+        select: int | str | None = None,
+    ): ...
+
+    def __init__(
+        self,
+        title_and_content: str | tuple[str, ...] = None,
+        content: tuple[str, ...] | None = None,
+        *,
+        color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
     ):
         """
+        **Overloads:**
+            ``` python
+            GuiButtonSelectorH(
+                title: str,
+                content: tuple[str, ...],
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                select: int | str | None = None
+            )
+            ```
+            ``` python
+            GuiButtonSelectorH(
+                content: tuple[str, ...],
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                select: int | str | None = None
+            )
+            ```
+
         Args:
-            content: Text for selector's buttons
-            title: Widget's title, `None` for same as content
+            title (str): Widget's title
+            content: Buttons' texts
             color: Selector button's text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: text or index of button to select initially
         """
-        super().__init__(content, title, color, select=select)
+        super().__init__(title_and_content, content, color=color, select=select)
 
 
 class ButtonGroupWidgetVertical(ButtonGroupWidgetHorizontal):
@@ -158,19 +234,57 @@ class GuiButtonSelectorV(GuiWidget):
 
     _qt_widget_class = ButtonGroupWidgetVertical
 
+    @overload
+    def __init__(
+        self,
+        title: str,
+        content: tuple[str, ...],
+        *,
+        color: str | tuple[int, int, int] | None = None,
+        select: int | str | None = None,
+    ): ...
+
+    @overload
     def __init__(
         self,
         content: tuple[str, ...],
-        title: str | None = None,
-        color: str | tuple[int, int, int] | None = None,
         *,
+        color: str | tuple[int, int, int] | None = None,
+        select: int | str | None = None,
+    ): ...
+
+    def __init__(
+        self,
+        title_and_content: str | tuple[str, ...] = None,
+        content: tuple[str, ...] | None = None,
+        *,
+        color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
     ):
         """
+        **Overloads:**
+            ``` python
+            GuiButtonSelectorV(
+                title: str,
+                content: tuple[str, ...],
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                select: int | str | None = None
+            )
+            ```
+            ``` python
+            GuiButtonSelectorV(
+                content: tuple[str, ...],
+                *,
+                color: str | tuple[int, int, int] | None = None,
+                select: int | str | None = None
+            )
+            ```
+
         Args:
-            content: Text for selector's buttons
-            title: Widget's title, `None` for same as content
+            title (str): Widget's title
+            content: Buttons' texts
             color: Selector button's text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: text or index of button to select initially
         """
-        super().__init__(content, title, color, select=select)
+        super().__init__(title_and_content, content, color=color, select=select)
