@@ -1,4 +1,4 @@
-## :::midiscripter.FileEventType
+## :::midiscripter.FileEvent
     options:
       show_if_no_docstring: true
       filters:

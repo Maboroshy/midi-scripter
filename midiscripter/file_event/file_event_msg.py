@@ -8,7 +8,10 @@ if TYPE_CHECKING:
     from midiscripter.file_event.file_event_port import FileEventIn
 
 
-class FileEventType(midiscripter.base.msg_base.AttrEnum):
+class FileEvent(midiscripter.base.msg_base.AttrEnum):
+    """File event message type enumerator
+    to use as [`FileEventMsg`][midiscripter.FileEventMsg] `type` attribute."""
+
     # Names are hardcoded, equal watchdog's event types
     MOVED = 'MOVED'
     DELETED = 'DELETED'
@@ -21,7 +24,7 @@ class FileEventType(midiscripter.base.msg_base.AttrEnum):
 class FileEventMsg(midiscripter.base.msg_base.Msg):
     ___match_args__ = ('type', 'path')
 
-    type: FileEventType
+    type: FileEvent
     """File event type"""
 
     path: pathlib.Path
@@ -31,7 +34,7 @@ class FileEventMsg(midiscripter.base.msg_base.Msg):
 
     def __init__(
         self,
-        type: FileEventType | str,
+        type: FileEvent | str,
         path: pathlib.Path,
         *,
         source: 'None | FileEventIn' = None,
@@ -40,8 +43,7 @@ class FileEventMsg(midiscripter.base.msg_base.Msg):
         Args:
             type: File event type
             path: File path
-            source (FileEventIn): The [`FileEventIn`][midiscripter.FileEventIn]
-                                  instance that generated the message
+            source: The [`FileEventIn`][midiscripter.FileEventIn] instance that generated the message
         """
         super().__init__(type, source)
         self.type = type
@@ -49,7 +51,7 @@ class FileEventMsg(midiscripter.base.msg_base.Msg):
 
     def matches(
         self,
-        type: 'None | Container[FileEventType] | FileEventType | str' = None,
+        type: 'None | Container[FileEvent] | FileEvent | str' = None,
         path: 'None | Container[pathlib.Path] | pathlib.Path' = None,
     ) -> bool:
         return super().matches(type, path)

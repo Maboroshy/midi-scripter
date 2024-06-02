@@ -7,8 +7,9 @@ if TYPE_CHECKING:
     from midiscripter.gui.gui_widgets.gui_widget_base import GuiWidget
 
 
-class GuiEventType(midiscripter.base.msg_base.AttrEnum):
-    """GUI event type enumerator to use as [`GuiEventMsg`][midiscripter.GuiEventMsg] `type` attribute."""
+class GuiEvent(midiscripter.base.msg_base.AttrEnum):
+    """GUI event type enumerator
+    to use as [`GuiEventMsg`][midiscripter.GuiEventMsg] `type` attribute."""
 
     TRIGGERED = 'TRIGGERED'
     CONTENT_SET = 'CONTENT_SET'
@@ -21,7 +22,7 @@ class GuiEventType(midiscripter.base.msg_base.AttrEnum):
 class GuiEventMsg(midiscripter.base.msg_base.Msg):
     """GUI interaction message produced by GUI widget port."""
 
-    type: GuiEventType
+    type: GuiEvent
     """GUI event type."""
 
     data: 'str | int | bool | Sequence | None'
@@ -42,7 +43,7 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
 
     def __init__(
         self,
-        type: GuiEventType,
+        type: GuiEvent,
         data: 'str | int | bool | Sequence | None' = None,
         *,
         source: 'None | GuiWidget' = None,
@@ -53,8 +54,7 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
 
     def matches(
         self,
-        type: 'None | Container[GuiEventType] | GuiEventType' = None,
-        data: 'None | Container[str | int | bool | Sequence | None] | \
-                       str | int | bool | Sequence | None' = None,
+        type: 'None | Container[GuiEvent] | GuiEvent' = None,
+        data: 'None | Container | str | int | bool | Sequence' = None,
     ) -> bool:
         return super().matches(type, data)

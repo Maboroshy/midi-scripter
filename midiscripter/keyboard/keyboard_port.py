@@ -2,8 +2,7 @@ import pynput.keyboard
 from typing import TYPE_CHECKING, overload
 
 import midiscripter.base.port_base
-import midiscripter.osc.osc_msg
-from midiscripter.keyboard.keyboard_msg import KeyEventType, KeyMsg
+from midiscripter.keyboard.keyboard_msg import KeyEvent, KeyMsg
 from midiscripter.logger import log
 
 if TYPE_CHECKING:
@@ -48,7 +47,7 @@ class KeyIn(midiscripter.base.port_base.Input):
         if key not in self.pressed_keys:
             self.pressed_keys.append(key)
 
-        msg = KeyMsg(KeyEventType.KEY_PRESS, self.pressed_keys.copy(), source=self)
+        msg = KeyMsg(KeyEvent.PRESS, self.pressed_keys.copy(), source=self)
         self._send_input_msg_to_calls(msg)
 
     def __on_release(self, key: pynput.keyboard.Key) -> None:
@@ -62,7 +61,7 @@ class KeyIn(midiscripter.base.port_base.Input):
             pressed_keys_for_msg = self.pressed_keys.copy()
             self.pressed_keys.remove(key)
 
-            msg = KeyMsg(KeyEventType.KEY_RELEASE, pressed_keys_for_msg, source=self)
+            msg = KeyMsg(KeyEvent.RELEASE, pressed_keys_for_msg, source=self)
             self._send_input_msg_to_calls(msg)
         except ValueError:
             pass
@@ -91,13 +90,13 @@ class KeyIn(midiscripter.base.port_base.Input):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[KeyEventType] | KeyEventType' = None,
+        type: 'None | Container[KeyEvent] | KeyEvent' = None,
         shortcut: 'None | Container[str] | str' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[KeyEventType] | KeyEventType' = None,
+        type: 'None | Container[KeyEvent] | KeyEvent' = None,
         shortcut: 'None | Container[str] | str' = None,
     ) -> 'Callable':
         return super().subscribe(type, shortcut)
@@ -125,15 +124,15 @@ class KeyOut(midiscripter.base.port_base.Output):
         # won't be displayed before the message
         self._log_msg_sent(msg)
 
-        if msg.type is KeyEventType.KEY_PRESS:
+        if msg.type is KeyEvent.PRESS:
             for keycode in msg.keycodes:
                 self.__pynput_controller.press(keycode)
 
-        elif msg.type is KeyEventType.KEY_RELEASE:
+        elif msg.type is KeyEvent.RELEASE:
             for keycode in msg.keycodes:
                 self.__pynput_controller.release(keycode)
 
-        elif msg.type is KeyEventType.KEY_TAP:
+        elif msg.type is KeyEvent.TAP:
             for keycode in msg.keycodes:
                 self.__pynput_controller.press(keycode)
             for keycode in reversed(msg.keycodes):

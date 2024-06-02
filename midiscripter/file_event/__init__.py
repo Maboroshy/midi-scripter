@@ -1,2 +1,2 @@
-from midiscripter.file_event.file_event_msg import FileEventMsg, FileEventType
+from midiscripter.file_event.file_event_msg import FileEventMsg, FileEvent
 from midiscripter.file_event.file_event_port import FileEventIn

@@ -47,8 +47,8 @@ class ScripterGUI(QApplication):
         self, msg: 'midiscripter.file_event.file_change_msg.FileEventMsg'
     ) -> None:
         if msg.type not in (
-            midiscripter.file_event.file_event_msg.FileEventType.CREATED,
-            midiscripter.file_event.file_event_msg.FileEventType.MODIFIED,
+            midiscripter.file_event.file_event_msg.FileEvent.CREATED,
+            midiscripter.file_event.file_event_msg.FileEvent.MODIFIED,
         ):
             return
 

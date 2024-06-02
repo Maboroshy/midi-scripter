@@ -30,12 +30,15 @@ MODIFIER_KEYS_VARIATIONS = {
 }
 
 
-class KeyEventType(midiscripter.base.msg_base.AttrEnum):
-    KEY_PRESS = 'KEY_PRESS'
-    KEY_RELEASE = 'KEY_RELEASE'
-    KEY_TAP = 'KEY_TAP'
-    """Key press and release. Isn't assigned by [`KeyIn`][midiscripter.KeyIn]. 
-       Use it for message declarations in calls."""
+class KeyEvent(midiscripter.base.msg_base.AttrEnum):
+    """Keyboard event message type enumerator
+    to use as [`KeyMsg`][midiscripter.KeyMsg] `type` attribute."""
+
+    PRESS = 'PRESS'
+    RELEASE = 'RELEASE'
+    TAP = 'TAP'
+    """Key press and release. Isn't assigned by [`KeyIn`][midiscripter.KeyIn]
+       but can be sent with [`KeyOut`][midiscripter.KeyOut]."""
 
 
 class KeyMsg(midiscripter.base.msg_base.Msg):
@@ -43,7 +46,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
 
     __match_args__ = ('type', 'shortcut')
 
-    type: KeyEventType
+    type: KeyEvent
     """Keyboard event type"""
 
     keycodes: list[pynput.keyboard.Key]
@@ -53,7 +56,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
 
     def __init__(
         self,
-        type: KeyEventType,
+        type: KeyEvent,
         shortcut_or_keycodes: str | Iterable[pynput.keyboard.Key],
         *,
         source: 'None | KeyIn' = None,
@@ -116,7 +119,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
 
     def matches(
         self,
-        type: 'None | Container[KeyEventType] | KeyEventType' = None,
+        type: 'None | Container[KeyEvent] | KeyEvent' = None,
         shortcut: 'None | Container[str] | str' = None,
     ) -> bool:
         return super().matches(type, shortcut)

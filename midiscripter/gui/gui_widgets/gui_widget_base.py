@@ -7,7 +7,7 @@ import midiscripter.base.msg_base
 import midiscripter.base.port_base
 import midiscripter.gui.app
 
-from .gui_msg import GuiEventMsg, GuiEventType
+from .gui_msg import GuiEventMsg, GuiEvent
 
 if TYPE_CHECKING:
     from .mixins import WrappedQWidgetMixin
@@ -70,26 +70,26 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     def __connect_change_signals(self) -> None:
         self.qt_widget.triggered_signal.connect(
-            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEventType.TRIGGERED))
+            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.TRIGGERED))
         )
         self.qt_widget.content_changed_signal.connect(
             lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEventType.CONTENT_SET, self.qt_widget.get_content())
+                GuiEventMsg(GuiEvent.CONTENT_SET, self.qt_widget.get_content())
             )
         )
         self.qt_widget.value_changed_signal.connect(
             lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEventType.VALUE_CHANGED, self.qt_widget.get_value())
+                GuiEventMsg(GuiEvent.VALUE_CHANGED, self.qt_widget.get_value())
             )
         )
         self.qt_widget.selection_changed_signal.connect(
             lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEventType.SELECTED, self.qt_widget.get_selected_item_text())
+                GuiEventMsg(GuiEvent.SELECTED, self.qt_widget.get_selected_item_text())
             )
         )
         self.qt_widget.toggle_state_changed_signal.connect(
             lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEventType.TOGGLED, self.qt_widget.get_toggle_state())
+                GuiEventMsg(GuiEvent.TOGGLED, self.qt_widget.get_toggle_state())
             )
         )
 
@@ -162,9 +162,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
     @color.setter
     def color(self, new_color_value: str | tuple[int, int, int]) -> None:
         self.qt_widget.set_color_signal.emit(new_color_value)
-        self._send_input_msg_to_calls(
-            GuiEventMsg(GuiEventType.COLOR_SET, new_color_value, source=self)
-        )
+        self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.COLOR_SET, new_color_value, source=self))
 
     @property
     def is_visible(self) -> bool:
@@ -177,13 +175,13 @@ class GuiWidget(midiscripter.base.port_base.Input):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[GuiEventType] | GuiEventType' = None,
+        type: 'None | Container[GuiEvent] | GuiEvent' = None,
         data: 'None | Container | str | int | bool | Sequence' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[GuiEventType] | GuiEventType' = None,
-        data: 'None | Container | str | int | bool | Sequence | None' = None,
+        type: 'None | Container[GuiEvent] | GuiEvent' = None,
+        data: 'None | Container | str | int | bool | Sequence' = None,
     ) -> 'Callable':
         return super().subscribe(type, data)
