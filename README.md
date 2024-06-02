@@ -1,6 +1,6 @@
 # <img src="docs/icon.svg" width="24"/> MIDI Scripter
 
-MIDI Scripter is a framework filtering, modifying, routing and any other
+MIDI Scripter is a framework for filtering, modifying, routing and any other
 scripting for MIDI, Open Sound Control (OSC), keyboard and mouse input and
 output with Python.
 
