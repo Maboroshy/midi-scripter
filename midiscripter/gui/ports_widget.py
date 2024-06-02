@@ -10,6 +10,7 @@ from midiscripter.base.port_base import Input, Output
 from midiscripter.logger import log
 from midiscripter.midi import MidiIn, MidiOut
 from midiscripter.keyboard import KeyIn
+from midiscripter.mouse import MouseIn
 
 
 class PortWidgetItem(QTreeWidgetItem):
@@ -84,19 +85,22 @@ class GeneralPortItem(PortItemMixin, PortWidgetItem):
             self.add_calls()
 
 
-class KeyInputPortItem(PortItemMixin, PortWidgetItem):
-    port_instance: None | KeyIn
+class AlwaysPresentInputPortItem(PortItemMixin, PortWidgetItem):
+    port_class: type[KeyIn | MouseIn]
+    port_instance: None | KeyIn | MouseIn
 
-    def __init__(self, parent_item: QTreeWidgetItem):
-        super().__init__(parent_item, ('Keyboard Input',))
-        self.repr = f'{midiscripter.KeyIn.__name__}()'
+    def __init__(self, parent_item: QTreeWidgetItem, port_class: type[KeyIn | MouseIn]):
+        self.port_class = port_class
+        super().__init__(parent_item, (self.port_class._force_uid,))
+
+        self.repr = f'{port_class.__name__}()'
 
         item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input]
         self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
 
         try:
-            port_index = (midiscripter.KeyIn.__name__, midiscripter.KeyIn._force_uid)
-            self.port_instance = midiscripter.KeyIn.instance_registry[port_index]
+            port_index = (port_class.__name__, self.port_class._force_uid)
+            self.port_instance = self.port_class.instance_registry[port_index]
             self.setCheckState(0, Qt.CheckState.Checked)
         except KeyError:
             self.port_instance = None
@@ -104,7 +108,7 @@ class KeyInputPortItem(PortItemMixin, PortWidgetItem):
 
     def request_state_change(self, new_state: bool) -> bool:
         if not self.port_instance:
-            self.port_instance = midiscripter.KeyIn()
+            self.port_instance = self.port_class()
         return PortItemMixin.request_state_change(self, new_state)
 
 
@@ -228,8 +232,11 @@ class PortsWidget(QTreeWidget):
         self.__add_declared_ports('OSC Inputs', midiscripter.OscIn)
         self.__add_declared_ports('OSC Outputs', midiscripter.OscOut)
 
-        KeyInputPortItem(self.__add_top_level_item('Keyboard Input'))
+        AlwaysPresentInputPortItem(self.__add_top_level_item('Keyboard Input'), KeyIn)
         self.__add_declared_ports('Keyboard Output', midiscripter.KeyOut)
+
+        AlwaysPresentInputPortItem(self.__add_top_level_item('Mouse Input'), MouseIn)
+        self.__add_declared_ports('Mouse Output', midiscripter.MouseOut)
 
         self.__add_declared_ports('Metronome', midiscripter.MetronomeIn)
         self.__add_declared_ports('File Event Watcher', midiscripter.FileEventIn)
