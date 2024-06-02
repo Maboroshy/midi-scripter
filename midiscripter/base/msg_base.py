@@ -1,8 +1,14 @@
 import enum
+from typing import Any
 from collections.abc import Container
 
 import midiscripter.shared
 from midiscripter.base.port_base import Input
+
+
+class Not:
+    def __init__(self, value: Container | Any):
+        self.value = value
 
 
 class AttrEnum(enum.StrEnum):
@@ -49,11 +55,13 @@ class Msg:
     def matches(self, *conditions_args, **conditions_kwargs) -> bool:
         """Checks if message's attributes match all provided attribute conditions:
 
-        1. If condition is `None` or omitted it matches anything.
+        1. If condition is `None` or omitted, it matches anything.
 
-        2. If condition equals attribute it matches the attribute.
+        2. If condition equals attribute, it matches the attribute.
 
-        3. If condition is a container and contains the attribute it matches the attribute.
+        3. If condition is a container and contains the attribute, it matches the attribute.
+
+        Use `Not(condition)` to invert condition matching.
 
         Returns:
             `True` if all attributes match, `False` if any does not match
@@ -68,15 +76,24 @@ class Msg:
             try:
                 attr = getattr(self, parameter_name)
             except AttributeError:
-                return False
+                if isinstance(condition, Not):
+                    continue
+                else:
+                    return False
 
             if attr == condition:
-                continue
+                if isinstance(condition, Not):
+                    return False
+                else:
+                    continue
 
             try:
-                if attr in condition:
-                    continue
-            except TypeError:
+                if attr in condition and not isinstance(condition, str):
+                    if isinstance(condition, Not):
+                        return False
+                    else:
+                        continue
+            except TypeError:  # condition is not a container
                 pass
 
             return False
