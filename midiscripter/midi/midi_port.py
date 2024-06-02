@@ -52,6 +52,9 @@ def _get_available_midi_port_names(
 
 
 class _MidiPortMixin(midiscripter.base.port_base.Port):
+    name: str
+    """MIDI port name"""
+
     # Attrs provided by the class that inherits from MidiPortMixin
     is_enabled: bool
     _available_names: list[str]
@@ -59,7 +62,9 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 
     # noinspection PyMissingConstructor
     def __init__(self, port_name: str, input_callback: 'Callable | None' = None):
-        self.__port_name = port_name
+        self.name = port_name
+        self.name: str
+        """MIDI port name"""
 
         if input_callback:
             self._rtmidi_port = rtmidi.MidiIn()
@@ -71,7 +76,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
     @property
     def _is_available(self) -> bool:
         """Port is available and can be opened."""
-        return self.__port_name in self._available_names
+        return self.name in self._available_names
 
     def _open(self) -> None:
         if self._rtmidi_port.is_port_open():
@@ -79,7 +84,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
             return
 
         try:
-            port_index = self._available_names.index(self.__port_name)
+            port_index = self._available_names.index(self.name)
             self._rtmidi_port.open_port(port_index)
             self.is_enabled = True
             log('Opened {port}', port=self)
@@ -87,7 +92,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
             if platform.system() == 'Windows':
                 log.red("Can't find port {port}. Check the port name.", port=self)
             else:
-                self._rtmidi_port.open_virtual_port(self.__port_name)
+                self._rtmidi_port.open_virtual_port(self.name)
                 self._is_virtual = True
                 self.is_enabled = True
                 log('Created and opened virtual port {port}', port=self)
