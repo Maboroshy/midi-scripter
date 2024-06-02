@@ -6,7 +6,22 @@ from PySide6.QtWidgets import *
 import midiscripter.gui.app
 
 if TYPE_CHECKING:
-    import gui_widget_base
+    from gui_widget_base import GuiWidget
+
+
+def _populate_layout(
+    layout: QBoxLayout, items: 'Sequence[GuiWidget, GuiWidgetLayout, Sequence]'
+) -> None:
+    for gui_widget_or_seq in items:
+        if not isinstance(gui_widget_or_seq, Sequence):
+            layout.addWidget(gui_widget_or_seq.qt_widget)
+            midiscripter.gui.app.remove_qwidget(gui_widget_or_seq.qt_widget)
+        else:
+            # Flip layout type
+            child_layout = [QHBoxLayout, QVBoxLayout][isinstance(layout, QHBoxLayout)]()
+            child_layout.setContentsMargins(0, 0, 0, 0)
+            layout.addLayout(child_layout)
+            _populate_layout(child_layout, gui_widget_or_seq)
 
 
 class GuiWidgetLayout:
@@ -14,50 +29,52 @@ class GuiWidgetLayout:
 
     def __init__(
         self,
-        rows: Sequence[
-            'gui_widget_base.GuiWidget | GuiWidgetLayout | '
-            'Sequence[gui_widget_base.GuiWidget | GuiWidgetLayout]'
-        ],
+        title: str,
+        *rows: Sequence['GuiWidget | GuiWidgetLayout | Sequence[GuiWidget | GuiWidgetLayout]'],
     ):
         """
         Args:
+            title: Layout title in GUI
             rows: A tuple of items to put in a row.
                   Items can be widgets, layouts or tuples of widgets or layouts.
                   If item is a tuple it's a column of items inside the tuple.
 
-        Warning:
-            Calls can't be subscribed to `GuiWidgetLayout`.
-            Pre-declare widgets to subscribed calls to them.
-
         Example:
+            ``` python
+            # 2 rows x 1 column
+            GuiWidgetLayout('2 x 1', row1_col1,
+                                     row2_col1)
             ```
-            GuiWidgetLayout([widget_col1_row1, widget_col2_row1],
-                            [widget_col1_row2, widget_col2_row2])
+            ``` python
+            # 1 row x 2 columns
+            GuiWidgetLayout('1 x 2', [row1_col1, row1_col2])
             ```
+            ``` python
+            # 2 rows x 2 columns
+            GuiWidgetLayout('2 x 2', [row1_col1, row1_col2],
+                                     [row2_col1, row2_col2])
+            ```
+            ``` python
+            # 2 x 2 with second row span
+            GuiWidgetLayout('row span', [row1_col1, row1_col2],
+                                              row2_span)
+            ```
+            ``` python
+            # 2 x 2 with column span
+            GuiWidgetLayout('column span', [col1_span, [row1_col2,
+                                                        row2_col2]])
+            ```
+
+        Note:
+            Calls can't be subscribed to `GuiWidgetLayout`.
+            Pre-declare widgets and subscribe calls to them.
         """
-        self.wrapped_qt_widgets = []
         self.qt_widget = QWidget()
+        self.qt_widget.setObjectName(title)
 
         qt_widget_layout = QVBoxLayout()
         qt_widget_layout.setContentsMargins(0, 0, 0, 0)
         self.qt_widget.setLayout(qt_widget_layout)
 
-        for row in rows:
-            if not isinstance(row, Sequence):
-                qt_widget_layout.addWidget(row.qt_widget)
-                midiscripter.gui.app.remove_qwidget(row.qt_widget)
-                self.wrapped_qt_widgets.append(row.qt_widget)
-            else:
-                if not row:
-                    continue
-
-                row_layout = QHBoxLayout()
-                row_layout.setContentsMargins(0, 0, 0, 0)
-                qt_widget_layout.addLayout(row_layout)
-
-                for gui_widget in row:
-                    row_layout.addWidget(gui_widget.qt_widget)
-                    midiscripter.gui.app.remove_qwidget(gui_widget.qt_widget)
-                    self.wrapped_qt_widgets.append(gui_widget.qt_widget)
-
+        _populate_layout(qt_widget_layout, rows)
         midiscripter.gui.app.add_qwidget(self.qt_widget)
