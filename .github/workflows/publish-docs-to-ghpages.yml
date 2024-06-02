@@ -29,6 +29,6 @@ jobs:
           restore-keys: |
             mkdocs-material-
             
-      - run: pip install mkdocs-material mkdocstrings-python griffe-inherited-docstrings
+      - run: pip install mkdocs-material mkdocstrings-python griffe-inherited-docstrings black
         
       - run: mkdocs gh-deploy --force
