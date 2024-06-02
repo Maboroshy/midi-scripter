@@ -1,6 +1,7 @@
 import collections
 import contextlib
 import copy
+import inspect
 import traceback
 from typing import TYPE_CHECKING, TypeVar, ClassVar, Any
 
@@ -60,12 +61,23 @@ class _PortRegistryMeta(type):
             The singleton class instance that has requested uid
         """
         uid = cls._force_uid or args[0]
+        registry_key = (cls.__name__, uid)
+        init_args = inspect.signature(cls.__init__).bind(cls, *args, **kwargs).arguments
+        init_args.pop('self')
 
         try:
-            return cls.instance_registry[(cls.__name__, uid)]
+            instance = cls.instance_registry[registry_key]
+            if instance._inited_with_args == init_args:
+                return instance
+            else:
+                raise ValueError(
+                    f'Init arguments for consecutive declarations '
+                    f'for {cls.__name__} "{uid}" must match: {instance._inited_with_args}'
+                )
         except KeyError:
             instance = super().__call__(*args, **kwargs)
-            cls.instance_registry[(cls.__name__, uid)] = instance
+            cls.instance_registry[registry_key] = instance
+            instance._inited_with_args = init_args
             return instance
 
 
@@ -90,7 +102,7 @@ class Port(metaclass=_PortRegistryMeta):
     def __init__(self, uid: 'Hashable'):
         """
         Args:
-            uid: Port's unique ID that will always lead to the same port instance
+            uid: Port's unique ID
         """
         self._uid = uid
         self.is_enabled = False
