@@ -1,30 +1,27 @@
 import time
+from typing import ClassVar
 
 import rtmidi
 
-import midiscripter.base.msg_base
 import midiscripter.base.port_base
 import midiscripter.shared
 import midiscripter.logger
+from midiscripter.base.msg_base import Msg
 
 
 class MidiPortsChangedIn(midiscripter.base.port_base.Input):
-    """MIDI ports change watcher. Produces [`Msg`][midiscripter.base.msg_base.Msg] objects
-    with `MIDI Ports Changed` as `type` on any MIDI port connection or disconnection.
+    """MIDI ports change watcher. Produces base [`Msg`][midiscripter.Msg] objects.
 
     Used as a service port for `Restart on new MIDI port found` GUI option.
-
-    Notes:
-        Can be used to restart CLI scripts on ports change by:
-        `MidiPortsChangedIn().subscribe(restart_script)`.
     """
 
-    REFRESH_RATE_SEC = 1
-    """MIDI ports polling rate."""
+    refresh_rate_sec: float = 1
+    """MIDI ports polling rate in seconds"""
 
-    _force_uid = 'MIDI Ports Change'
+    _force_uid: ClassVar[str] = 'MIDI Ports Change'
 
     def __init__(self):
+        """"""
         super().__init__(self._force_uid)
         self.__dummy_midi_input = rtmidi.MidiIn()
         self.__dummy_midi_output = rtmidi.MidiOut()
@@ -42,7 +39,7 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
 
     def __updater_worker(self) -> None:
         while self.is_enabled:
-            time.sleep(self.REFRESH_RATE_SEC)
+            time.sleep(self.refresh_rate_sec)
 
             current_inputs = self.__dummy_midi_input.get_ports()
             current_outputs = self.__dummy_midi_output.get_ports()
@@ -51,6 +48,8 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
                 self.__last_check_inputs != current_inputs
                 or self.__last_check_outputs != current_outputs
             ):
+                msg = Msg('MIDI Ports Changed', self)
+                self._send_input_msg_to_calls(msg)
+
                 self.__last_check_inputs = current_inputs
                 self.__last_check_outputs = current_outputs
-                self._send_input_msg_to_calls(midiscripter.base.msg_base.Msg('MIDI Ports Changed'))
