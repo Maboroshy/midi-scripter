@@ -125,7 +125,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         _MidiPortMixin.__init__(self, port_name, self.__callback)
         midiscripter.base.port_base.Input.__init__(self, port_name)
 
-        self.attached_passthrough_outs: 'list[MidiOut]' = []
+        self.attached_passthrough_outs: list[MidiOut] = []
         """[`MidiOut`][midiscripter.MidiOut] ports attached as pass-through ports
         which will send all incoming messages as soon as they arrive before sending them to calls"""
 

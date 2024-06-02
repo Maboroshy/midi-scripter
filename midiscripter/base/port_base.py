@@ -156,10 +156,10 @@ class Input(Port):
 
     def __init__(self, uid: 'Hashable'):
         super().__init__(uid)
-        self.calls: 'list[None | tuple[tuple, dict], list[Callable]]' = []
+        self.calls: list[None | tuple[tuple, dict], list[Callable]] = []
 
         # workarounds for mkdocstrings issue #607
-        self.calls: 'list[None | tuple[tuple, dict], list[Callable]]'
+        self.calls: list[None | tuple[tuple, dict], list[Callable]]
         """Message match arguments and callables that will be called with matching incoming messages.
            `None` conditions matches any message."""
 
