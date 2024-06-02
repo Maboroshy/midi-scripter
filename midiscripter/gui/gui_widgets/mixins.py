@@ -101,13 +101,17 @@ class AdaptiveTextSizeMixin:
         font = self.font()
         content_rect = self.contentsRect()
 
-        font_size = 0
+        font_size = 1
+        increment = 1
         text_rect = QSize()
         while (
             text_rect.height() < content_rect.height() and text_rect.width() < content_rect.width()
         ):
-            font_size += 1
+            # increment decreases CPU load while keeping size change smooth
+            increment = int(1 + (font_size / 20))
+            font_size += increment
             font.setPixelSize(font_size)
             text_rect = QFontMetrics(font).boundingRect(self.text())
 
+        font.setPixelSize(font_size - increment)
         self.setFont(font)
