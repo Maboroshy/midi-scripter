@@ -1,5 +1,5 @@
 import pynput.keyboard
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, ClassVar
 
 import midiscripter.base.port_base
 from midiscripter.keyboard.keyboard_msg import KeyEvent, KeyMsg
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class KeyIn(midiscripter.base.port_base.Input):
     """Keyboard input port. Produces [`KeyMsg`][midiscripter.KeyMsg] objects."""
 
-    supress_input: bool
+    __supress_input: bool
     """Prevent the input events from being passed to the rest of the system
     
     Warning: 
@@ -34,7 +34,7 @@ class KeyIn(midiscripter.base.port_base.Input):
             self._force_uid,
         )
         self.__pynput_listener = None
-        self.supress_input = supress_input
+        self.__supress_input = supress_input
         self.pressed_keys = []
 
     def __on_press(self, key: pynput.keyboard.Key) -> None:
@@ -72,7 +72,7 @@ class KeyIn(midiscripter.base.port_base.Input):
             return
 
         self.__pynput_listener = pynput.keyboard.Listener(
-            self.__on_press, self.__on_release, suppress=self.supress_input
+            self.__on_press, self.__on_release, suppress=self.__supress_input
         )
         self.__pynput_listener.start()
         self.__pynput_listener.wait()
