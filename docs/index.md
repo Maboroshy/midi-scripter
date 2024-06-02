@@ -1,4 +1,4 @@
-MIDI Scripter scripts has 5 main elements:
+MIDI Scripter scripts use 5 main elements:
 
 ```python
 from midiscripter import *
@@ -7,7 +7,7 @@ from midiscripter import *
 midi_keyboard = MidiIn('MIDI Keyboard')
 proxy_output = MidiOut('To DAW')
 
-# 2. GUI widgets (optional)
+# 2. GUI widgets
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
 
 # 3. Calls
@@ -26,173 +26,175 @@ if __name__ == '__main__':
 
 ## 1. Ports
 
-_Input ports_ are a source and _output ports_ are a destination for
-_message_ objects.
+There are two port types: input ports and output ports.
 
-_Port_ is typically declared as `port_class(name_or_adress)` or `port_class
-()` for those that don't need a name. Check specific ports description in
-API documentation.
+Port is typically declared as `port_class(name_or_adress)` or `port_class
+()` for those that don't need a name. For more information on specific port 
+declaration check its description in API documentation.
 
-_Port_ declaration line is all you need to use the port, the _starter_
-function does the rest.
-
-_Port_ declaration for unavailable MIDI port name will create a virtual port
-(prepended with `[v]` in GUI) on Linux and macOS. On Windows you'll have to
+On Linux and macOS port declaration for unavailable MIDI port name will 
+create a virtual port (prepended with `[v]` in GUI). On Windows you'll have to
 use [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) to
-create virtual ports manually. Virtual MIDI ports can be used to write proxy
+manually create virtual ports. Virtual MIDI ports can be used to write proxy
 scripts, like the one above.
 
-The _starter_ opens all declared _ports_ and input _ports_ start to
-send _messages_ to subscribed _calls_.
+Port declaration line is all you need to use the port, the starter
+function does the rest.
 
-_Calls_ or other Python code can use `output_port.send(msg)` to send messages.
+The starter opens all declared ports, and input ports start to feed incoming 
+messages to subscribed callables.
+
+Callables or any other Python code can use `output_port.send(msg)` to send 
+messages.
 
 Available ports:
-[MIDI](api/midi_port.md),
-[OSC](api/osc_port.md),
-[Keyboard](api/key_port.md),
-[Metronome](api/metronome_port.md),
-[File System Events](api/fs_port.md),
-[Midi Ports Changes](api/midi_ports_changed.md).
 
-## 2. GUI widgets (optional)
+- [MIDI](api/midi_port.md)
+- [OSC](api/osc_port.md)
+- [Keyboard](api/key_port.md)
+- [Mouse](api/mouse_port.md)
+- [Metronome](api/metronome_port.md)
+- [File System Events](api/fs_port.md)
+- [Midi Ports Changes](api/midi_ports_changed.md)
 
-_GUI widgets_ declared in the script appear in GUI window opened
-by [`start_gui`][midiscripter.start_gui] _starter_.
+## 2. GUI widgets
 
-Widgets are declared as `widget_class(content)`, `widget_class(content, title)`
-or `widget_class(content, title, color)` where:
+Declared GUI widgets appear in GUI window opened by 
+[`start_gui`][midiscripter.start_gui] starter function.
 
-- content - widget's text or tuple of its items' text;
-- title - optional widget title, by default the title is the content;
-- color - optional widget's text color as color name or tuple of RGB values.
+Widgets are declared as `widget_class(title, content)` or `widget_class
+(content)` (used in example above) where:
 
-Widget's initial state can be set by key value arguments specific for widget
-class (`select`, `toggle_state`, etc.) like in the example above.
+- title - widget title;
+- content - widget's text or tuple of its items' text.
 
-Widget's current state can be got or set by reading or changing its properties.
+Widget's initial state can be set by keyword arguments specific for widget
+class (`color`, `select`, `toggle_state`, etc.) like in the example above.
+
+Widget's state can be read or set by reading or changing its properties.
 
 Check the widgets description in API documentation for declaration arguments and
-properties of each widget.
+properties for each widget.
 
-_GUI widgets_ can be rearranged inside or even outside of GUI window by dragging
-their titles. The initial widget layout can be messy, but it's easy to
+GUI widgets can be rearranged inside or even outside of GUI window by dragging
+their titles. At first run widget layout can be messy, but it's easy to
 arrange it as you want. The GUI will save the widget layout for each script.
 
-_GUI widgets_ act like input ports. They can subscribe _calls_ that will
-receive [`GuiEventMsg`][midiscripter.GuiEventMsg] _messages_.
+GUI widgets act like input ports. They can subscribe callables that will
+receive [`GuiEventMsg`][midiscripter.GuiEventMsg] messages.
 
 Custom PySide6 widgets can be added to the GUI by `add_qwidget(qwidget)`.
 
 Available widgets:
-[GuiText][midiscripter.GuiText],
-[GuiButton][midiscripter.GuiButton],
-[GuiToggleButton][midiscripter.GuiToggleButton],
-[GuiButtonSelectorH][midiscripter.GuiButtonSelectorH],
-[GuiButtonSelectorV][midiscripter.GuiButtonSelectorV],
-[GuiListSelector][midiscripter.GuiListSelector],
-[GuiWidgetLayout][midiscripter.GuiWidgetLayout].
+
+- [`GuiText`][midiscripter.GuiText]
+- [`GuiButton`][midiscripter.GuiButton]
+- [`GuiToggleButton`][midiscripter.GuiToggleButton]
+- [`GuiButtonSelectorH`][midiscripter.GuiButtonSelectorH]
+- [`GuiButtonSelectorV`][midiscripter.GuiButtonSelectorV]
+- [`GuiListSelector`][midiscripter.GuiListSelector]
+- [`GuiWidgetLayout`][midiscripter.GuiWidgetLayout]
 
 ## 3. Calls
 
-_Call_ is a function, an object method or anything callable that takes _message_
-as the only argument. _Calls_ can have any name and are not expected to return
-anything.
+Input ports subscribe functions, object methods or anything callable 
+to call with incoming message object. Callables can have any name, 
+must have message as the only argument and are not expected to return anything.
 
-_Calls_ are subscribed to an input _port_ messages
-by `@input_port_obj.subscribe` decorator. A single call can be subscribed to
-multiple ports by multiple decorators:
+Callables are subscribed to an input port's messages
+by `@input_port.subscribe` decorator. 
+A single callable can be subscribed to multiple ports by multiple decorators:
 
 ``` python
-@midi_in_port_obj_1.subscribe
-@midi_in_port_obj_2.subscribe
+@input_port_1.subscribe
+@input_port_2.subscribe
 def do_something(msg: MidiMsg) -> None:
-    log.green('The call receives messages from both ports')
+    log.green('This function receives messages from both ports')
 ```
 
-MIDI Scripter has its own logger that can be used for _calls_ debugging or
-feedback output. Print log messages with `log('message')`
-or `log.red('colored message')`. THe color methods
-are `red`, `yellow`, `green`, `cyan`, `blue` and `magenta`.
+MIDI Scripter has its own [logger](api/logging.md) that can be used 
+for calls debugging or feedback output. 
+Print log messages with `log('message')` or `log.red('colored message')`. 
+The color methods are `red`, `yellow`, `green`, `cyan`, `blue` and `magenta`.
 
-Each _call_ runs in its own thread but all _calls_ run in the same process.
-So if a_call_ does some heavy computing it can increase latency and jitter for
+Each call runs in its own thread but all calls run in the same process.
+So if a call does some heavy computing it can increase latency and jitter for
 the whole script. It's advised to move heavy computing out of the main
 process with Python's
 [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html)
 module.
 
-Each _call_ receives its own copy of the input _message_ it can modify without
+Each callable receives its own copy of the input message it can modify without
 affecting other calls' work.
 
-Getting exception in a _call_ won't affect other _calls_ or the script's work.
+Getting exception in a call won't affect other calls or the script's work.
 Exception details are printed to log.
 
-You can check _call_ execution time statistics in the Ports GUI widget by
+You can check call execution time statistics in the Ports GUI widget by
 hovering mouse over a call item.
 
 ## 4. Messages
 
-_Messages_ are data objects generated by input _ports_ or created in the
-script's code. _Messages_ can be sent with an output _port_ of the same type.
+Messages are data objects generated by input ports or created in the
+script's code. Messages can be sent with an output port of the same type.
 
-Each _message_ stores the source _port_ instance as `source` attribute and its
+Each message stores the source port instance as `source` attribute and its
 creation time in epoch format as `ctime` attribute.
 
-The time since _message_ creation (in milliseconds) can be checked by
-its `age_ms` attribute. You can use it for log messages.
+The time since message creation (in milliseconds) can be checked by
+its `age_ms` attribute. You can use it in log messages.
 
-[`MidiMsg`][midiscripter.MidiMsg] objects attributes meanings depending
+[MIDI message][midiscripter.MidiMsg] objects attributes meanings depending
 on [MIDI message type][midiscripter.MidiType]:
 
-| `type`                    | `channel`                                      | `data1`                         | `data2`                     | `combined_data`                      |
-|---------------------------|------------------------------------------------|---------------------------------|-----------------------------|--------------------------------------|
-| `MidiType.NOTE_ON`        | **Channel**<br>(1-16)                          | **Note**<br>(0-127)             | **Velocity**<br>(0-127)     | useless                              |
-| `MidiType.NOTE_OFF`       | **Channel**<br>(1-16)                          | **Note**<br>(0-127)             | **Velocity**<br>(0-127)     | useless                              |
-| `MidiType.CONTROL_CHANGE` | **Channel**<br>(1-16)                          | **Controller**<br>(0-127)       | **Value**<br>(0-127)        | useless                              |
-| `MidiType.POLYTOUCH`      | **Channel**<br>(1-16)                          | **Note**<br>(0-127)             | **Pressure**<br>(0-127)     | useless                              |
-| `MidiType.AFTERTOUCH`     | **Channel**<br>(1-16)                          | **Pressure**<br>(0-127)         | useless                     | useless                              |
-| `MidiType.PROGRAM_CHANGE` | **Channel** <br>(1-16)                         | **Program**<br>(0-127)          | useless                     | useless                              |
-| `MidiType.PITCH_BEND`     | **Channel**<br>(1-16)                          | useless                         | useless                     | **Pitch**<br>(0-16383)               |
-| `MidiType.SYSEX`          | **Manufacturer ID** <br>(1 or 3 ints in tuple) | **Sub ID**<br>(2 ints in tuple) | **Data**<br>(ints in tuple) | **Whole message**<br>(ints in tuple) | 
+| `type`                    | `channel`                               | `data1`                       | `data2`                     | `combined_data`                      |
+|---------------------------|-----------------------------------------|-------------------------------|-----------------------------|--------------------------------------|
+| `MidiType.NOTE_ON`        | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Velocity**<br>(0-127)     | useless                              |
+| `MidiType.NOTE_OFF`       | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Velocity**<br>(0-127)     | useless                              |
+| `MidiType.CONTROL_CHANGE` | **Channel**<br>(1-16)                   | **Controller**<br>(0-127)     | **Value**<br>(0-127)        | useless                              |
+| `MidiType.POLYTOUCH`      | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Pressure**<br>(0-127)     | useless                              |
+| `MidiType.AFTERTOUCH`     | **Channel**<br>(1-16)                   | **Pressure**<br>(0-127)       | useless                     | useless                              |
+| `MidiType.PROGRAM_CHANGE` | **Channel** <br>(1-16)                  | **Program**<br>(0-127)        | useless                     | useless                              |
+| `MidiType.PITCH_BEND`     | **Channel**<br>(1-16)                   | useless                       | useless                     | **Pitch**<br>(0-16383)               |
+| `MidiType.SYSEX`          | **Manufacturer ID** <br>(ints in tuple) | **Sub ID**<br>(ints in tuple) | **Data**<br>(ints in tuple) | **Whole message**<br>(ints in tuple) | 
 
 The common attribute names and their defaults allows to safely change
 message's `type`:
 
 ```python
-# This type doesn't use the data2 attribute
->> > msg = ChannelMsg(MidiType.PROGRAM_CHANGE, 1, 10)
+# This type of message doesn't use the `data2` attribute
+>>> msg = ChannelMsg(MidiType.PROGRAM_CHANGE, 1, 10)
 
-# But it still has the default value it doesn't use
->> > msg.data2
-128
+# But it still has the default value for `data2` it doesn't use
+>>> msg.data2
+64
 
 # So when you change its `type` the message is still valid to send
->> > msg.type = MidiType.CONTROL_CHANGE >> > msg
+>>> msg.type = MidiType.CONTROL_CHANGE 
+>>> msg
 ChannelMsg(MidiType.CONTROL_CHANGE, 1, 10, 128)  
 ```
 
-[OSC][midiscripter.OscMsg] and [keyboard messages][midiscripter.KeyMsg] are not
-that complicated. They and other _message_ types are described in API
-documentation.
+Other message types are simpler. Check the API documentation for their 
+description.
 
 Available message types:
-[MidiMsg][midiscripter.MidiMsg]
-([ChannelMsg][midiscripter.ChannelMsg],
-[SysexMsg][midiscripter.SysexMsg]),
-[OscMsg][midiscripter.OscMsg],
-[KeyMsg][midiscripter.KeyMsg],
-[GuiEventMsg][midiscripter.GuiEventMsg],
-[FileEventMsg][midiscripter.FileEventMsg],
-[MidiPortsChangedIn][midiscripter.MidiPortsChangedIn].
+
+- [`MidiMsg`][midiscripter.MidiMsg] ([`ChannelMsg`][midiscripter.ChannelMsg],
+[`SysexMsg`][midiscripter.SysexMsg])
+- [`OscMsg`][midiscripter.OscMsg]
+- [`KeyMsg`][midiscripter.KeyMsg]
+- [`MouseMsg`][midiscripter.MouseMsg]
+- [`GuiEventMsg`][midiscripter.GuiEventMsg]
+- [`FileEventMsg`][midiscripter.FileEventMsg]
 
 ## 5. Starter
 
-_Starter_ is a function that should be called after _ports_, _widgets_ and
-_calls_ are set up. _Starter_ opens all the _ports_, keeps input _message_
-listening running and handles logging.
+Starter is a function that should be called after ports, widgets and
+calls are set up. Starter opens all the ports, keeps input message
+listening loops running and handles logging.
 
-There are 3 _starter_ functions:
+There are 3 starter functions:
 
 - [`start_gui`][midiscripter.start_gui] - starts the script with GUI and routes
   log messages to its Log widget. The preferred starter.
@@ -203,13 +205,66 @@ There are 3 _starter_ functions:
   logging to console. That increases latency and jitter. Use only while
   debugging the script with no access to GUI.
 
+## Message matching
+
+Message objects can be filtered by their attributes values as in the example 
+above, but they also has more powerful [`matches`][midiscripter.Msg.matches] 
+method that can check all the attributes at once.
+
+This method takes conditions for each message object attribute in the same 
+order as message object's `__init__`.
+
+Matching uses the simplified 
+[schema](https://github.com/keleshev/schema)-like approach:
+
+1. If condition is `None` or omitted, it matches anything.
+2. If condition equals attribute, it matches the attribute.
+3. If condition is a container and contains the attribute, it matches the 
+attribute.
+
+Use `Not(condition)` to invert condition matching.
+
+``` python
+>>> msg = MidiMsg(MidiType.NOTE_ON, 1, 61, 80)
+
+>>> msg.matches(
+    (MidiType.NOTE_ON, MidiType.NOTE_OFF),  # only "note on" or "note off"
+    None,  # any channel
+    range(60, 120)  # note value between 60 and 120
+)  # no velocity value provided - matches any velocity
+True
+
+>>> msg.matches(
+    MidiType.NOTE_ON,  # only "note on"
+    data2=Not(range(60, 128))  # velocity less than 60 won't match
+)  
+False
+```
+
+The same matching patter can be used as the arguments for 
+`@input_port_subscribe` decorator. Only matching messages will go to the calls:
+
+``` python
+@input_port.subscribe(MidiType.SYSEX)
+def only_sysex(msg: MidiMsg) -> None: 
+    log('Only the sysex messages will go here')
+```
+
+Using `subscribe` arguments where possible improves the script's efficiency, 
+since no calls are mode for non-matching messages.
+
+The one-line message filter using matching `subscribe`:
+``` python
+MidiIn('MIDI Controller').subscribe(MidiType.SYSEX)(MidiOut('To DAW').send)
+```
+
 ## Combining multiple scripts
 
 A single combined script is much easier to manage than running multiple
 scripts in parallel.
 
-Some ports can be opened only once by their design. To simplify ports management
-_port_ declaration with the same name always returns the same _port_ object
+Some ports can be opened only once by their design. To overcome that
+port declaration with the same arguments always returns the same port object
 instance (singleton):
 
 ``` python
@@ -220,7 +275,7 @@ True
 True
 ```
 
-It's advised to put _starter_ into `if __name__ == '__main__':` clause, like in
+It's advised to put starter into `if __name__ == '__main__':` clause, like in
 the example scripts. It allows to safely combine standalone scripts later by
 importing them:
 

@@ -1,17 +1,16 @@
-# MIDI Scripter
+# <img src="docs/icon.svg" width="24"/> MIDI Scripter
 
-MIDI Scripter is a framework for scripting MIDI, keyboard and Open Sound
-Control (OSC) input and output with only a few lines of Python code.
+MIDI Scripter is a framework filtering, modifying, routing and any other
+scripting for MIDI, Open Sound Control (OSC), keyboard and mouse input and
+output with Python.
 
-MIDI Scripter listens to selected input ports and feed incoming messages to
+MIDI Scripter listens to the input ports and feeds incoming messages to
 subscribed callables (functions, methods, etc.). These callables or any
-other Python code can send modified or brand-new messages with
-output ports. MIDI Scripter can act as a proxy to filter and transform and
-convert the input.
+other Python code can send modified or created messages with output ports. 
+MIDI Scripter can act as a proxy to filter, transform and convert the input.
 
-MIDI Scripter includes customizable GUI that provides message logging,
-"ready to paste" port and message declarations and one line of code widgets for
-monitoring / controlling scripts.
+MIDI Scripter includes customizable GUI for message logging, coding
+assistance and GUI controls and indicators to use in scripts.
 
 An octave transposer with GUI controls in 10 lines of code:
 
@@ -19,7 +18,7 @@ An octave transposer with GUI controls in 10 lines of code:
 from midiscripter import *
 
 midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you with port names
-proxy_output = MidiOut('To DAW')  # using virtual port for output
+proxy_output = MidiOut('To DAW')  # using virtual proxy port for output
 
 # GUI control in a single line
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
@@ -40,40 +39,42 @@ if __name__ == '__main__':  # combine multiple scripts by importing them
 
 [Overview and API documentation available.](https://maboroshy.github.io/midi-scripter)
 
+The average measured roundtrip latency for the script above is less than 0.25 
+milliseconds.
+
 Currently MIDI Scripter is at "beta" development stage. It's fully
 functional but needs more user feedback. It works on Windows and Linux and
 should work on macOS.
 
 ## What it can do
 
-For writing Python code:
+The basics:
 
-- Prepare MIDI, OSC and keyboard inputs and outputs with a single line,
-  without boilerplate code.
-- Feed input messages to functions or any callables by "decorating" them.
-- Work with common message objects instead of raw data different for each port
-  type.
-- Send MIDI, OSC and keyboard output messages.
-- Create GUI widgets with one line and arrange them with mouse on your script's
-  dashboard.
+- Receive MIDI, OSC, keyboard and mouse input messages.
+- Filter, modify and do anything Python can with the messages.
+- Send out modified or generated MIDI, OSC, keyboard and mouse messages.
 
-For live performance setups:
+For performance MIDI setups:
 
-- Make extra layers to multiply MIDI controls.
+- Make extra banks and layers to multiply MIDI controls.
 - Organize mappings into sets / scenes with GUI dashboard.
 - Make an extra overlay mappings on top of MIDI controller's DAW integration by
   using proxies.
-- Create and map complex macros.
-
-For MIDI related apps:
-
-- Make custom sequencers or MIDI output generators.
-- Make basic music training GUI applications based on MIDI input.
 
 For software control and automation:
 
+- Map or convert the messages to each other with any conditions and logic.
 - Use MIDI controllers or keyboard shortcuts to run any Python code.
-- Use keyboard macros to control apps.
+- Use keyboard and mouse macros.
+
+For writing MIDI related Python code:
+
+- Prepare MIDI, OSC keyboard and mouse inputs and outputs with a single line,
+  without boilerplate code.
+- Feed input messages to functions or any callables by decorators.
+- Work with message objects instead of raw data different for each input type.
+- Create GUI widgets with a single line and arrange them with mouse.
+- Write basic MIDI related GUI applications with very little Python code.
 
 ## Installation
 
@@ -89,15 +90,16 @@ Extra steps for Windows:
 ## Quick Start
 
 1. Paste [script template](examples/script_template.py) to Python IDE or plain
-   text editor. IDE is greatly recommended.
-2. Run unaltered template script from IDE or by `python` command to open GUI for
-   more info on available ports and their input.
-3. Turn on available ports' checkboxes to enable them, and watch the log for
+   text editor. IDE is recommended.
+2. Run template script as-is from IDE or by `python your_script.py` command to
+   open GUI for more info on available ports and incoming input.
+3. Turn on available ports' checkboxes to enable them, watch the log for
    input messages.
-4. Click on port names and messages to copy their declarations to the clipboard.
-   Paste the declarations to your script.
-5. Write the functions you need. Subscribe them to input messages with
-   `@input_port.subscribe` decorator. Use `log('messages')` for debugging.
-   Use `output_port.send(msg)` to send modified or created messages from a
-   function.
+4. Click on port names and messages in log to copy their declarations to the
+   clipboard. Paste the declarations to your script.
+5. Modify the template function to make it do what you want.
+   Use `log('messages')` for debugging.
 6. Restart the script from GUI to check how in works.
+7. Write more complex scripts. Use more inputs, outputs and functions
+   (callables). Subscribe callables to input messages with
+   `@input_port.subscribe` decorator.
