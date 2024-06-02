@@ -65,10 +65,10 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
         Args:
             type: Keyboard event type
             shortcut_or_keycodes: keyboard shortcut description or event key codes
-            source (KeyIn): The [`KeyIn`][midiscripter.KeyIn] instance that generated the message
+            source: The [`KeyIn`][midiscripter.KeyIn] instance that generated the message
 
         Tip:
-            Run GUI and Enable keyboard input. Use log to get messages with shortcuts you need.
+            Run GUI and enable keyboard input. Use log to get messages with shortcuts you need.
         """
         super().__init__(type, source)
         self.__shortcut_cache = ''

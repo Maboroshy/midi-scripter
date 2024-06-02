@@ -39,7 +39,7 @@ def _all_opened() -> None:
 
 
 class _PortRegistryMeta(type):
-    """Metaclass that enforces one uid - one port instance (singleton) rule"""
+    """Metaclass that enforces one declaration - one port instance (singleton) rule"""
 
     __singleton_instance_type = TypeVar('__singleton_instance_type', bound='Port')
     """Type for correct IDE recognition and code completion for returned port subclasses"""
@@ -73,17 +73,19 @@ class Port(metaclass=_PortRegistryMeta):
     """Port base class
 
     Notes:
-        Port declaration with `uid` of an already existing port
-        will return the existing port (singleton)
+        Port declarations with the same arguments will return the same instance port (singleton)
     """
-
-    is_enabled: bool
-    """`True` if port is listening messages / ready to send messages"""
 
     _force_uid: ClassVar[None | str] = None
     """UID override for classes that have can have only one instance per whole class,
        like keyboard port classes. Object for these classes are declared without arguments.
     """
+
+    is_enabled: bool
+    """`True` if port is listening messages / ready to send messages"""
+
+    _inited_with_args: dict
+    """Arguments the port singleton was initialized with. Used by `_PortRegistryMeta`."""
 
     def __init__(self, uid: 'Hashable'):
         """
@@ -137,8 +139,8 @@ class Input(Port):
     """`True` if port is listening and generating messages"""
 
     calls: list[None | tuple[tuple, dict], list['Callable']]
-    """Message conditions and callables that will be called with matching incoming messages.
-    `None` conditions matches all messages."""
+    """Message match arguments and callables that will be called with matching incoming messages.
+    `None` conditions matches any message."""
 
     def __init__(self, uid: 'Hashable'):
         super().__init__(uid)
@@ -146,13 +148,13 @@ class Input(Port):
 
         # workarounds for mkdocstrings issue #607
         self.calls: list[None | tuple[tuple, dict], list['Callable']]
-        """Message conditions and callables that will be called with matching incoming messages.
-           `None` conditions matches all messages."""
+        """Message match arguments and callables that will be called with matching incoming messages.
+           `None` conditions matches any message."""
 
     def subscribe(
         self,
-        *msg_matches_args: 'tuple[None | Container | Any]',
-        **msg_matches_kwargs: 'dict[str, None | Container | Any]',
+        *msg_matches_args: 'tuple[None | Container[Any] | Any]',
+        **msg_matches_kwargs: 'dict[str, None | Container[Any] | Any]',
     ) -> 'Callable':
         """Decorator to subscribe a callable to the input's messages.
 
@@ -223,7 +225,7 @@ class Input(Port):
             by the subclass implementation of `open` method.
 
         Args:
-            msg: A message received by the input port to send to it's registered calls.
+            msg: A message received by the input port to send to its registered calls.
         """
         log('{input} got message {msg}', input=self, msg=msg)
 

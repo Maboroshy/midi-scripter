@@ -32,8 +32,7 @@ class OscMsg(midiscripter.base.msg_base.Msg):
         Args:
             address: Open Sound Control message address
             data: Open Sound Control message data
-            source (OscIn): The [`OscIn`][midiscripter.OscIn] instance
-                            that generated the message
+            source: The [`OscIn`][midiscripter.OscIn] instance that generated the message
         """
         super().__init__(self.type, source)
         self.address = address

@@ -24,15 +24,11 @@ class MidiType(midiscripter.base.msg_base.AttrEnum):
 
 
 class MidiMsg(midiscripter.base.msg_base.Msg):
-    """The base class for MIDI message that sets the common attributes
-    for [`ChannelMsg`][midiscripter.ChannelMsg] and [`SysexMsg`][midiscripter.SysexMsg].
-
-    `MidiMsg` class will produce [`ChannelMsg`][midiscripter.ChannelMsg]
+    """The base class for MIDI messages that will produce [`ChannelMsg`][midiscripter.ChannelMsg]
     or [`SysexMsg`][midiscripter.SysexMsg] objects depending on init arguments.
 
     It is advised to use [`ChannelMsg`][midiscripter.ChannelMsg]
-    or [`SysexMsg`][midiscripter.SysexMsg] classes
-    to create MIDI messages in calls for clarity.
+    or [`SysexMsg`][midiscripter.SysexMsg] classes to create own MIDI messages for clarity.
     """
 
     __match_args__: tuple[str] = ('type', 'channel', 'data1', 'data2')
@@ -87,7 +83,7 @@ class ChannelMsg(MidiMsg):
         type: MidiType = MidiType.CONTROL_CHANGE,
         channel: int = 1,
         data1: int = 0,
-        data2: int = 127,
+        data2: int = 64,
         *,
         combined_data: None | int = None,
         source: 'None | MidiIn' = None,
@@ -95,7 +91,7 @@ class ChannelMsg(MidiMsg):
         """
         Args:
             type: MIDI message type.
-            channel: MIDI message channel
+            channel: MIDI message channel (1-16)
             data1: First data byte: note, control, program or aftertouch value
                    depending on MIDI message type (0-127)
             data2: Second data byte: velocity, value depending on MIDI message type (0-127)
@@ -122,7 +118,7 @@ class ChannelMsg(MidiMsg):
 
     @property
     def combined_data(self) -> int | tuple[int, ...]:
-        """Both data bytes combined to 14-bit number:
+        """Both data bytes combined to 14-bit number -
         pitch value for pitch bend MIDI message (0-16383)."""
         return self.data1 | (self.data2 << 7)
 
@@ -159,13 +155,14 @@ class SysexMsg(MidiMsg):
     """Message data."""
 
     def __new__(cls, *args, **kwargs):
+        """Resets base class custom __new__"""
         return object.__new__(SysexMsg)
 
     def __init__(self, combined_data: tuple[int, ...], *, source: 'None | MidiIn' = None):
         """
         Args:
             combined_data: Whole sysex message including opening (`240`) and closing (`247`) bytes
-            source (MidiIn): The [`MidiIn`][midiscripter.MidiIn] instance that generated the message
+            source: The [`MidiIn`][midiscripter.MidiIn] instance that generated the message
         """
         midiscripter.base.msg_base.Msg.__init__(self, MidiType.SYSEX, source)
         self.combined_data = combined_data
@@ -181,7 +178,7 @@ class SysexMsg(MidiMsg):
 
     @property
     def combined_data(self) -> tuple[int, ...]:
-        """Whole sysex message including opening (`240`) and closing (`247`) bytes."""
+        """Whole sysex message including opening `240` and closing `247` bytes."""
         return (
             rtmidi.midiconstants.SYSTEM_EXCLUSIVE,
             *self.channel,
@@ -206,7 +203,7 @@ class SysexMsg(MidiMsg):
             channel_len = 3
         elif payload_data[0] in (126, 127):  # universal
             channel_len = 2
-        else:  # 1 int manufacturer
+        else:  # single int manufacturer
             channel_len = 1
 
         sub_id_len = 2

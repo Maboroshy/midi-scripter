@@ -23,7 +23,7 @@ class KeyIn(midiscripter.base.port_base.Input):
     pressed_keys: list[pynput.keyboard.Key]
     """Currently pressed keys"""
 
-    _force_uid = 'Keyboard In'
+    _force_uid: ClassVar[str] = 'Keyboard In'
 
     def __init__(self, *, supress_input: bool = False):
         """
@@ -105,9 +105,10 @@ class KeyIn(midiscripter.base.port_base.Input):
 class KeyOut(midiscripter.base.port_base.Output):
     """Keyboard output port. Sends [`KeyMsg`][midiscripter.KeyMsg] objects."""
 
-    _force_uid = 'Keyboard Output'
+    _force_uid: ClassVar[str] = 'Keyboard Output'
 
     def __init__(self):
+        """"""
         super().__init__(self._force_uid)
         self.__pynput_controller = pynput.keyboard.Controller()
 

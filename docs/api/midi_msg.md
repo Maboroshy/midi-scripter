@@ -7,6 +7,7 @@
 
 ## :::midiscripter.MidiMsg
     options:
+      merge_init_into_class : false
       members: none
 
 ## :::midiscripter.ChannelMsg

@@ -40,8 +40,8 @@ _NOTE_INT_TO_NOTE_NAME_MAP_FLATS = ('C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', '
 
 
 class NoteData:
-    """Optional wrapper for MIDI note data for readable representation.
-    When using it as `int` - it's note MIDI data, when using as `str` - it's note name.
+    """Optional wrapper for readable representation of MIDI note data.
+    When using it as `int` - it's note's MIDI data, when using as `str` - it's note's name.
     """
 
     middle_c_octave_n = 3
@@ -53,7 +53,7 @@ class NoteData:
         """
         Args:
             int_or_name: note MIDI data (0-127) or note name (like 'C#3' or 'Db3')
-            use_flats: True to use flats in note name (Db3), False to use sharps (C#3)
+            use_flats: `True` to use flats in note name (Db3), `False` to use sharps (C#3)
         """
         if isinstance(int_or_name, int):
             self.__int = int_or_name
