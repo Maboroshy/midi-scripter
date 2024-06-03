@@ -36,6 +36,7 @@ doc = [
   'mkdocs-material',
   'mkdocstrings',
   'griffe-inherited-docstrings',
+  'black'
 ]
 
 [tool.hatch.build.targets.sdist]
