@@ -1,5 +1,6 @@
 from typing import overload
 
+from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import *
 
 from .gui_widget_base import GuiWidget
@@ -162,6 +163,16 @@ class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
     def get_selected_item_text(self) -> str | None:
         if self.qt_button_group.checkedButton():
             return self.qt_button_group.checkedButton().text()
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+
+        font_sizes_and_fonts = {
+            button.font().pixelSize(): button.font()
+            for button in self.wrapped_qt_buttons_map.values()
+        }
+        smallest_font = font_sizes_and_fonts[min(font_sizes_and_fonts)]
+        [button.setFont(smallest_font) for button in self.wrapped_qt_buttons_map.values()]
 
 
 class GuiButtonSelectorH(GuiWidget):
