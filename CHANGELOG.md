@@ -4,6 +4,7 @@
 
 ### Fixed
 - Greatly increased performance of GUI widgets text autoresize
+- Buttons in button selector widgets now always have same text size
 
 ## **v0.4** - 02.06.2024
 
