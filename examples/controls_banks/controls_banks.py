@@ -27,6 +27,7 @@ BANKS_CHANNELS_RANGE = range(BANKS_CHANNELS_START_FROM, BANKS_CHANNELS_START_FRO
 
 
 def send_saved_feedback_values() -> None:
+    """Sends messages with all CC latest values for selected bank to MIDI controller"""
     for control, value in banks_feedback_cc_values[current_bank_index].items():
         feedback_msg = MidiMsg(MidiType.CONTROL_CHANGE, MIDI_CONTROLLER_CHANNEL, control, value)
         to_midi_controller.send(feedback_msg)
@@ -34,6 +35,7 @@ def send_saved_feedback_values() -> None:
 
 @bank_selector_widget.subscribe(type=GuiEvent.SELECTED)
 def gui_bank_selector(msg: GuiEventMsg) -> None:
+    """Sets current bank on GUI widget selection with feedback to MIDI controller's selector"""
     global current_bank_index
     current_bank_index = int(msg.data) - 1
     log.blue(f'Selected bank #{msg.data}')
@@ -49,6 +51,7 @@ def gui_bank_selector(msg: GuiEventMsg) -> None:
 
 @from_midi_controller.subscribe(*BANK_SELECTOR_ATTRS)
 def cc_bank_selector(msg: MidiMsg) -> None:
+    """Sets current bank on MIDI controller's selector with feedback to GUI widget"""
     global current_bank_index
     new_bank_index = int(msg.data2 / 128 * NUMBER_OF_BANKS)
 
@@ -56,13 +59,14 @@ def cc_bank_selector(msg: MidiMsg) -> None:
         return
 
     current_bank_index = new_bank_index
-    log.blue(f'Selected bank #{current_bank_index + 1}')
+    bank_selector_widget.select(new_bank_index)
 
     send_saved_feedback_values()
 
 
 @from_midi_controller.subscribe
 def input_proxy(msg: MidiMsg) -> None:
+    """A general MIDI input proxy that changes message channel according to selected bank"""
     if msg.matches(*BANK_SELECTOR_ATTRS):
         return
 
@@ -74,6 +78,7 @@ def input_proxy(msg: MidiMsg) -> None:
 
 @from_daw.subscribe
 def feedback_proxy(msg: MidiMsg) -> None:
+    """A feedback proxy that saves feedback even for not selected banks for later sending"""
     if msg.type is not MidiType.CONTROL_CHANGE:
         to_midi_controller.send(msg)
         return

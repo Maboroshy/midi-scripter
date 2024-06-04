@@ -1,7 +1,9 @@
 # Controls Banks
 
-This script adds extra banks for the MIDI continuous controllers. Banks 
-can be switched by a dedicated continuous controller and a GUI widget. 
+![](/examples/controls_banks/screenshot.png)
+
+This script adds extra banks for the MIDI continuous controllers. 
+Banks can be switched by a dedicated continuous controller and a GUI widget. 
 
 The script also saves received feedback for each bank and sends it to 
 controller on bank selection.
