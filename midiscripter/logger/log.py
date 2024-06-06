@@ -24,7 +24,7 @@ class Log:
         for log entry with highlighted object representations.
     """
 
-    FLUSH_DELAY = 0.1
+    FLUSH_DELAY = 0.05
 
     ADD_SPACER_THRESHOLD_SEC = 2
     """Time in seconds after which an empty line is added to log to separate logged actions"""
