@@ -208,11 +208,11 @@ There are 3 starter functions:
 ## Message matching
 
 Message objects can be filtered by their attributes values as in the example 
-above, but they also has more powerful [`matches`][midiscripter.Msg.matches] 
+above, but they also have more powerful [`matches`][midiscripter.Msg.matches] 
 method that can check all the attributes at once.
 
-This method takes conditions for each message object attribute in the same 
-order as message object's `__init__`.
+This method takes conditions for each message object attribute in the 
+order of message object's `__init__`.
 
 Matching uses the simplified 
 [schema](https://github.com/keleshev/schema)-like approach:
