@@ -173,12 +173,26 @@ class LogView(QPlainTextEdit):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.LeftButton and self.__anchor_text:
-            QGuiApplication.clipboard().setText(self.__anchor_text)
-            QToolTip().showText(
-                event.globalPosition().toPoint(),
-                f'Copied {self.__anchor_text}',
-                self,
-                msecShowTime=2000,
-            )
+        if not self.__anchor_text or event.button() not in (
+            Qt.MouseButton.LeftButton,
+            Qt.MouseButton.MiddleButton,
+        ):
+            super().mouseReleaseEvent(event)
+            return
+
+        if event.button() == Qt.MouseButton.LeftButton:
+            text_for_clipboard = self.__anchor_text
+        else:
+            text_for_clipboard = self.__anchor_text[
+                self.__anchor_text.find('(') + 1 : self.__anchor_text.rfind(')')
+            ]
+
+        QGuiApplication.clipboard().setText(text_for_clipboard)
+
+        QToolTip().showText(
+            event.globalPosition().toPoint(),
+            f'Copied {text_for_clipboard}',
+            self,
+            msecShowTime=2000,
+        )
         super().mouseReleaseEvent(event)
