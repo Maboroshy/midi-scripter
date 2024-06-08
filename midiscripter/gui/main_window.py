@@ -11,7 +11,7 @@ import midiscripter.gui.ports_widget
 class TrayIcon(QSystemTrayIcon):
     def __init__(self, icon: QIcon, parent: 'MainWindow' = None):
         super().__init__(icon, parent)
-        self.setToolTip(QApplication.instance().applicationName())
+        self.setToolTip(QApplication.instance().applicationDisplayName())
         self.activated.connect(self.__activated)
 
         menu = QMenu(parent)
@@ -32,17 +32,12 @@ class TrayIcon(QSystemTrayIcon):
 
 
 class MainWindow(QMainWindow):
-    dock_names: set[str] = set()
     dock_widgets: list[QDockWidget] = []
 
     def __init__(self, widgets_to_add: list[QWidget]):
         super().__init__()
         self.__normal_flags = self.windowFlags()
         self.__always_on_top_flags = self.__normal_flags | Qt.WindowStaysOnTopHint
-
-        app_name = QApplication.instance().organizationName()
-        script_name = QApplication.instance().applicationName()
-        self.setWindowTitle(f'{app_name} - {script_name}')
 
         self.setDockNestingEnabled(True)
 

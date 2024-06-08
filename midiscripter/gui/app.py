@@ -28,6 +28,8 @@ class ScripterGUI(QApplication):
         if midiscripter.shared.script_path:
             self.setApplicationName(pathlib.Path(midiscripter.shared.script_path).name)
 
+        self.setApplicationDisplayName(f'{self.applicationName()} - {self.organizationName()}')
+
         icon_path = pathlib.Path(midiscripter.__file__).parent / 'resources' / 'icon.ico'
         self.setWindowIcon(QIcon(str(icon_path)))
 
