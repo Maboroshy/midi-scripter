@@ -12,7 +12,7 @@ sustain_value = 0  # A global variable
 
 @run_after_ports_opened
 @ableton_osc_in.subscribe(address='/live/startup')
-def start_listener(msg: OscMsg = None) -> None:
+def start_listener() -> None:
     """Sets session record listener on script start or Ableton Live start while script is running"""
     ableton_osc_out.send(OscMsg('/live/song/start_listen/session_record_status'))
 
@@ -26,7 +26,7 @@ def get_midi_keyboard_sustain(msg: MidiMsg) -> None:
 
 
 @ableton_osc_in.subscribe('/live/song/get/session_record_status', 1)
-def session_record_started(msg: OscMsg) -> None:
+def session_record_started(_: OscMsg) -> None:
     """Sends sustain message to Ableton Live as soon as session record starts"""
     global sustain_value
     midi_output_to_ableton.send(ChannelMsg(MidiType.CONTROL_CHANGE, 1, 64, sustain_value))

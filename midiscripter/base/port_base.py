@@ -59,10 +59,10 @@ class SubscribedCall:
         self.__required_parameter_count = len(inspect.signature(callable_).parameters)
 
     def __call__(self, msg: 'Msg' = None) -> None:
+        msg = msg or Msg('')
         if self.__required_parameter_count == 0:
             self.__callable()
         else:
-            msg = msg or Msg('')
             self.__callable(msg)
         self.statistics.append(msg._age_ms)
 
