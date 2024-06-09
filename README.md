@@ -46,7 +46,13 @@ Currently MIDI Scripter is at "beta" development stage. It's fully
 functional but needs more user feedback. It works on Windows and Linux and
 should work on macOS.
 
-## What it can do
+## Documentation and Examples
+
+[Overview and full API documentation is available here.](https://maboroshy.github.io/midi-scripter)
+
+[You can find more examples here.](https://github.com/Maboroshy/midi-scripter/tree/master/examples)
+
+## What It Can Do
 
 The basics:
 
