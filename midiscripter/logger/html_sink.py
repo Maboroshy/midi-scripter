@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
 from midiscripter.base.msg_base import Msg
-from midiscripter.base.port_base import Input, Output
+from midiscripter.base.port_base import Input, Output, SubscribedCall
 
 
 def to_html_link(text: str, color: str, link_text: str) -> str:
@@ -41,9 +41,9 @@ class HtmlSink:
                             str(arg_object), self.COLOR_MAP[obj_type], arg_object.__repr__()
                         )
                 else:
-                    if isinstance(arg_object, Callable):
+                    if isinstance(arg_object, SubscribedCall):
                         kwargs[arg_name] = to_html_colored_text(
-                            arg_object.__name__, self.COLOR_MAP[Callable]
+                            arg_object.name, self.COLOR_MAP[Callable]
                         )
 
             if text:

@@ -4,6 +4,7 @@ import platform
 import sys
 import time
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import __main__
 
@@ -12,7 +13,11 @@ if platform.system() == 'Windows':
     import win32con
     import win32process
 
+from midiscripter.base.port_base import SubscribedCall
 from shared.autostart import AutostartManager
+
+if TYPE_CHECKING:
+    from midiscripter.base.msg_base import Msg
 
 
 try:
@@ -33,7 +38,7 @@ def precise_epoch_time() -> float:
 
 
 def restart_script() -> None:
-    """Exit and restart current script"""
+    """Exit and restart the current script"""
     os.execv(sys.executable, ['python', script_path])
     exit(0)
 
@@ -50,15 +55,21 @@ run_after_ports_open_subscribed_calls = []
 
 
 # A Decorator
-def run_after_ports_opened(function: Callable[[], None]) -> Callable:
+def run_after_ports_opened(callable_: 'Callable[[Msg], None] | Callable[[], None]') -> Callable:
     """Decorator to subscribe a callable to run after all ports are opened at the script start
 
+
     Args:
-        function: A callable with no arguments
+        callable_: A callable with single argument or no arguments.
+
+    Notes:
+        Single argument callables are called with dummy message object.
+
+        That hack allows the same callable to be also used for port's subscription
+        where the message is real.
 
     Returns:
         Subscribed callable.
     """
-    if function not in run_after_ports_open_subscribed_calls:
-        run_after_ports_open_subscribed_calls.append(function)
-    return function
+    run_after_ports_open_subscribed_calls.append(SubscribedCall(None, callable_))
+    return callable_

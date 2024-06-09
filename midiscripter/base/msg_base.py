@@ -1,9 +1,11 @@
 import enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from collections.abc import Container
 
 import midiscripter.shared
-from midiscripter.base.port_base import Input
+
+if TYPE_CHECKING:
+    from midiscripter.base.port_base import Input
 
 
 class Not:
@@ -26,12 +28,12 @@ class Msg:
     ctime: float
     """Message creation time in ["Unix time"](https://wikipedia.org/wiki/Unix_time) format"""
 
-    source: Input
+    source: 'Input | None'
     """Input port instance that generated the message"""
 
     __match_args__: tuple[str] = ('type',)
 
-    def __init__(self, type: str, source: Input | None = None):
+    def __init__(self, type: str, source: 'Input | None' = None):
         """
         Args:
             source: Input port instance that generated the message

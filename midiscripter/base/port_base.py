@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, TypeVar, ClassVar, Any
 
 import midiscripter.shared
 from midiscripter.logger import log
+from midiscripter.base.msg_base import Msg
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Hashable, Container
-    from midiscripter.base.msg_base import Msg
 
 
 @contextlib.contextmanager
@@ -37,6 +37,34 @@ def _all_opened() -> None:
     log._flush()
     log._sink = None
     midiscripter.shared.thread_executor.shutdown(wait=False)
+
+
+class SubscribedCall:
+    """Wrapper object created for subscribed callable"""
+
+    name: str
+    """Callable name"""
+
+    conditions: None | tuple[tuple, dict]
+    """Message match conditions for call"""
+
+    statistics: collections.deque
+    """Last 20 call execution durations in milliseconds"""
+
+    def __init__(self, conditions: 'None | tuple[tuple, dict]', callable_: 'Callable'):
+        self.name = callable_.__qualname__
+        self.conditions = conditions
+        self.statistics = collections.deque(maxlen=20)
+        self.__callable = callable_
+        self.__required_parameter_count = len(inspect.signature(callable_).parameters)
+
+    def __call__(self, msg: 'Msg' = None) -> None:
+        if self.__required_parameter_count == 0:
+            self.__callable()
+        else:
+            msg = msg or Msg('')
+            self.__callable(msg)
+        self.statistics.append(msg._age_ms)
 
 
 class _PortRegistryMeta(type):
@@ -150,16 +178,16 @@ class Input(Port):
     is_enabled: bool
     """`True` if port is listening and generating messages"""
 
-    calls: list[None | tuple[tuple, dict], list['Callable']]
+    calls: list[None | tuple[tuple, dict], list[SubscribedCall]]
     """Message match arguments and callables that will be called with matching incoming messages.
     `None` conditions matches any message."""
 
     def __init__(self, uid: 'Hashable'):
         super().__init__(uid)
-        self.calls: list[None | tuple[tuple, dict], list[Callable]] = []
+        self.calls: list[None | tuple[tuple, dict], list[SubscribedCall]] = []
 
         # workarounds for mkdocstrings issue #607
-        self.calls: list[None | tuple[tuple, dict], list[Callable]]
+        self.calls: list[None | tuple[tuple, dict], list[SubscribedCall]]
         """Message match arguments and callables that will be called with matching incoming messages.
            `None` conditions matches any message."""
 
@@ -204,11 +232,15 @@ class Input(Port):
             Subscribed callable.
         """
 
-        def wrapped_subscribe(call: 'Callable[[Msg], None]') -> 'Callable':
-            if msg_matches_args[0] is call or not msg_matches_args and not msg_matches_kwargs:  # noqa: SIM108
+        def wrapped_subscribe(
+            callable_: 'Callable[[Msg], None] | Callable[[], None]',
+        ) -> 'Callable':
+            if msg_matches_args[0] is callable_ or not msg_matches_args and not msg_matches_kwargs:  # noqa: SIM108
                 conditions = None
             else:
                 conditions = (msg_matches_args, msg_matches_kwargs)
+
+            call = SubscribedCall(conditions, callable_)
 
             try:
                 call_list_for_conditions = next(
@@ -218,10 +250,7 @@ class Input(Port):
             except StopIteration:
                 self.calls.append((conditions, [call]))
 
-            call.conditions = conditions
-            call.statistics = collections.deque(maxlen=20)
-
-            return call
+            return callable_
 
         if callable(msg_matches_args[0]):
             return wrapped_subscribe(msg_matches_args[0])
@@ -253,7 +282,7 @@ class Input(Port):
         midiscripter.shared.thread_executor.map(self.__call_worker, calls, msg_copies)
 
     @staticmethod
-    def __call_worker(call: 'Callable', msg: 'Msg') -> None:
+    def __call_worker(call: SubscribedCall, msg: 'Msg') -> None:
         """Function called in thread for each subscribed call and each received message.
 
         Notes:
@@ -266,7 +295,6 @@ class Input(Port):
         """
         try:
             call(msg)
-            call.statistics.append(msg._age_ms)
         except Exception as exc:
             log.red(''.join(traceback.format_exception(exc)))
 

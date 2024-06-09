@@ -99,7 +99,8 @@ Available widgets:
 
 Input ports subscribe functions, object methods or anything callable 
 to call with incoming message object. Callables can have any name, 
-must have message as the only argument and are not expected to return anything.
+must have message as the only argument or have no arguments 
+and are not expected to return anything.
 
 Callables are subscribed to an input port's messages
 by `@input_port.subscribe` decorator. 

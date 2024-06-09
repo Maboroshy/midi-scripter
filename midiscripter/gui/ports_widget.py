@@ -6,7 +6,7 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 import midiscripter.logger.html_sink
-from midiscripter.base.port_base import Input, Output
+from midiscripter.base.port_base import Input, Output, SubscribedCall
 from midiscripter.logger import log
 from midiscripter.midi import MidiIn, MidiOut
 from midiscripter.keyboard import KeyIn
@@ -187,13 +187,10 @@ class CallItem(PortWidgetItem):
         self,
         parent_item: QTreeWidgetItem,
         port_instance: Input,
-        origin_call_list: list['Callable'],
-        call: 'Callable',
+        origin_call_list: list[SubscribedCall],
+        call: SubscribedCall,
     ):
-        if call.conditions:
-            item_name = f'{self.MATCH_CALL_PREFIX} {call.__name__}'
-        else:
-            item_name = call.__name__
+        item_name = f'{self.MATCH_CALL_PREFIX} {call.name}' if call.conditions else call.name
 
         super().__init__(parent_item, (item_name,))
         self.port_instance = port_instance
