@@ -35,10 +35,6 @@ if __name__ == '__main__':  # combine multiple scripts by importing them
 
 ![Screenshot after some widget arrangement](https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot.png?raw=true)
 
-[You can find more examples here.](https://github.com/Maboroshy/midi-scripter/tree/master/examples)
-
-[Overview and API documentation available.](https://maboroshy.github.io/midi-scripter)
-
 The average measured roundtrip latency for the script above is less than 0.25 
 milliseconds.
 
@@ -46,7 +42,13 @@ Currently MIDI Scripter is at "beta" development stage. It's fully
 functional but needs more user feedback. It works on Windows and Linux and
 should work on macOS.
 
-## What it can do
+## Documentation and Examples
+
+[Overview and full API documentation is available here.](https://maboroshy.github.io/midi-scripter)
+
+[You can find more examples here.](https://github.com/Maboroshy/midi-scripter/tree/master/examples)
+
+## What It Can Do
 
 The basics:
 
