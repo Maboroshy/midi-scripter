@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="22"/> MIDI Scripter
+# <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="23"/> MIDI Scripter
 
 MIDI Scripter is a framework for filtering, modifying, routing and any other
 scripting for MIDI, Open Sound Control (OSC), keyboard and mouse input and
