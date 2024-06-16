@@ -181,8 +181,6 @@ class PassthroughOutputMidiPortItem(OutputMidiPortItem):
 
 
 class CallItem(PortWidgetItem):
-    MATCH_CALL_PREFIX = '[m]'
-
     def __init__(
         self,
         parent_item: QTreeWidgetItem,
@@ -190,9 +188,7 @@ class CallItem(PortWidgetItem):
         origin_call_list: list[SubscribedCall],
         call: SubscribedCall,
     ):
-        item_name = f'{self.MATCH_CALL_PREFIX} {call.name}' if call.conditions else call.name
-
-        super().__init__(parent_item, (item_name,))
+        super().__init__(parent_item, (call.name,))
         self.port_instance = port_instance
         self.origin_call_list = origin_call_list
         self.call = call
@@ -216,6 +212,7 @@ class PortsWidget(QTreeWidget):
         self.setHeaderHidden(True)
         self.setMinimumWidth(200)
         self.setMinimumHeight(200)
+        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         self.setMouseTracking(True)
         self.itemEntered.connect(self.__update_item_tooltip)
         self.__populate()
