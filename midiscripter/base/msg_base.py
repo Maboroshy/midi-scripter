@@ -46,13 +46,13 @@ class Msg:
         """Message creation time in ["Unix time"](https://wikipedia.org/wiki/Unix_time) format"""
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({", ".join(repr(value) for value in self.__as_tuple())})'
+        return f'{self.__class__.__name__}({", ".join(repr(value) for value in self._as_tuple())})'
 
     def __str__(self):
-        return ' | '.join(str(value) for value in self.__as_tuple() if value is not None)
+        return ' | '.join(str(value) for value in self._as_tuple() if value is not None)
 
     def __eq__(self, other_msg: 'Msg'):
-        return type(self) is type(other_msg) and self.__as_tuple() == other_msg.__as_tuple()
+        return type(self) is type(other_msg) and self._as_tuple() == other_msg._as_tuple()
 
     def matches(self, *conditions_args, **conditions_kwargs) -> bool:
         """Checks if message's attributes match all provided attribute conditions:
@@ -107,7 +107,7 @@ class Msg:
         # Using faster rounding
         return int((midiscripter.shared.precise_epoch_time() - self.ctime) * 1000000) / 1000
 
-    def __as_tuple(self) -> tuple:
+    def _as_tuple(self) -> tuple:
         """Converts message to a tuple based on message's __match_args__ class attribute
 
         Returns:
