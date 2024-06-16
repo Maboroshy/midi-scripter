@@ -22,7 +22,7 @@ jobs:
           
       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
         
-      - run: mv --no-target-directory README.md /docs/index.md
+      - run: mv --no-target-directory README.md ./docs/index.md
         
       - uses: actions/cache@v4
         with:
