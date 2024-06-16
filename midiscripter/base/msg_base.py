@@ -15,7 +15,7 @@ class Not:
 
 class AttrEnum(enum.StrEnum):
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.value.__repr__()})'
+        return f'{self.__class__.__name__}.{self.value}'
 
 
 class Msg:
