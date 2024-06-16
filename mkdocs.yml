@@ -3,7 +3,8 @@ site_url: https://maboroshy.github.io/midi-scripter
 repo_url: https://github.com/Maboroshy/midi-scripter
 
 nav:
-    - Overview: index.md
+    - Readme: index.md  # Copied from README.md by GitHub action on publish
+    - Overview: overview.md
 
     - API Documentation:
         - Midi:
