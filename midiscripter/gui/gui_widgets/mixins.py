@@ -72,9 +72,10 @@ class WrappedQWidgetMixin:
         self.__color = new_color_value
 
 
-# noinspection PyUnresolvedReferences, PyPep8Naming
+# noinspection PyUnresolvedReferences
 class AdaptiveTextSizeMixin:
     def __init__(self):
+        self.setMinimumSize(QSize(30, 30))
         self.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored))
         self.setContentsMargins(10, 5, 10, 5)
         self.__longest_text_rect_size = QFontMetrics(self.font()).boundingRect(self.text()).size()
