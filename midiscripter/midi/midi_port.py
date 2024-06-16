@@ -122,7 +122,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         Args:
             port_name: MIDI input port name
         """
-        _MidiPortMixin.__init__(self, port_name, self.__callback)
+        _MidiPortMixin.__init__(self, port_name, self._callback)
         midiscripter.base.port_base.Input.__init__(self, port_name)
 
         self.attached_passthrough_outs: list[MidiOut] = []
@@ -162,16 +162,22 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
     ) -> 'Callable':
         return super().subscribe(type, channel, data1, data2)
 
-    def __callback(self, rt_midi_input: tuple[tuple[hex, ...], float], _: list) -> None:
+    def _callback(self, rt_midi_input: list[list[hex, ...], float], _: list) -> None:
         if not self.is_enabled:
             return
-
         rt_midi_data, _ = rt_midi_input
         [output._passthrough_send(rt_midi_data) for output in self.attached_passthrough_outs]
-        self._send_input_msg_to_calls(self.__convert_to_msg(rt_midi_data))
+        self._send_input_msg_to_calls(self._convert_to_msg(rt_midi_data))
 
-    def __convert_to_msg(
-        self, rt_midi_data: tuple[hex, ...]
+    @staticmethod
+    def _raw_channel_midi_to_attrs(rt_midi_data: list[hex, ...]) -> tuple[MidiType, int, ...]:
+        midi_type_byte = rt_midi_data[0] & 0xF0
+        midi_type = BYTE_TO_TYPE_MAP[midi_type_byte]
+        channel = (rt_midi_data[0] & 0xF) + 1
+        return midi_type, channel, *rt_midi_data[1:]
+
+    def _convert_to_msg(
+        self, rt_midi_data: list[hex, ...]
     ) -> 'midiscripter.midi.midi_msg.ChannelMsg | midiscripter.midi.midi_msg.SysexMsg':
         if (
             rt_midi_data[0] == rtmidi.midiconstants.SYSTEM_EXCLUSIVE
@@ -180,11 +186,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
             return midiscripter.midi.midi_msg.SysexMsg(rt_midi_data, source=self)
 
         elif rt_midi_data[0] < rtmidi.midiconstants.SYSTEM_EXCLUSIVE:
-            midi_type_byte = rt_midi_data[0] & 0xF0
-            midi_type = BYTE_TO_TYPE_MAP[midi_type_byte]
-            channel = (rt_midi_data[0] & 0xF) + 1
-
-            msg_atts = (midi_type, channel, *rt_midi_data[1:])
+            msg_atts = self._raw_channel_midi_to_attrs(rt_midi_data)
             return midiscripter.midi.midi_msg.ChannelMsg(*msg_atts, source=self)
 
         else:
