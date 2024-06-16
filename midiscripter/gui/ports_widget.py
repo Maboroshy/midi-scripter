@@ -338,9 +338,11 @@ class PortsWidget(QTreeWidget):
             )
 
         if item.call.conditions:
-            tooltip_text = (
-                f'Conditions: {item.call.conditions[0]} {item.call.conditions[1]}\n{tooltip_text}'
-            )
+            if isinstance(item.call.conditions, tuple):
+                conditions_str = f'{item.call.conditions[0] or ''}{item.call.conditions[1] or ''}'
+            else:
+                conditions_str = str(item.call.conditions)
+            tooltip_text = f'Conditions: {conditions_str}\n{tooltip_text}'
 
         self.blockSignals(True)
         item.setData(0, Qt.ItemDataRole.ToolTipRole, tooltip_text)

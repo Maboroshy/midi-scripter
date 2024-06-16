@@ -1,4 +1,4 @@
-from .shared import restart_script, run_after_ports_opened
+from .shared import restart_script
 from .base import *
 from .cli import *
 from .file_event import *

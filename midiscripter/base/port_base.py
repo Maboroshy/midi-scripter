@@ -1,6 +1,7 @@
 import collections
 import contextlib
 import copy
+import enum
 import inspect
 import traceback
 from typing import TYPE_CHECKING, TypeVar, ClassVar, Any
@@ -13,21 +14,29 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Hashable, Container
 
 
+class CallOn(enum.StrEnum):
+    NOT_MATCHED_BY_ANY_CALL = 'NOT MATCHED BY ANY CALLS'
+    PORT_OPEN = 'PORT OPEN'
+
+
 @contextlib.contextmanager
 def _all_opened() -> None:
     for port in _PortRegistryMeta.instance_registry.values():
         port._open()
 
-    for call in midiscripter.shared.run_after_ports_open_subscribed_calls:
+        if isinstance(port, Input):
+            for conditions, call_list in port.calls:
+                if conditions == CallOn.PORT_OPEN:
+                    for call in call_list:
 
-        def __call_runner() -> None:
-            try:
-                log('Running {call}', call=call)  # noqa: B023
-                call()  # noqa: B023
-            except Exception as exc:
-                log.red(''.join(traceback.format_exception(exc)))
+                        def __call_runner() -> None:
+                            try:
+                                log('Running {call}', call=call)  # noqa: B023
+                                call()  # noqa: B023
+                            except Exception as exc:
+                                log.red(''.join(traceback.format_exception(exc)))
 
-        midiscripter.shared.thread_executor.submit(__call_runner)
+                        midiscripter.shared.thread_executor.submit(__call_runner)
 
     yield
 
@@ -125,7 +134,7 @@ class Port(metaclass=_PortRegistryMeta):
     """`True` if port is listening messages / ready to send messages"""
 
     _inited_with_args: dict
-    """Arguments the port singleton was initialized with. Used by `_PortRegistryMeta`."""
+    """The arguments the port singleton was initialized with. Used by `_PortRegistryMeta`."""
 
     def __init__(self, uid: 'Hashable'):
         """
@@ -235,7 +244,11 @@ class Input(Port):
         def wrapped_subscribe(
             callable_: 'Callable[[Msg], None] | Callable[[], None]',
         ) -> 'Callable':
-            if msg_matches_args[0] is callable_ or not msg_matches_args and not msg_matches_kwargs:  # noqa: SIM108
+            if msg_matches_args[0] in CallOn:
+                conditions = msg_matches_args[0]
+            elif (
+                msg_matches_args[0] is callable_ or not msg_matches_args and not msg_matches_kwargs
+            ):  # noqa: SIM108
                 conditions = None
             else:
                 conditions = (msg_matches_args, msg_matches_kwargs)
@@ -273,10 +286,17 @@ class Input(Port):
         if not self.is_enabled:
             return
 
-        calls = []
+        matched_calls = []
+        not_matched_by_any_calls = []
         for conditions, call_list in self.calls:
-            if conditions is None or msg.matches(*conditions[0], **conditions[1]):
-                calls.extend(call_list)
+            if conditions == CallOn.NOT_MATCHED_BY_ANY_CALL:
+                not_matched_by_any_calls = call_list
+            elif isinstance(conditions, str) and conditions in CallOn:
+                continue
+            elif conditions is None or msg.matches(*conditions[0], **conditions[1]):
+                matched_calls.extend(call_list)
+
+        calls = matched_calls or not_matched_by_any_calls
 
         msg_copies = [copy.copy(msg) for _ in range(len(calls))]
         midiscripter.shared.thread_executor.map(self.__call_worker, calls, msg_copies)
@@ -321,7 +341,7 @@ class Output(Port):
 
     def _validate_msg_send(self, msg: 'Msg') -> bool:
         if not self.is_enabled:
-            log.red("Can't send message {msg}. {output} is disabled!", msg=msg, output=self)
+            log.red("Can't send message {msg} - {output} is disabled!", msg=msg, output=self)
             return False
         return True
 

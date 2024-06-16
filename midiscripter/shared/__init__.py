@@ -3,8 +3,6 @@ import os
 import platform
 import sys
 import time
-from collections.abc import Callable
-from typing import TYPE_CHECKING
 
 import __main__
 
@@ -13,11 +11,7 @@ if platform.system() == 'Windows':
     import win32con
     import win32process
 
-from midiscripter.base.port_base import SubscribedCall
 from shared.autostart import AutostartManager
-
-if TYPE_CHECKING:
-    from midiscripter.base.msg_base import Msg
 
 
 try:
@@ -49,27 +43,3 @@ def _raise_current_process_cpu_priority() -> None:
         pid = win32api.GetCurrentProcessId()
         handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, True, pid)
         win32process.SetPriorityClass(handle, win32process.HIGH_PRIORITY_CLASS)
-
-
-run_after_ports_open_subscribed_calls = []
-
-
-# A Decorator
-def run_after_ports_opened(callable_: 'Callable[[Msg], None] | Callable[[], None]') -> Callable:
-    """Decorator to subscribe a callable to run after all ports are opened at the script start
-
-
-    Args:
-        callable_: A callable with single argument or no arguments.
-
-    Notes:
-        Single argument callables are called with dummy message object.
-
-        That hack allows the same callable to be also used for port's subscription
-        where the message is real.
-
-    Returns:
-        Subscribed callable.
-    """
-    run_after_ports_open_subscribed_calls.append(SubscribedCall(None, callable_))
-    return callable_
