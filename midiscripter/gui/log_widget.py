@@ -20,6 +20,15 @@ class LogWidget(QWidget):
 
         layout.addWidget(QLabel(self.TOP_LABEL_TEXT), 1, 1, 1, 4)
 
+        pause_button = QPushButton('Hold')
+        pause_button.setToolTip('Pause the logging')
+        pause_button.setCheckable(True)
+        pause_button.toggled.connect(
+            lambda state: (log_view.pause_logging, log_view.resume_logging)[state]()
+        )
+        pause_button.setFixedWidth(40)
+        layout.addWidget(pause_button, 1, 4, 1, 1, Qt.AlignmentFlag.AlignRight)
+
         log_view = LogView()
         layout.addWidget(log_view, 2, 1, 1, 4)
 
@@ -155,14 +164,20 @@ class LogView(QPlainTextEdit):
         if self.__filter_text_parts or self.__exclude_text_parts:
             self.__apply_filter(len(log_entries))
 
-    def showEvent(self, event: QShowEvent) -> None:
-        log.flushing_is_enabled = True
-        log._flush()
-        super().showEvent(event)
+    @staticmethod
+    def pause_logging() -> None:
+        log._sink = None
+
+    def resume_logging(self) -> None:
+        log._sink = midiscripter.logger.html_sink.HtmlSink(self.append_html_entry.emit)
 
     def hideEvent(self, event: QHideEvent) -> None:
-        log.flushing_is_enabled = False
+        self.pause_logging()
         super().hideEvent(event)
+
+    def showEvent(self, event: QShowEvent) -> None:
+        self.resume_logging()
+        super().showEvent(event)
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self.__anchor_text = self.anchorAt(event.pos())
