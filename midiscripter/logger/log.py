@@ -33,12 +33,11 @@ class Log:
     """Max size of message buffer to flush to log widget when it becomes visible"""
 
     def __init__(self):
-        self.__sink = None
+        self.__sink_call = None
         self.is_enabled = True
 
         self.__buffer = collections.deque(maxlen=self.BUFFER_SIZE)
-        self.__start_buffer_flush_thread()
-        self.__wait_counter = 0
+        self.__last_entry_time = time.time()
 
     def __call__(self, text: str, **kwargs):
         """Print log message.
@@ -53,7 +52,12 @@ class Log:
         if not self.is_enabled:
             return
 
-        kwargs['_ctime_str'] = self._get_current_precise_time_stamp()
+        now_time = midiscripter.shared.precise_epoch_time()
+        kwargs['_ctime_str'] = self._get_precise_time_stamp(now_time)
+
+        if now_time - self.__last_entry_time > self.ADD_SPACER_THRESHOLD_SEC:
+            self.__buffer.append(('', {}))
+        self.__last_entry_time = now_time
 
         self.__buffer.append((str(text), kwargs))
 
@@ -61,13 +65,15 @@ class Log:
     def _sink(self) -> 'Callable':
         """A callable that receives a list of log strings to print them for user.
         Set by starter. Can be altered to customize the logger."""
-        return self.__sink
+        return self.__sink_call
 
     @_sink.setter
-    def _sink(self, sink_obj: 'HtmlSink | ConsoleSink | Callable[[list[str]], None]') -> None:
-        self.__sink = sink_obj
-        self._flush()
-        self.__start_buffer_flush_thread()
+    def _sink(
+        self, sink_obj: 'None | HtmlSink | ConsoleSink | Callable[[list[str]], None]'
+    ) -> None:
+        self.__sink_call = sink_obj
+        if self.__sink_call:
+            self.__start_buffer_flush_thread()
 
     def __start_buffer_flush_thread(self) -> None:
         threading.Thread(target=self._buffer_flush_worker, daemon=True).start()
@@ -75,21 +81,16 @@ class Log:
     def _buffer_flush_worker(self) -> None:
         """Thread worker loop that flushes buffered messages"""
         while self._sink:
-            time.sleep(self.FLUSH_DELAY)
-            self.__wait_counter += self.FLUSH_DELAY
             if self.__buffer:
                 self._flush()
+            time.sleep(self.FLUSH_DELAY)
 
     def _flush(self) -> None:
         """Sends buffered messages to sink"""
-        if not self.__sink:
+        if not self.__sink_call:
             return
 
         output_entries = []
-
-        if self.__wait_counter > self.ADD_SPACER_THRESHOLD_SEC:
-            output_entries.append(('', {}))
-        self.__wait_counter = 0
 
         while self.__buffer:
             output_entries.append(self.__buffer.popleft())  # for thread safety
@@ -100,9 +101,11 @@ class Log:
             pass
 
     @staticmethod
-    def _get_current_precise_time_stamp() -> str:
-        """Returns current timestamp with microsecond precision as a string"""
-        precise_time = midiscripter.shared.precise_epoch_time()
+    def _get_precise_time_stamp(precise_epoch_time: None | float = None) -> str:
+        """Returns current timestamp with microsecond precision as a string
+
+        The argument is there to not get current time two times during log call"""
+        precise_time = precise_epoch_time or midiscripter.shared.precise_epoch_time()
         time_string = time.strftime('%H:%M:%S', time.localtime(precise_time))
 
         # >1.5 times faster than datetime

@@ -42,7 +42,7 @@ class LogWidget(QWidget):
 
 class LogView(QPlainTextEdit):
     append_html_entry = Signal(list)
-    entry_ctime_part_len = len(log._get_current_precise_time_stamp()) + 2
+    entry_ctime_part_len = len(log._get_precise_time_stamp()) + 2
 
     def __init__(self):
         super().__init__()
