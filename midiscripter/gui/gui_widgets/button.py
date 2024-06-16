@@ -32,9 +32,27 @@ class GuiButton(GuiWidget):
         self,
         title_and_content: str,
         content: str | None = None,
+        *,
         color: str | tuple[int, int, int] | None = None,
     ):
         """
+        **Overloads:**
+            ``` python
+            GuiToggleButton(
+                title: str,
+                content: str,
+                *,
+                color: str | tuple[int, int, int] | None = None,
+            )
+            ```
+            ``` python
+            GuiToggleButton(
+                content: str,
+                *,
+                color: str | tuple[int, int, int] | None = None,
+            )
+            ```
+
         Args:
             title_and_content: Widget's title and button text, should be unique among all widgets.
             content: Button text, if set `title_and_content` is used only for title
