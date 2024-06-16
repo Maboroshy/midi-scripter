@@ -54,7 +54,7 @@ class HtmlSink:
 
             try:
                 html_entries.append(html_entry.format(**kwargs))
-            except KeyError:
+            except (IndexError, KeyError):
                 html_entries.append(html_entry)
 
         self.sink_function(html_entries)
