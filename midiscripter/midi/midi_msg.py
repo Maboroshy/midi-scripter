@@ -90,7 +90,7 @@ class ChannelMsg(MidiMsg):
     ):
         """
         Args:
-            type: MIDI message type.
+            type: MIDI message type
             channel: MIDI message channel (1-16)
             data1: First data byte: note, control, program or aftertouch value
                    depending on MIDI message type (0-127)
@@ -158,7 +158,7 @@ class SysexMsg(MidiMsg):
         """Resets base class custom __new__"""
         return object.__new__(SysexMsg)
 
-    def __init__(self, combined_data: tuple[int, ...], *, source: 'None | MidiIn' = None):
+    def __init__(self, combined_data: Sequence[int, ...], *, source: 'None | MidiIn' = None):
         """
         Args:
             combined_data: Whole sysex message including opening (`240`) and closing (`247`) bytes
