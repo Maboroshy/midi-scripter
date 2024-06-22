@@ -42,9 +42,6 @@ def _all_opened() -> None:
 class SubscribedCall:
     """Wrapper object created for subscribed callable"""
 
-    name: str
-    """Callable name"""
-
     conditions: None | tuple[tuple, dict]
     """Message match conditions for call"""
 
@@ -52,7 +49,6 @@ class SubscribedCall:
     """Last 20 call execution durations in milliseconds"""
 
     def __init__(self, conditions: 'None | tuple[tuple, dict]', callable_: 'Callable'):
-        self.name = callable_.__qualname__
         self.conditions = conditions
         self.statistics = collections.deque(maxlen=20)
         self.__callable = callable_
@@ -65,6 +61,9 @@ class SubscribedCall:
         else:
             self.__callable(msg)
         self.statistics.append(msg._age_ms)
+
+    def __str__(self):
+        return self.__callable.__qualname__
 
 
 class _PortRegistryMeta(type):

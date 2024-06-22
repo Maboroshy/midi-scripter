@@ -43,7 +43,7 @@ class HtmlSink:
                 else:
                     if isinstance(arg_object, SubscribedCall):
                         kwargs[arg_name] = to_html_colored_text(
-                            arg_object.name, self.COLOR_MAP[Callable]
+                            str(arg_object), self.COLOR_MAP[Callable]
                         )
 
             if text:

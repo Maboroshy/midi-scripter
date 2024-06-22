@@ -188,7 +188,7 @@ class CallItem(PortWidgetItem):
         origin_call_list: list[SubscribedCall],
         call: SubscribedCall,
     ):
-        super().__init__(parent_item, (call.name,))
+        super().__init__(parent_item, (str(call),))
         self.port_instance = port_instance
         self.origin_call_list = origin_call_list
         self.call = call
