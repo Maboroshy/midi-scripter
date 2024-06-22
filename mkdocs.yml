@@ -44,8 +44,9 @@ nav:
         
         - Base Classes:
             - Ports: api/base_ports.md
-            - Message: api/base_msg.md
             - GUI Widget: api/base_gui_widget.md
+            - Call: api/base_call.md
+            - Message: api/base_msg.md
 theme:
     name: material
     locale: en

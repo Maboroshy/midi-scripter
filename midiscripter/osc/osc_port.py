@@ -68,6 +68,7 @@ class OscIn(midiscripter.base.port_base.Input):
         midiscripter.shared.thread_executor.submit(self._osc_server.serve_forever)
         self.is_enabled = True
         log('Opened {input}', input=self)
+        self._call_on_port_open()
 
     def _close(self) -> None:
         self._osc_server.shutdown()

@@ -15,28 +15,19 @@ if TYPE_CHECKING:
 
 
 class CallOn(enum.StrEnum):
+    """Special conditions to use as `@input_port.subscribe(argument)`"""
+
     NOT_MATCHED_BY_ANY_CALL = 'NOT MATCHED BY ANY CALLS'
+    """Call when a message is not matched by any other call"""
+
     PORT_OPEN = 'PORT OPEN'
+    """Call after port is opened"""
 
 
 @contextlib.contextmanager
 def _all_opened() -> None:
     for port in _PortRegistryMeta.instance_registry.values():
         port._open()
-
-        if isinstance(port, Input):
-            for conditions, call_list in port.calls:
-                if conditions == CallOn.PORT_OPEN:
-                    for call in call_list:
-
-                        def __call_runner() -> None:
-                            try:
-                                log('Running {call}', call=call)  # noqa: B023
-                                call()  # noqa: B023
-                            except Exception as exc:
-                                log.red(''.join(traceback.format_exception(exc)))
-
-                        midiscripter.shared.thread_executor.submit(__call_runner)
 
     yield
 
@@ -317,6 +308,32 @@ class Input(Port):
             call(msg)
         except Exception as exc:
             log.red(''.join(traceback.format_exception(exc)))
+
+    def _call_on_port_open(self) -> None:
+        for conditions, call_list in self.calls:
+            if conditions == CallOn.PORT_OPEN:
+                for call in call_list:
+
+                    def __call_runner() -> None:
+                        try:
+                            log('Running {call}', call=call)  # noqa: B023
+                            call()  # noqa: B023
+                        except Exception as exc:
+                            log.red(''.join(traceback.format_exception(exc)))
+
+                    midiscripter.shared.thread_executor.submit(__call_runner)
+
+    def _open(self) -> None:
+        """Prepares and activates the port
+
+        Notes:
+            Supposed to be overridden in subclasses.
+            Should have a check against second opening.
+            Must set `is_enabled` parameter to `True`.
+            Must run `_call_on_port_open`.
+        """
+        self.is_enabled = True
+        self._call_on_port_open()
 
 
 class Output(Port):

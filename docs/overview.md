@@ -114,6 +114,11 @@ def do_something(msg: MidiMsg) -> None:
     log.green('This function receives messages from both ports')
 ```
 
+Callable subscription can have conditions provided as 
+`@input_port.subscribe(conditions)`. Conditions can be 
+[message `.matches` arguments](#message-matching) 
+or a [`CallOn` enum value][midiscripter.CallOn].
+
 MIDI Scripter has its own [logger](api/logging.md) that can be used 
 for calls debugging or feedback output. 
 Print log messages with `log('message')` or `log.red('colored message')`. 
@@ -293,9 +298,3 @@ if __name__ == '__main__':
     # Uses setups from both scripts and runs them as a single script
     start_gui() 
 ```
-
-## Controlling Ableton Live 
-
-Primary target for writing Midi Scripter was to overcome some limitations of 
-Ableton Live with Python coding without getting into its built-in MIDI 
-remote scripts.
