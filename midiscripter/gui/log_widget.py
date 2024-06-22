@@ -36,6 +36,11 @@ class LogWidget(QWidget):
         exclude_line.setPlaceholderText('Substrings divided by ";"')
         exclude_line.setClearButtonEnabled(True)
         exclude_line.textChanged.connect(log_view.set_exclude)
+        exclude_line.textChanged.connect(
+            lambda text: exclude_line.setStyleSheet(
+                f'background-color: {"yellow" if bool(text) else "none"}'
+            )
+        )
         exclude_line.setText(QSettings().value('log exclude', ''))
         layout.addWidget(QLabel('Exclude:'), 3, 1, 1, 1)
         layout.addWidget(exclude_line, 3, 2, 1, 1)
@@ -44,6 +49,11 @@ class LogWidget(QWidget):
         filter_line.setPlaceholderText('Substrings divided by ";"')
         filter_line.setClearButtonEnabled(True)
         filter_line.textChanged.connect(log_view.set_filter)
+        filter_line.textChanged.connect(
+            lambda text: filter_line.setStyleSheet(
+                f'background-color: {"yellow" if bool(text) else "none"}'
+            )
+        )
         filter_line.setText(QSettings().value('log filter', ''))
         layout.addWidget(QLabel('Filter:'), 3, 3, 1, 1)
         layout.addWidget(filter_line, 3, 4, 1, 1)
@@ -66,7 +76,7 @@ class LogView(QPlainTextEdit):
         self.setMouseTracking(True)
 
         self.append_html_entry.connect(self.__add_entry)
-        log._sink = midiscripter.logger.html_sink.HtmlSink(self.append_html_entry.emit)
+        self.resume_logging()
 
     @Slot(str)
     def set_filter(self, filter_text: str) -> None:
