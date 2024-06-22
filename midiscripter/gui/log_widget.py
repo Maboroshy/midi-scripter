@@ -24,7 +24,7 @@ class LogWidget(QWidget):
         pause_button.setToolTip('Pause the logging')
         pause_button.setCheckable(True)
         pause_button.toggled.connect(
-            lambda state: (log_view.pause_logging, log_view.resume_logging)[state]()
+            lambda state: (log_view.resume_logging, log_view.pause_logging)[state]()
         )
         pause_button.setFixedWidth(40)
         layout.addWidget(pause_button, 1, 4, 1, 1, Qt.AlignmentFlag.AlignRight)
@@ -166,9 +166,11 @@ class LogView(QPlainTextEdit):
 
     @staticmethod
     def pause_logging() -> None:
+        print('pause')
         log._sink = None
 
     def resume_logging(self) -> None:
+        print('resume')
         log._sink = midiscripter.logger.html_sink.HtmlSink(self.append_html_entry.emit)
 
     def hideEvent(self, event: QHideEvent) -> None:
