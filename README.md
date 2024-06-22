@@ -56,12 +56,13 @@ The basics:
 - Filter, modify and do anything Python can with the messages.
 - Send out modified or generated MIDI, OSC, keyboard and mouse messages.
 
-For performance MIDI setups:
+For music performance MIDI setups:
 
 - Make extra banks and layers to multiply MIDI controls.
 - Organize mappings into sets / scenes with GUI dashboard.
 - Make an extra overlay mappings on top of MIDI controller's DAW integration by
   using proxies.
+- Control Ableton Live by [special remote script or AbletonOSC]().
 
 For software control and automation:
 

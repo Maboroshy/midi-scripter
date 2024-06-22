@@ -5,6 +5,7 @@ repo_url: https://github.com/Maboroshy/midi-scripter
 nav:
     - Readme: index.md  # Copied from README.md by GitHub action on publish
     - Overview: overview.md
+    - Controlling Ableton Live: ableton.md
 
     - API Documentation:
         - MIDI:
@@ -24,6 +25,10 @@ nav:
             - Ports: api/mouse_port.md
             - Message: api/mouse_msg.md
 
+        - Ableton Live Remote:
+            - Ports: api/ableton_port.md
+            - Message: api/ableton_msg.md
+              
         - GUI Widgets:
             - Text: api/gui_text.md
             - Buttons: api/gui_buttons.md
@@ -109,6 +114,7 @@ plugins:
             members_order: source
             show_symbol_type_heading: true
             show_symbol_type_toc: true
+            show_labels: false
             
             filters:
               - "!^_"
