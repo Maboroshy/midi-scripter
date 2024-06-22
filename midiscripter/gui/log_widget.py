@@ -166,11 +166,9 @@ class LogView(QPlainTextEdit):
 
     @staticmethod
     def pause_logging() -> None:
-        print('pause')
         log._sink = None
 
     def resume_logging(self) -> None:
-        print('resume')
         log._sink = midiscripter.logger.html_sink.HtmlSink(self.append_html_entry.emit)
 
     def hideEvent(self, event: QHideEvent) -> None:
