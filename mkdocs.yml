@@ -7,7 +7,7 @@ nav:
     - Overview: overview.md
 
     - API Documentation:
-        - Midi:
+        - MIDI:
             - Ports: api/midi_port.md
             - Messages: api/midi_msg.md
             - Utils: api/midi_note_data.md  
@@ -36,10 +36,10 @@ nav:
         - Logging: api/logging.md
         
         - Extra ports:
-            - Metronome: api/metronome_port.md
             - File System Events:
                 - Port: api/fs_port.md
                 - Message: api/fs_event_msg.md
+            - Metronome: api/metronome_port.md
             - Midi Ports Changes: api/midi_ports_changed.md
         
         - Base Classes:
