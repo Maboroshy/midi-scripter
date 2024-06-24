@@ -1,7 +1,8 @@
 from midiscripter import *
 
-midi_input_from_ableton = MidiIn('From DAW')
+piano = MidiIn('MIDI Keyboard')
 midi_output_to_ableton = MidiOut('To DAW')
+piano.passthrough_out(midi_output_to_ableton)
 
 ableton_osc_in = OscIn(11001)
 ableton_osc_out = OscOut(11000)
@@ -17,7 +18,7 @@ def start_listener() -> None:
     ableton_osc_out.send(OscMsg('/live/song/start_listen/session_record_status'))
 
 
-@midi_input_from_ableton.subscribe(MidiType.CONTROL_CHANGE, None, 64)
+@piano.subscribe(MidiType.CONTROL_CHANGE, None, 64)
 def get_midi_keyboard_sustain(msg: MidiMsg) -> None:
     """Puts sustain value to global variable"""
     global sustain_value
@@ -30,7 +31,7 @@ def session_record_started(_: OscMsg) -> None:
     """Sends sustain message to Ableton Live as soon as session record starts"""
     global sustain_value
     midi_output_to_ableton.send(ChannelMsg(MidiType.CONTROL_CHANGE, 1, 64, sustain_value))
-    log.blue(f'Session record started. Sending sustain: {str(sustain_value)}.')
+    log.cyan(f'Session record started. Sending sustain: {str(sustain_value)}.')
 
 
 if __name__ == '__main__':
