@@ -344,12 +344,18 @@ class PortsView(QTreeWidget):
         selected_item: MidiPortItem | GeneralPortItem | CallItem = self.selectedItems()[0]
 
         try:
-            port_repr = selected_item.repr
-            QGuiApplication.clipboard().setText(port_repr)
+            if QGuiApplication.keyboardModifiers() == Qt.KeyboardModifier.ControlModifier:
+                text_for_clipboard = selected_item.repr[
+                    selected_item.repr.find('(') + 1 : selected_item.repr.rfind(')')
+                ]
+            else:
+                text_for_clipboard = selected_item.repr
+
+            QGuiApplication.clipboard().setText(text_for_clipboard)
             QTimer.singleShot(
                 200,
                 lambda: QToolTip().showText(
-                    self.cursor().pos(), f'Copied {port_repr}', self, msecShowTime=2000
+                    self.cursor().pos(), f'Copied {text_for_clipboard}', self, msecShowTime=2000
                 ),
             )  # Don't hide on mouse button release
         except AttributeError:

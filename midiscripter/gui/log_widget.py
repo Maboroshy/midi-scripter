@@ -76,14 +76,16 @@ class LogView(QPlainTextEdit):
 
     @Slot(str)
     def set_filter(self, filter_text: str) -> None:
-        self.__filter_text_parts = [text.lower().strip() for text in filter_text.split(';') if text]
+        self.__filter_text_parts = [
+            text.lower().strip().strip("'") for text in filter_text.split(';') if text
+        ]
         self.__apply_filter()
         QSettings().setValue('log filter', filter_text)
 
     @Slot(str)
     def set_exclude(self, exclude_text: str) -> None:
         self.__exclude_text_parts = [
-            text.lower().strip() for text in exclude_text.split(';') if text
+            text.lower().strip().strip("'") for text in exclude_text.split(';') if text
         ]
         self.__apply_filter()
         QSettings().setValue('log exclude', exclude_text)
@@ -194,19 +196,16 @@ class LogView(QPlainTextEdit):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if not self.__anchor_text or event.button() not in (
-            Qt.MouseButton.LeftButton,
-            Qt.MouseButton.MiddleButton,
-        ):
+        if not self.__anchor_text or event.button() != Qt.MouseButton.LeftButton:
             super().mouseReleaseEvent(event)
             return
 
-        if event.button() == Qt.MouseButton.LeftButton:
-            text_for_clipboard = self.__anchor_text
-        else:
+        if QGuiApplication.keyboardModifiers() == Qt.KeyboardModifier.ControlModifier:
             text_for_clipboard = self.__anchor_text[
                 self.__anchor_text.find('(') + 1 : self.__anchor_text.rfind(')')
             ]
+        else:
+            text_for_clipboard = self.__anchor_text
 
         QGuiApplication.clipboard().setText(text_for_clipboard)
 
