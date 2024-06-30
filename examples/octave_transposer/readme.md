@@ -8,7 +8,7 @@ and sends it through virtual MIDI output.
 
 ## Prerequisites
 
-- 'To DAW' virtual port for output.
+- `To DAW` virtual port for output.
 - Replace `'MIDI Keyboard'` with your MIDI controller port name.
-- Set 'To DAW' virtual port as an input in your DAW.
+- Set `To DAW` virtual port as an input in your DAW.
 - Arrange the widgets in script's GUI.
