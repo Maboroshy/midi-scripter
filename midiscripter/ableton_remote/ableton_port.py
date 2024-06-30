@@ -12,6 +12,7 @@ from midiscripter.ableton_remote.remote_script_midi_mapping import (
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
+    from midiscripter.base.msg_base import Msg
 
 
 # noinspection PyMethodOverriding

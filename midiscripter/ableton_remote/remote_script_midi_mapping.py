@@ -306,8 +306,8 @@ def _reversed_event_dict(source_map: dict[AbletonEvent, tuple[MidiType, int, int
         if isinstance(item, tuple):
             reversed_map[item] = (event, None)
         elif isinstance(item[0], list):  # list in list
-            for index, item in enumerate(item):
-                for nested_index, attrs in enumerate(item):
+            for index, subitem in enumerate(item):
+                for nested_index, attrs in enumerate(subitem):
                     reversed_map[attrs] = (event, (index, nested_index))
         elif isinstance(item, list):
             for index, attrs in enumerate(item):
