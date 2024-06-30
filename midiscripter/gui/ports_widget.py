@@ -1,4 +1,3 @@
-import itertools
 from collections.abc import Callable
 
 from PySide6.QtCore import *
@@ -6,11 +5,13 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 import midiscripter.logger.html_sink
+from midiscripter.ableton_remote import AbletonIn, AbletonOut
 from midiscripter.base.port_base import Input, Output, SubscribedCall
 from midiscripter.logger import log
 from midiscripter.midi import MidiIn, MidiOut
 from midiscripter.keyboard import KeyIn
 from midiscripter.mouse import MouseIn
+from .saved_state_controls import SavedToggleButton
 
 
 class PortWidgetItem(QTreeWidgetItem):
@@ -79,7 +80,11 @@ class GeneralPortItem(PortItemMixin, PortWidgetItem):
         super().__init__(parent_item, (item_text,))
 
         self.set_color_by_port_type(type(self.port_instance))
-        self.setCheckState(0, Qt.CheckState.Checked)
+
+        if self.port_instance.is_enabled:
+            self.setCheckState(0, Qt.CheckState.Checked)
+        else:
+            self.setCheckState(0, Qt.CheckState.Unchecked)
 
         if issubclass(type(self.port_instance), Input):
             self.add_calls()
@@ -94,16 +99,13 @@ class AlwaysPresentInputPortItem(PortItemMixin, PortWidgetItem):
         super().__init__(parent_item, (self.port_class._force_uid,))
 
         self.repr = f'{port_class.__name__}()'
+        self.set_color_by_port_type(port_class)
 
-        item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input]
-        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
-
-        try:
-            port_index = (port_class.__name__, self.port_class._force_uid)
-            self.port_instance = self.port_class.instance_registry[port_index]
+        port_index = (port_class.__name__, self.port_class._force_uid)
+        self.port_instance = self.port_class.instance_registry.get(port_index, None)
+        if self.port_instance and self.port_instance.is_enabled:
             self.setCheckState(0, Qt.CheckState.Checked)
-        except KeyError:
-            self.port_instance = None
+        else:
             self.setCheckState(0, Qt.CheckState.Unchecked)
 
     def request_state_change(self, new_state: bool) -> bool:
@@ -120,7 +122,7 @@ class AbsentMidiPortItem(QTreeWidgetItem):
 
 
 class MidiPortItem(PortItemMixin, PortWidgetItem):
-    port_instance: MidiIn | MidiOut
+    port_instance: None | MidiIn | MidiOut
     PORT_CLASS: type[MidiIn | MidiOut]
     VIRTUAL_PORT_PREFIX = '[v]'
 
@@ -205,40 +207,63 @@ class CallItem(PortWidgetItem):
         return new_state
 
 
-class PortsWidget(QTreeWidget):
+class PortsWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setObjectName('Ports')
-        self.setHeaderHidden(True)
-        self.setMinimumWidth(200)
+        self.setMinimumWidth(175)
         self.setMinimumHeight(200)
-        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        ports_view = PortsView()
+        layout.addWidget(ports_view)
+
+        hide_unused_button = SavedToggleButton(
+            'Show Unused Ports', ports_view.repopulate, default_state=True
+        )
+        layout.addWidget(hide_unused_button)
+
+
+class PortsView(QTreeWidget):
+    __ALWAYS_PRESENT_PORT_TYPES = (KeyIn, MouseIn)
+
+    def __init__(self):
+        super().__init__()
+        self.setHeaderHidden(True)
+        self.setFrameStyle(QFrame.Shape.NoFrame)
+
         self.setMouseTracking(True)
         self.itemEntered.connect(self.__update_item_tooltip)
-        self.__populate()
+        self.repopulate()
 
-    def __populate(self) -> None:
+        self.itemSelectionChanged.connect(self.__item_selected)
+        # with set blocks on data change itemChanged is emitted only on check state change
+        self.itemChanged.connect(self.__item_state_changed)
+
+        self.repopulate()
+
+    def repopulate(self, show_unused: bool = True) -> None:
         """Populates the widget with items"""
+        self.__show_unused = show_unused
+
+        self.blockSignals(True)
+
         self.clear()
 
         self.__add_midi_ports()
 
-        self.__add_declared_ports('OSC Inputs', midiscripter.OscIn)
-        self.__add_declared_ports('OSC Outputs', midiscripter.OscOut)
-
-        AlwaysPresentInputPortItem(self.__add_top_level_item('Keyboard Input'), KeyIn)
-        self.__add_declared_ports('Keyboard Output', midiscripter.KeyOut)
-
-        AlwaysPresentInputPortItem(self.__add_top_level_item('Mouse Input'), MouseIn)
-        self.__add_declared_ports('Mouse Output', midiscripter.MouseOut)
+        self.__add_declared_ports('OSC', midiscripter.OscIn, midiscripter.OscOut)
+        self.__add_declared_ports('Ableton Live', midiscripter.AbletonIn, midiscripter.AbletonOut)
+        self.__add_declared_ports('Keyboard', KeyIn, midiscripter.KeyOut)
+        self.__add_declared_ports('Mouse', MouseIn, midiscripter.MouseOut)
 
         self.__add_declared_ports('Metronome', midiscripter.MetronomeIn)
         self.__add_declared_ports('File Event Watcher', midiscripter.FileEventIn)
         self.__add_declared_ports('MIDI Port Changes Watcher', midiscripter.MidiPortsChangedIn)
 
-        self.itemSelectionChanged.connect(self.__item_selected)
-        # with set blocks on data change itemChanged is emitted only on check state change
-        self.itemChanged.connect(self.__item_state_changed)
+        self.blockSignals(False)
 
     def __add_top_level_item(self, item_text: str) -> QTreeWidgetItem:
         bold_font = self.font()
@@ -251,40 +276,65 @@ class PortsWidget(QTreeWidget):
         return top_item
 
     def __add_midi_ports(self) -> None:
-        for title, _item_class in [
+        for title, item_class in [
             ('MIDI Inputs', InputMidiPortItem),
             ('MIDI Outputs', OutputMidiPortItem),
         ]:
             top_item = self.__add_top_level_item(title)
-            port_class = _item_class.PORT_CLASS
+            port_class = item_class.PORT_CLASS
 
-            port_instance_list = [
-                port
+            port_instances = {
+                port.name: port
                 for port in port_class.instance_registry.values()
                 if isinstance(port, port_class)
+            }
+
+            ableton_remote_port_names = [
+                port.name
+                for port in port_class.instance_registry.values()
+                if isinstance(port, AbletonIn | AbletonOut)
             ]
-            virtual_port_names = [port._uid for port in port_instance_list if port._is_virtual]
 
-            for port_name in itertools.chain(port_class._available_names, virtual_port_names):
-                _item_class(top_item, port_name)
+            virtual_port_names = [port._uid for port in port_instances.values() if port._is_virtual]
+            for port_name in virtual_port_names:
+                if port_name not in ableton_remote_port_names:
+                    item_class(top_item, port_name)
 
-            for port_instance in port_instance_list:
+            for port_name in port_class._available_names:
+                if port_name in ableton_remote_port_names:
+                    continue
+                if not self.__show_unused and port_name not in port_instances:
+                    continue
+                item_class(top_item, port_name)
+
+            for port_instance in port_instances.values():
                 if not port_instance._is_available and port_instance._uid not in virtual_port_names:
                     AbsentMidiPortItem(top_item, port_instance._uid)
 
-    def __add_declared_ports(self, title: str, port_type: type[Input | Output]) -> None:
+    def __add_declared_ports(self, title: str, *port_types: type[Input | Output]) -> None:
         port_instances_to_add = []
-        for port_key, port_instance in port_type.instance_registry.items():
-            if port_key[0] is port_type.__name__:
-                port_instances_to_add.append(port_instance)
+        always_present_port_types_to_add = []
+        for port_type in port_types:
+            if port_type in self.__ALWAYS_PRESENT_PORT_TYPES and self.__show_unused:
+                always_present_port_types_to_add.append(port_type)
 
-        if not port_instances_to_add:
+            for port_key, port_instance in port_type.instance_registry.items():
+                if (
+                    port_key[0] is port_type.__name__
+                    and port_type not in always_present_port_types_to_add
+                ):
+                    port_instances_to_add.append(port_instance)
+
+        if not port_instances_to_add and not always_present_port_types_to_add:
             return
 
         port_top = self.__add_top_level_item(title)
 
-        for port in port_instances_to_add:
-            GeneralPortItem(port_top, port)
+        for port_type in always_present_port_types_to_add:
+            AlwaysPresentInputPortItem(port_top, port_type)
+
+        for port_instance in port_instances_to_add:
+            GeneralPortItem(port_top, port_instance)
 
     def __item_selected(self) -> None:
         """Sends selected item text to the clipboard and shows a "copied" tooltip"""

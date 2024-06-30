@@ -41,8 +41,15 @@ class MainWindow(QMainWindow):
 
         self.setDockNestingEnabled(True)
 
-        self.add_widget_as_dock(midiscripter.gui.ports_widget.PortsWidget())
-        self.add_widget_as_dock(midiscripter.gui.log_widget.LogWidget())
+        self.setStyleSheet("""
+            QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
+        """)
+
+        self.ports_widget = midiscripter.gui.ports_widget.PortsWidget()
+        self.log_widget = midiscripter.gui.log_widget.LogWidget()
+
+        self.add_widget_as_dock(self.ports_widget, fix_width=True)
+        self.add_widget_as_dock(self.log_widget)
 
         for widget in widgets_to_add:
             self.add_widget_as_dock(widget)
@@ -53,11 +60,14 @@ class MainWindow(QMainWindow):
         self.tray = TrayIcon(self.windowIcon(), self)
         self.tray.show()
 
-    def add_widget_as_dock(self, widget: QWidget) -> None:
+    def add_widget_as_dock(self, widget: QWidget, fix_width: bool = False) -> None:
         dock = QDockWidget(self)
         dock.setObjectName(widget.objectName())
         dock.setWindowTitle(widget.objectName())
         dock.setWidget(widget)
+
+        if fix_width:
+            dock.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
         self.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock)
         self.dock_widgets.append(dock)

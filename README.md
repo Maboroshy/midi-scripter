@@ -95,9 +95,11 @@ Extra steps for Windows:
 1. Paste [script template](examples/script_template.py) to Python IDE or plain
    text editor. IDE is recommended.
 2. Run template script as-is from IDE or by `python your_script.py` command to
-   open GUI for more info on available ports and incoming input.
-3. Turn on available ports' checkboxes to enable them, watch the log for
-   input messages.
+   open GUI (screenshot below) for more info on available ports and incoming 
+   input.
+3. Make sure `Show Unused Ports` button under the port list is on. 
+   Turn on available ports' checkboxes to enable them, watch the log 
+   for input messages.
 4. Click on port names and messages in log to copy their declarations to the
    clipboard. Paste the declarations to your script.
 5. Modify the template function to make it do what you want.
@@ -106,3 +108,5 @@ Extra steps for Windows:
 7. Write more complex scripts. Use more inputs, outputs and functions
    (callables). Subscribe callables to input messages with
    `@input_port.subscribe` decorator.
+
+![Screenshot](https://github.com/Maboroshy/midi-scripter/blob/master/docs/screenshot.png?raw=true)

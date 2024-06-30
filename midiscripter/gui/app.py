@@ -33,6 +33,10 @@ class ScripterGUI(QApplication):
         icon_path = pathlib.Path(midiscripter.__file__).parent / 'resources' / 'icon.ico'
         self.setWindowIcon(QIcon(str(icon_path)))
 
+        palette = self.palette()
+        palette.setColor(QPalette.ColorRole.Window, QColor('white'))
+        self.setPalette(palette)
+
         self.__time_until_restart_sec = self.RESTART_DELAY
         self.request_restart.connect(self, self.restart)
         self.aboutToQuit.connect(self.__cleanup)

@@ -9,60 +9,10 @@ import midiscripter.shared
 import midiscripter.file_event
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
+from .saved_state_controls import SavedCheckedAction
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from base.msg_base import Msg
-
-
-class SavedCheckedStateAction(QAction):
-    def __init__(
-        self,
-        name: str,
-        func_for_state: 'Callable | None' = None,
-        *,
-        checked_func: 'Callable | None' = None,
-        unchecked_func: 'Callable | None' = None,
-        default_state: bool = False,
-        key_shortcut: 'QKeySequence | None' = None,
-        is_shared_setting: bool = False,
-    ):
-        super().__init__(name)
-        self.__func_for_state = func_for_state
-        self.__checked_func = checked_func
-        self.__unchecked_func = unchecked_func
-        self.__default_state = default_state
-        self.__setting_name = f'action {name}'
-
-        if key_shortcut:
-            self.setShortcut(key_shortcut)
-
-        if is_shared_setting:
-            self.__qsettings_args = (QApplication.instance().organizationName(), 'Shared')
-        else:
-            self.__qsettings_args = (None,)
-
-        self.setCheckable(True)
-        # replaces force _state_changed that causes widgets toggled by action to pop up
-        self.setChecked(default_state)
-        self.toggled.connect(self.__state_changed)
-        self.setChecked(bool(self))
-
-    def __bool__(self):
-        return QSettings(*self.__qsettings_args).value(
-            self.__setting_name, self.__default_state, type=bool
-        )
-
-    def __state_changed(self, state: bool) -> None:
-        QSettings(*self.__qsettings_args).setValue(self.__setting_name, state)
-
-        if self.__func_for_state:
-            self.__func_for_state(state)
-
-        if state is True and self.__checked_func:
-            self.__checked_func()
-        if state is False and self.__unchecked_func:
-            self.__unchecked_func()
 
 
 class MenuBar(QMenuBar):
@@ -90,7 +40,7 @@ class MenuBar(QMenuBar):
         toggle_autostart.setChecked(self.autostart._check_if_enabled())
         toggle_autostart.toggled.connect(self.__set_autostart)
 
-        self.always_on_top = SavedCheckedStateAction(
+        self.always_on_top = SavedCheckedAction(
             'Window always on top',
             main_window.set_always_on_top,
             key_shortcut=QKeySequence('Ctrl+Space'),
@@ -99,12 +49,12 @@ class MenuBar(QMenuBar):
 
         options_menu.addSeparator()
 
-        self.watch_script_file = SavedCheckedStateAction(
+        self.watch_script_file = SavedCheckedAction(
             'Restart on script file change', self.__set_watching_script_file
         )
         options_menu.insertAction(QAction(), self.watch_script_file)
 
-        self.watch_midi_ports = SavedCheckedStateAction(
+        self.watch_midi_ports = SavedCheckedAction(
             'Restart on MIDI port changes', self.__set_watching_midi_ports
         )
         options_menu.insertAction(QAction(), self.watch_midi_ports)
@@ -112,7 +62,7 @@ class MenuBar(QMenuBar):
         # Dock widgets
         widgets_menu = self.addMenu('Widgets')
 
-        self.lock_dock_widgets = SavedCheckedStateAction(
+        self.lock_dock_widgets = SavedCheckedAction(
             'Hide widgets titles',
             main_window.set_dock_titles_visibility,
             key_shortcut=QKeySequence('Ctrl+T'),

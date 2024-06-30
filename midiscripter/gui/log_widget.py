@@ -7,38 +7,23 @@ from midiscripter.logger import log
 
 
 class LogWidget(QWidget):
-    TOP_LABEL_TEXT = (
-        'Log widget introduces extra latency and jitter while visible.\n'
-        'Click the references to copy them to the clipboard.'
-    )
-
     def __init__(self):
         super().__init__()
         self.setObjectName('Log')
+
         layout = QGridLayout()
         self.setLayout(layout)
 
-        layout.addWidget(QLabel(self.TOP_LABEL_TEXT), 1, 1, 1, 4)
-
-        pause_button = QPushButton('Hold')
-        pause_button.setToolTip('Pause the logging')
-        pause_button.setCheckable(True)
-        pause_button.toggled.connect(
-            lambda state: (log_view.resume_logging, log_view.pause_logging)[state]()
-        )
-        pause_button.setFixedWidth(40)
-        layout.addWidget(pause_button, 1, 4, 1, 1, Qt.AlignmentFlag.AlignRight)
-
         log_view = LogView()
-        layout.addWidget(log_view, 2, 1, 1, 4)
+        layout.addWidget(log_view, 2, 1, 1, 5)
 
         exclude_line = QLineEdit()
-        exclude_line.setPlaceholderText('Substrings divided by ";"')
+        exclude_line.setPlaceholderText('Substrings divided by ;')
         exclude_line.setClearButtonEnabled(True)
         exclude_line.textChanged.connect(log_view.set_exclude)
         exclude_line.textChanged.connect(
             lambda text: exclude_line.setStyleSheet(
-                f'background-color: {"yellow" if bool(text) else "none"}'
+                f'background-color: {"lightgreen" if bool(text) else "white"}'
             )
         )
         exclude_line.setText(QSettings().value('log exclude', ''))
@@ -46,17 +31,26 @@ class LogWidget(QWidget):
         layout.addWidget(exclude_line, 3, 2, 1, 1)
 
         filter_line = QLineEdit()
-        filter_line.setPlaceholderText('Substrings divided by ";"')
+        filter_line.setPlaceholderText('Substrings divided by ;')
         filter_line.setClearButtonEnabled(True)
         filter_line.textChanged.connect(log_view.set_filter)
         filter_line.textChanged.connect(
             lambda text: filter_line.setStyleSheet(
-                f'background-color: {"yellow" if bool(text) else "none"}'
+                f'background-color: {"lightgreen" if bool(text) else "white"}'
             )
         )
         filter_line.setText(QSettings().value('log filter', ''))
         layout.addWidget(QLabel('Filter:'), 3, 3, 1, 1)
         layout.addWidget(filter_line, 3, 4, 1, 1)
+
+        pause_button = QPushButton('Hold')
+        pause_button.setToolTip('Pause the logging')
+        pause_button.setCheckable(True)
+        pause_button.toggled.connect(
+            lambda state: log_view.pause_logging() if state else log_view.resume_logging()
+        )
+        pause_button.setFixedWidth(40)
+        layout.addWidget(pause_button, 3, 5, 1, 1, Qt.AlignmentFlag.AlignRight)
 
 
 class LogView(QPlainTextEdit):
@@ -71,9 +65,11 @@ class LogView(QPlainTextEdit):
 
         self.setReadOnly(True)
         self.setUndoRedoEnabled(False)
-        self.setWordWrapMode(QTextOption.NoWrap)
+        self.setWordWrapMode(QTextOption.WrapMode.NoWrap)
         self.setMaximumBlockCount(log.BUFFER_SIZE)
         self.setMouseTracking(True)
+
+        self.setFrameStyle(QFrame.Shape.NoFrame)
 
         self.append_html_entry.connect(self.__add_entry)
         self.resume_logging()
@@ -192,9 +188,9 @@ class LogView(QPlainTextEdit):
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self.__anchor_text = self.anchorAt(event.pos())
         if self.__anchor_text:
-            self.viewport().setCursor(Qt.PointingHandCursor)
+            self.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         else:
-            self.viewport().setCursor(Qt.IBeamCursor)
+            self.viewport().setCursor(Qt.CursorShape.IBeamCursor)
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
