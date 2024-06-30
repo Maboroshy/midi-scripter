@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 name = 'midiscripter'
-version = '0.4.1'
+version = '0.5'
 description = 'Framework for scripting MIDI, keyboard and Open Sound Control input and output'
 readme = 'README.md'
 requires-python = '>=3.11'
