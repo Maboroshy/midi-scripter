@@ -10,7 +10,7 @@
 - Ableton Live control ports and messages with custom remote script
 - `CallOn` flags to use as port subscription conditions
 - `OscQueryMaker` can include data to requests
-- `Control + Click` on port reference now copies its name 
+- `Control + Click` on object reference in GUI now copies its arguments
 - `Show Unused Ports` button for Port widget 
 - `Hold` button for Log widget
 
