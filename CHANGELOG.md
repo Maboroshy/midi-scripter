@@ -1,5 +1,22 @@
 # Changelog
 
+## **v0.5** - 30.06.2024
+
+### Fixed
+- Increased log performance
+- Maximized window sizing issues
+
+### Added
+- Ableton Live control ports and messages with custom remote script
+- `CallOn` flags to use as port subscription conditions
+- `OscQueryMaker` can include data to requests
+- `Control + Click` on port reference now copies its name 
+- `Show Unused Ports` button for Port widget 
+- `Hold` button for Log widget
+
+### Changed
+- GUI colors
+
 ## **v0.4.1** - 03.06.2024
 
 ### Fixed
@@ -29,7 +46,6 @@
 
 ### Fixed
 - Fixed and improved `GuiWidgetLayout`
-- Fixed and improved example scripts
 
 ## **v0.3** - 07.05.2024
 
