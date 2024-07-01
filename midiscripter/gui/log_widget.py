@@ -77,7 +77,7 @@ class LogView(QPlainTextEdit):
     @Slot(str)
     def set_filter(self, filter_text: str) -> None:
         self.__filter_text_parts = [
-            text.lower().strip().strip("'") for text in filter_text.split(';') if text
+            text.lower().strip().strip("'") for text in filter_text.split(';') if text.strip()
         ]
         self.__apply_filter()
         QSettings().setValue('log filter', filter_text)
@@ -85,7 +85,7 @@ class LogView(QPlainTextEdit):
     @Slot(str)
     def set_exclude(self, exclude_text: str) -> None:
         self.__exclude_text_parts = [
-            text.lower().strip().strip("'") for text in exclude_text.split(';') if text
+            text.lower().strip().strip("'") for text in exclude_text.split(';') if text.strip()
         ]
         self.__apply_filter()
         QSettings().setValue('log exclude', exclude_text)
