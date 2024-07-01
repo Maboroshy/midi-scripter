@@ -101,18 +101,21 @@ class LogView(QPlainTextEdit):
 
         start_from_block_number = 0 if not last_n_blocks else document.blockCount() - last_n_blocks
 
+        previous_visible_entry = None
         for line_n in range(start_from_block_number, document.blockCount()):
             block = document.findBlockByNumber(line_n)
             log_entry = block.text()[self.entry_ctime_part_len :]
 
-            if (
-                log_entry
-                and self.__text_line_is_excluded(log_entry)
+            if log_entry and (  # noqa: SIM114
+                self.__text_line_is_excluded(log_entry)
                 or not self.__text_line_matches_filter(log_entry)
             ):
                 block.setVisible(False)
+            elif not log_entry and not previous_visible_entry:  # two separators in a row
+                block.setVisible(False)
             else:
                 block.setVisible(True)
+                previous_visible_entry = log_entry
 
         self.setDocument(document)
 
@@ -170,7 +173,7 @@ class LogView(QPlainTextEdit):
         self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
 
         if self.__filter_text_parts or self.__exclude_text_parts:
-            self.__apply_filter(len(log_entries))
+            self.__apply_filter(len(log_entries) + 1)
 
     @staticmethod
     def pause_logging() -> None:
