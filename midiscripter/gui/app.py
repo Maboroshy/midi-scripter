@@ -11,7 +11,7 @@ from PySide6.QtWidgets import *
 
 import midiscripter.base.port_base
 import midiscripter.shared
-import midiscripter.file_event.file_event_msg
+import midiscripter.file_event
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
 
@@ -49,12 +49,10 @@ class ScripterGUI(QApplication):
         else:
             self.main_window.close()
 
-    def restart_at_file_change(
-        self, msg: 'midiscripter.file_event.file_change_msg.FileEventMsg'
-    ) -> None:
+    def restart_at_file_change(self, msg: midiscripter.file_event.FileEventMsg) -> None:
         if msg.type not in (
-            midiscripter.file_event.file_event_msg.FileEvent.CREATED,
-            midiscripter.file_event.file_event_msg.FileEvent.MODIFIED,
+            midiscripter.file_event.FileEvent.CREATED,
+            midiscripter.file_event.FileEvent.MODIFIED,
         ):
             return
 

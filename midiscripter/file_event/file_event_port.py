@@ -67,7 +67,7 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
         midiscripter.logger.log('Stopped {input}', input=self)
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent) -> None:
-        # Override of `watchdog.events.FileSystemEventHandler` method.
+        # Override for `watchdog.events.FileSystemEventHandler` method.
         # Runs on each file system change in `_path`.
         if not self.is_enabled:
             return
