@@ -43,13 +43,13 @@ class LogWidget(QWidget):
         layout.addWidget(QLabel('Filter:'), 3, 3, 1, 1)
         layout.addWidget(filter_line, 3, 4, 1, 1)
 
-        pause_button = QPushButton('Hold')
+        pause_button = QPushButton('Pause')
         pause_button.setToolTip('Pause the logging')
         pause_button.setCheckable(True)
         pause_button.toggled.connect(
             lambda state: log_view.pause_logging() if state else log_view.resume_logging()
         )
-        pause_button.setFixedWidth(40)
+        pause_button.setFixedWidth(50)
         layout.addWidget(pause_button, 3, 5, 1, 1, Qt.AlignmentFlag.AlignRight)
 
 
@@ -211,6 +211,7 @@ class LogView(QPlainTextEdit):
             text_for_clipboard = self.__anchor_text
 
         QGuiApplication.clipboard().setText(text_for_clipboard)
+        QApplication.instance().main_window.message_sender_widget.paste(text_for_clipboard)
 
         QToolTip().showText(
             event.globalPosition().toPoint(),
