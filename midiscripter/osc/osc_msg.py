@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class OscMsg(midiscripter.base.msg_base.Msg):
     """Open Sound Control message"""
 
-    __match_args__ = ('type', 'address', 'data')
+    __match_args__ = ('address', 'data')
     type: str = 'OSC'
 
     address: str
@@ -37,6 +37,11 @@ class OscMsg(midiscripter.base.msg_base.Msg):
         super().__init__(self.type, source)
         self.address = address
         self.data = data
+
+    def __str__(self):
+        return (
+            f'{self.type} | {self.address}{" | " + str(self.data) if self.data is not None else ""}'
+        )
 
     def matches(
         self,
