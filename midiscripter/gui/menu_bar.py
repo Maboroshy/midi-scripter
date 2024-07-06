@@ -40,6 +40,8 @@ class MenuBar(QMenuBar):
         toggle_autostart.setChecked(self.autostart._check_if_enabled())
         toggle_autostart.toggled.connect(self.__set_autostart)
 
+        options_menu.insertAction(QAction(), QApplication.instance().single_instance_only)
+
         self.always_on_top = SavedCheckedAction(
             'Window always on top',
             main_window.set_always_on_top,

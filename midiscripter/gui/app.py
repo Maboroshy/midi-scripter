@@ -1,6 +1,8 @@
+import os
 import pathlib
 import platform
 import signal
+import socket
 import sys
 import time
 from typing import NoReturn
@@ -14,6 +16,7 @@ import midiscripter.shared
 import midiscripter.file_event
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
+from .saved_state_controls import SavedCheckedAction
 
 
 class ScripterGUI(QApplication):
@@ -40,6 +43,11 @@ class ScripterGUI(QApplication):
         self.__time_until_restart_sec = self.RESTART_DELAY
         self.request_restart.connect(self, self.restart)
         self.aboutToQuit.connect(self.__cleanup)
+
+        # Action to use before main window creation
+        self.single_instance_only = SavedCheckedAction('Allow only a single instance', shared=True)
+        if self.single_instance_only:
+            self.__terminate_if_second_instance()
 
     def prepare_main_window(self, minimized_to_tray: bool = False) -> None:
         self.main_window = midiscripter.gui.main_window.MainWindow(self.widgets_to_add)
@@ -72,6 +80,17 @@ class ScripterGUI(QApplication):
             QSettings().setValue('restart win minimized', self.main_window.isMinimized())
             QSettings().setValue('restart closed to tray', not self.main_window.isVisible())
             self.exit(1467)
+
+    def __terminate_if_second_instance(self) -> None:
+        try:
+            self.__single_instance_socket = socket.socket()
+            self.__single_instance_socket.bind(('127.0.0.1', 1337))
+        except OSError:
+            print(
+                f'"{self.single_instance_only.text()}" option is enabled.\n'
+                "Second instance won't be started."
+            )
+            sys.exit(1)
 
     def __cleanup(self) -> None:
         self.main_window.close()

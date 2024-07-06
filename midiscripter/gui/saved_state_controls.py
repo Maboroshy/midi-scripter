@@ -18,7 +18,7 @@ class SavedCheckedStateMixin:
         unchecked_func: 'Callable | None' = None,
         default_state: bool = False,
         key_shortcut: 'QKeySequence | None' = None,
-        is_shared_setting: bool = False,
+        shared: bool = False,
     ):
         super().__init__(name)
         self.__func_for_state = func_for_state
@@ -30,7 +30,7 @@ class SavedCheckedStateMixin:
         if key_shortcut:
             self.setShortcut(key_shortcut)
 
-        if is_shared_setting:
+        if shared:
             self.__qsettings_args = (QApplication.instance().organizationName(), 'Shared')
         else:
             self.__qsettings_args = (None,)
