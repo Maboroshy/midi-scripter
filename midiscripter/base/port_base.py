@@ -26,12 +26,12 @@ class CallOn(enum.StrEnum):
 
 @contextlib.contextmanager
 def _all_opened() -> None:
-    for port in _PortRegistryMeta.instance_registry.values():
+    for port in Port._instances.values():
         port._open()
 
     yield
 
-    for port in _PortRegistryMeta.instance_registry.values():
+    for port in Port._instances.values():
         port._close()
 
     log._flush()
@@ -66,49 +66,7 @@ class SubscribedCall:
         return self.__callable.__qualname__
 
 
-class _PortRegistryMeta(type):
-    """Metaclass that enforces one declaration - one port instance (singleton) rule"""
-
-    __singleton_instance_type = TypeVar('__singleton_instance_type', bound='Port')
-    """Type for correct IDE recognition and code completion for returned port subclasses"""
-
-    instance_registry: dict[tuple[str, 'Hashable'], __singleton_instance_type] = {}
-    """Declared ports register as port class name and port uid to port instance map"""
-
-    def __call__(
-        cls: type[__singleton_instance_type], *args, **kwargs
-    ) -> __singleton_instance_type:
-        """
-        Args:
-            *args: if the class' `_force_uid` attribute is `None` (default)
-                   the metaclass uses the first argument as uid
-            **kwargs: -
-
-        Returns:
-            The singleton class instance that has requested uid
-        """
-        uid = cls._force_uid or args[0]
-        registry_key = (cls.__name__, uid)
-        init_args = inspect.signature(cls.__init__).bind(cls, *args, **kwargs).arguments
-        init_args.pop('self')
-
-        try:
-            instance = cls.instance_registry[registry_key]
-            if instance._inited_with_args == init_args:
-                return instance
-            else:
-                raise ValueError(
-                    f'Init arguments for consecutive declarations '
-                    f'for {cls.__name__} "{uid}" must match: {instance._inited_with_args}'
-                )
-        except KeyError:
-            instance = super().__call__(*args, **kwargs)
-            cls.instance_registry[registry_key] = instance
-            instance._inited_with_args = init_args
-            return instance
-
-
-class Port(metaclass=_PortRegistryMeta):
+class Port:
     """Port base class
 
     Notes:
@@ -125,6 +83,41 @@ class Port(metaclass=_PortRegistryMeta):
 
     _inited_with_args: dict
     """The arguments the port singleton was initialized with. Used by `_PortRegistryMeta`."""
+
+    __port_instance_type = TypeVar('__port_instance_type', bound='Port')
+    """Type for correct IDE recognition and code completion for returned port subclasses"""
+
+    _instances: dict[str, __port_instance_type] = {}
+    """Name to instances registry for each port type filled by `__new__`"""
+
+    def __init_subclass__(cls, **kwargs):
+        cls._instances = {}
+
+    def __new__(cls, *args, **kwargs) -> __port_instance_type:
+        uid = cls._force_uid or args[0]
+        init_args = inspect.signature(cls.__init__).bind(cls, *args, **kwargs).arguments
+        init_args.pop('self')
+
+        try:
+            instance = cls._instances[uid]
+            if instance._inited_with_args == init_args:
+                return instance
+            else:
+                raise ValueError(
+                    f'Init arguments for consecutive declarations '
+                    f'for {cls.__name__} "{uid}" must match: {instance._inited_with_args}'
+                )
+        except KeyError:
+            instance = super().__new__(cls)
+            instance._inited_with_args = init_args
+
+            for parent_class in cls.mro()[:-1]:
+                try:
+                    parent_class._instances[uid] = instance
+                except AttributeError:  # not a Port subclass in mro
+                    pass
+
+            return instance
 
     def __init__(self, uid: 'Hashable'):
         """

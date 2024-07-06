@@ -1,3 +1,4 @@
+import itertools
 from collections.abc import Callable
 
 from PySide6.QtCore import *
@@ -101,8 +102,7 @@ class AlwaysPresentInputPortItem(PortItemMixin, PortWidgetItem):
         self.repr = f'{port_class.__name__}()'
         self.set_color_by_port_type(port_class)
 
-        port_index = (port_class.__name__, self.port_class._force_uid)
-        self.port_instance = self.port_class.instance_registry.get(port_index, None)
+        self.port_instance = self.port_class._instances.get(self.port_class._force_uid, None)
         if self.port_instance and self.port_instance.is_enabled:
             self.setCheckState(0, Qt.CheckState.Checked)
         else:
@@ -128,8 +128,7 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
 
     def __init__(self, parent_item: QTreeWidgetItem, port_name: str):
         self.port_name = port_name
-        port_key = (self.PORT_CLASS.__name__, self.port_name)
-        self.port_instance = self.PORT_CLASS.instance_registry.get(port_key, None)
+        self.port_instance = self.PORT_CLASS._instances.get(self.port_name, None)
         self.repr = f"{self.PORT_CLASS.__name__}('{self.port_name}')"
 
         if self.port_instance and self.port_instance._is_virtual:
@@ -283,19 +282,14 @@ class PortsView(QTreeWidget):
             top_item = self.__add_top_level_item(title)
             port_class = item_class.PORT_CLASS
 
-            port_instances = {
-                port.name: port
-                for port in port_class.instance_registry.values()
-                if isinstance(port, port_class)
-            }
+            port_instances = port_class._instances.values()
 
-            ableton_remote_port_names = [
-                port.name
-                for port in port_class.instance_registry.values()
-                if isinstance(port, AbletonIn | AbletonOut)
-            ]
+            ableton_port_instances = itertools.chain(
+                AbletonIn._instances.values(), AbletonOut._instances.values()
+            )
+            ableton_remote_port_names = [port.name for port in ableton_port_instances]
 
-            virtual_port_names = [port._uid for port in port_instances.values() if port._is_virtual]
+            virtual_port_names = [port._uid for port in port_instances if port._is_virtual]
             for port_name in virtual_port_names:
                 if port_name not in ableton_remote_port_names:
                     item_class(top_item, port_name)
@@ -303,27 +297,24 @@ class PortsView(QTreeWidget):
             for port_name in port_class._available_names:
                 if port_name in ableton_remote_port_names:
                     continue
-                if not self.__show_unused and port_name not in port_instances:
+                if not self.__show_unused and port_name not in port_class._instances:
                     continue
                 item_class(top_item, port_name)
 
-            for port_instance in port_instances.values():
+            for port_instance in port_instances:
                 if not port_instance._is_available and port_instance._uid not in virtual_port_names:
                     AbsentMidiPortItem(top_item, port_instance._uid)
 
     def __add_declared_ports(self, title: str, *port_types: type[Input | Output]) -> None:
-        port_instances_to_add = []
         always_present_port_types_to_add = []
+        port_instances_to_add = []
         for port_type in port_types:
             if port_type in self.__ALWAYS_PRESENT_PORT_TYPES and self.__show_unused:
                 always_present_port_types_to_add.append(port_type)
 
-            for port_key, port_instance in port_type.instance_registry.items():
-                if (
-                    port_key[0] is port_type.__name__
-                    and port_type not in always_present_port_types_to_add
-                ):
-                    port_instances_to_add.append(port_instance)
+            for port_instance in port_type._instances.values():
+                if port_type not in always_present_port_types_to_add:
+                    port_instances_to_add.append(port_instance)  # noqa: PERF401
 
         if not port_instances_to_add and not always_present_port_types_to_add:
             return
