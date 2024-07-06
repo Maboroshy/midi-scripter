@@ -1,5 +1,17 @@
 # Changelog
 
+## **v0.6** - __________
+
+### Fixed
+- Log filter spaces handling
+- Log entry separators handling while using log filters
+- OSC message representation in log
+- Autostart imports issues
+
+### Added
+- Message Sender widget 
+- "Allow only a single instance" option
+
 ## **v0.5** - 30.06.2024
 
 ### Fixed

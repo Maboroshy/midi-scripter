@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 name = 'midiscripter'
-version = '0.5'
+version = '0.6'
 description = 'Framework for scripting MIDI, keyboard and Open Sound Control input and output'
 readme = 'README.md'
 requires-python = '>=3.11'
@@ -26,18 +26,13 @@ dependencies = [
   'python-osc ~=1.7',  # Unlicense
   'pynput ~=1.7',  # LGPL
   'watchdog ~=4.0',  # Apache
-  'PySide6_Essentials >6.4, <6.7',  # LGPL Got broken Signal.connect on 6.7
+  'PySide6_Essentials >6.4',  # LGPL
   'pywin32; platform_system == "Windows"',  # BSD
 ]
 
 [project.optional-dependencies]
 dev = ['ruff']
-doc = [
-  'mkdocs-material',
-  'mkdocstrings',
-  'griffe-inherited-docstrings',
-  'black'
-]
+doc = ['mkdocs-material', 'mkdocstrings', 'griffe-inherited-docstrings', 'black']
 
 [tool.hatch.build.targets.sdist]
 only-include = ['midiscripter']
@@ -54,8 +49,7 @@ Source = 'https://github.com/Maboroshy/midi-scripter'
 line-length = 100
 
 [tool.ruff.lint]
-select = ['B', 'C', 'E', 'F', 'PERF', 'TCH', 'SIM', 'UP', 'ANN001',
-  'ANN201', 'ANN202', ]
+select = ['B', 'C', 'E', 'F', 'PERF', 'TCH', 'SIM', 'UP', 'ANN001', 'ANN201', 'ANN202']
 ignore = ['E501', 'F401', 'F405', 'F403', 'SIM105']
 
 [tool.ruff.format]
