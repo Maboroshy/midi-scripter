@@ -1,7 +1,7 @@
 # <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="23"/> MIDI Scripter
 
 MIDI Scripter is a framework for filtering, modifying, routing and any other
-scripting for MIDI, Open Sound Control (OSC), keyboard and mouse input and
+scripting of MIDI, Open Sound Control (OSC), keyboard and mouse input and
 output with Python.
 
 MIDI Scripter listens to the input ports and feeds incoming messages to
@@ -48,7 +48,7 @@ should work on macOS.
 
 [You can find more examples here.](https://github.com/Maboroshy/midi-scripter/tree/master/examples)
 
-## What It Can Do
+## Features
 
 The basics:
 
@@ -78,6 +78,7 @@ For writing MIDI related Python code:
 - Work with message objects instead of raw data different for each input type.
 - Create GUI widgets with a single line and arrange them with mouse.
 - Write basic MIDI related GUI applications with very little Python code.
+- Fully type annotated API.
 
 ## Installation
 
@@ -95,8 +96,8 @@ Extra steps for Windows:
 1. Paste [script template](examples/script_template.py) to Python IDE or plain
    text editor. IDE is recommended.
 2. Run template script as-is from IDE or by `python your_script.py` command to
-   open GUI (screenshot below) for more info on available ports and incoming 
-   input.
+   open GUI (like on screenshot below) for more info on available ports and 
+   incoming input.
 3. Make sure `Show Unused Ports` button under the port list is on. 
    Turn on available ports' checkboxes to enable them, watch the log 
    for input messages.
