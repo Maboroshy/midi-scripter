@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         self.tray.show()
 
     def add_widget_as_dock(
-        self, widget: QWidget, *, fix_width: bool = False, hidden_by_default=False
+        self, widget: QWidget, *, fix_width: bool = False, hidden_by_default: bool = False
     ) -> None:
         dock = QDockWidget(self)
         dock.setObjectName(widget.objectName())
