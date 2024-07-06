@@ -6,6 +6,7 @@ import midiscripter.shared
 import midiscripter.gui.log_widget
 import midiscripter.gui.menu_bar
 import midiscripter.gui.ports_widget
+import midiscripter.gui.message_sender
 
 
 class TrayIcon(QSystemTrayIcon):
@@ -47,9 +48,11 @@ class MainWindow(QMainWindow):
 
         self.ports_widget = midiscripter.gui.ports_widget.PortsWidget()
         self.log_widget = midiscripter.gui.log_widget.LogWidget()
+        self.message_sender_widget = midiscripter.gui.message_sender.MessageSender()
 
         self.add_widget_as_dock(self.ports_widget, fix_width=True)
         self.add_widget_as_dock(self.log_widget)
+        self.add_widget_as_dock(self.message_sender_widget, hidden_by_default=True)
 
         for widget in widgets_to_add:
             self.add_widget_as_dock(widget)
@@ -60,7 +63,9 @@ class MainWindow(QMainWindow):
         self.tray = TrayIcon(self.windowIcon(), self)
         self.tray.show()
 
-    def add_widget_as_dock(self, widget: QWidget, fix_width: bool = False) -> None:
+    def add_widget_as_dock(
+        self, widget: QWidget, *, fix_width: bool = False, hidden_by_default=False
+    ) -> None:
         dock = QDockWidget(self)
         dock.setObjectName(widget.objectName())
         dock.setWindowTitle(widget.objectName())
@@ -71,6 +76,9 @@ class MainWindow(QMainWindow):
 
         self.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock)
         self.dock_widgets.append(dock)
+
+        if hidden_by_default:
+            dock.hide()
 
     def set_dock_titles_visibility(self, are_hidden: bool) -> None:
         # Can't make full lock with setFixedSize due to AdaptiveTextSizeWidgets

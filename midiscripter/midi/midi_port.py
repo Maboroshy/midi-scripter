@@ -6,11 +6,10 @@ import rtmidi.midiconstants
 
 import midiscripter.base.port_base
 from midiscripter.logger import log
-from midiscripter.midi.midi_msg import MidiType
+from midiscripter.midi.midi_msg import MidiType, MidiMsg
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Container
-    from midiscripter.midi.midi_msg import MidiMsg
 
 
 BYTE_TO_TYPE_MAP = {
@@ -210,7 +209,7 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
         _MidiPortMixin.__init__(self, port_name)
         midiscripter.base.port_base.Output.__init__(self, port_name)
 
-    def send(self, msg: 'MidiMsg') -> None:
+    def send(self, msg: MidiMsg) -> None:
         """Send the MIDI message.
 
         Args:

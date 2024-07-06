@@ -334,7 +334,7 @@ class Output(Port):
     is_enabled: bool
     """`True` if port is ready to send messages"""
 
-    def send(self, msg: 'Msg') -> None:
+    def send(self, msg: Msg) -> None:
         """Send message using the output port.
 
         Args:

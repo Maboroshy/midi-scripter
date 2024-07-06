@@ -79,7 +79,7 @@ class AbletonOut(midiscripter.midi.MidiOut):
         """
         super().__init__(proxy_midi_port_name)
 
-    def send(self, msg: 'AbletonMsg') -> None:
+    def send(self, msg: AbletonMsg) -> None:
         """Send message to Ableton remote script.
 
         Args:
