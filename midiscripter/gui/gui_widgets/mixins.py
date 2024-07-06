@@ -74,6 +74,9 @@ class WrappedQWidgetMixin:
 
 # noinspection PyUnresolvedReferences
 class AdaptiveTextSizeMixin:
+    SIZE_CHANGE_INCREMENT_DIVIDER: int = 20
+    """Sets the balance between CPU load and size change smoothness. Less divider - less load."""
+
     def __init__(self):
         self.setMinimumSize(QSize(30, 30))
         self.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored))
@@ -109,10 +112,10 @@ class AdaptiveTextSizeMixin:
             text_rect.height() < content_rect.height() and text_rect.width() < content_rect.width()
         ):
             # increment decreases CPU load while keeping size change smooth
-            increment = int(1 + (font_size / 20))
+            increment = int(1 + (font_size / self.SIZE_CHANGE_INCREMENT_DIVIDER))
             font_size += increment
-            font.setPixelSize(font_size)
+            font.setPointSize(font_size)
             text_rect = QFontMetrics(font).boundingRect(self.text())
 
-        font.setPixelSize(font_size - increment)
+        font.setPointSize(font_size - increment)
         self.setFont(font)
