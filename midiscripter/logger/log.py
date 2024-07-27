@@ -1,7 +1,7 @@
 import collections
 import threading
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple, Protocol
 
 import midiscripter.shared
 
@@ -9,6 +9,18 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from midiscripter.logger.console_sink import ConsoleSink
     from midiscripter.logger.html_sink import HtmlSink
+
+
+class LogObj(Protocol):
+    log_str: str
+    log_repr: str
+
+
+class LogEntry(NamedTuple):
+    text: str
+    kwargs: dict
+    timestamp: str
+    color: str
 
 
 class Log:
@@ -36,6 +48,7 @@ class Log:
         self.__sink_call = None
         self.is_enabled = True
 
+        self.__buffer: collections.deque[None | LogEntry]
         self.__buffer = collections.deque(maxlen=self.BUFFER_SIZE)
         self.__last_entry_time = time.time()
 
@@ -52,17 +65,30 @@ class Log:
         if not self.is_enabled:
             return
 
+        try:
+            color = kwargs.pop('_color')
+        except KeyError:
+            color = None
+
+        # str and repr are created on call because object can be altered while entry is in buffer
+        for obj in kwargs.values():
+            obj: LogObj
+            obj.log_str = str(obj)
+            obj.log_repr = repr(obj)
+
         now_time = midiscripter.shared.precise_epoch_time()
-        kwargs['_ctime_str'] = self._get_precise_time_stamp(now_time)
+        timestamp = self._get_precise_timestamp(now_time)
+
+        log_entry = LogEntry(text, kwargs, timestamp, color)
 
         if now_time - self.__last_entry_time > self.ADD_SPACER_THRESHOLD_SEC:
-            self.__buffer.append(('', {}))
+            self.__buffer.append(None)
         self.__last_entry_time = now_time
 
-        self.__buffer.append((str(text), kwargs))
+        self.__buffer.append(log_entry)
 
     @property
-    def _sink(self) -> 'Callable':
+    def _sink(self) -> 'None | HtmlSink | ConsoleSink | Callable[[list[str]], None]':
         """A callable that receives a list of log strings to print them for user.
         Set by starter. Can be altered to customize the logger."""
         return self.__sink_call
@@ -101,7 +127,7 @@ class Log:
             pass
 
     @staticmethod
-    def _get_precise_time_stamp(precise_epoch_time: None | float = None) -> str:
+    def _get_precise_timestamp(precise_epoch_time: None | float = None) -> str:
         """Returns current timestamp with microsecond precision as a string
 
         The argument is there to not get current time two times during log call"""

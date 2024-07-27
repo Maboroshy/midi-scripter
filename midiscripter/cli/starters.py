@@ -16,10 +16,10 @@ def start_cli_debug() -> NoReturn:
     log._sink = midiscripter.logger.console_sink.ConsoleSink()
     log('')
     log('Available MIDI inputs:')
-    [log('{input}', input=port_name) for port_name in midiscripter.midi.MidiIn._available_names]
+    [log.green(port_name) for port_name in midiscripter.midi.MidiIn._available_names]
     log('')
     log('Available MIDI outputs:')
-    [log('{output}', output=port_name) for port_name in midiscripter.midi.MidiOut._available_names]
+    [log.magenta(port_name) for port_name in midiscripter.midi.MidiOut._available_names]
     log('')
     _run_cli_loop()
 
