@@ -1,3 +1,4 @@
+from typing import Any
 from collections.abc import Sequence
 
 from PySide6.QtCore import *
@@ -7,38 +8,54 @@ from PySide6.QtWidgets import *
 
 # noinspection PyUnresolvedReferences
 class WrappedQWidgetMixin:
-    # Signals are required to emit them from another thread that is not possible for setter methods below
+    # Signals are required to emit them from another thread.
+    # That is not possible for setter methods below.
     set_content_signal = Signal(object)
     set_value_signal = Signal(object)
     set_selection_signal = Signal(object)
     set_toggle_state_signal = Signal(bool)
     set_color_signal = Signal(object)
+    set_range_signal = Signal(object)
 
     triggered_signal = Signal()
     content_changed_signal = Signal()
     value_changed_signal = Signal()
     selection_changed_signal = Signal()
     toggle_state_changed_signal = Signal()
+    range_changed_signal = Signal()
 
     def __init__(self):
-        self.__color = None
+        self._color = None
 
         self.set_content_signal.connect(self.set_content)
         self.set_value_signal.connect(self.set_value)
         self.set_selection_signal.connect(self.set_selection)
         self.set_toggle_state_signal.connect(self.set_toggle_state)
         self.set_color_signal.connect(self.set_color)
+        self.set_range_signal.connect(self.set_range)
 
-    def get_content(self) -> str | Sequence[str]:
+    # Setters only, getters not used
+
+    def set_content(self, content: Any | Sequence[Any]) -> None:
         raise NotImplementedError
 
-    def set_content(self, new_content: str | Sequence[str]) -> None:
+    def set_range(self, range: tuple[int | float, int | float]) -> None:
         raise NotImplementedError
+
+    def set_color(self, color: str | tuple[int, int, int]) -> None:
+        qcolor = QColor(color) if isinstance(color, str) else QColor(*color)
+
+        palette = self.palette()
+        palette.setColor(QPalette.ColorGroup.Active, QPalette.ColorRole.ButtonText, qcolor)
+        palette.setColor(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText, qcolor)
+        self.setPalette(palette)
+
+    # Getters and setters
 
     def get_value(self) -> str | None:
         raise NotImplementedError
 
-    def set_value(self, new_value: str | int | bool) -> None:
+    def set_value(self, value: str | int | bool) -> None:
         raise NotImplementedError
 
     def get_selected_item_index(self) -> int | None:
@@ -53,23 +70,8 @@ class WrappedQWidgetMixin:
     def get_toggle_state(self) -> bool | None:
         raise NotImplementedError
 
-    def set_toggle_state(self, new_state: bool) -> None:
+    def set_toggle_state(self, state: bool) -> None:
         raise NotImplementedError
-
-    def get_color(self) -> str | None:
-        return self.__color
-
-    def set_color(self, new_color_value: str | tuple[int, int, int]) -> None:
-        if isinstance(new_color_value, str):
-            color = QColor(new_color_value)
-        else:
-            color = QColor(*new_color_value)
-
-        palette = self.palette()
-        palette.setColor(QPalette.ColorGroup.Active, QPalette.ColorRole.ButtonText, color)
-        palette.setColor(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText, color)
-        self.setPalette(palette)
-        self.__color = new_color_value
 
 
 # noinspection PyUnresolvedReferences

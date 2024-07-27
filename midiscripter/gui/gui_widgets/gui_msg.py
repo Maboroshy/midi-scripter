@@ -11,9 +11,11 @@ class GuiEvent(midiscripter.base.msg_base.AttrEnum):
     """GUI event type enumerator
     to use as [`GuiEventMsg`][midiscripter.GuiEventMsg] `type` attribute."""
 
-    TRIGGERED = 'TRIGGERED'
     CONTENT_SET = 'CONTENT_SET'
     COLOR_SET = 'COLOR_SET'
+    RANGE_SET = 'RANGE_SET'
+
+    TRIGGERED = 'TRIGGERED'
     TOGGLED = 'TOGGLED'
     SELECTED = 'SELECTED'
     VALUE_CHANGED = 'VALUE_CHANGED'
@@ -29,12 +31,13 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
     """New value set by event.
     
     Data meaning for event types:  
-    TRIGGERED - None.  
-    CONTENT_SET - New content.  
-    COLOR_SET - New text color.  
-    TOGGLED - New toggle state.  
-    SELECTED - Selected item text.  
-    VALUE_CHANGED - New value.
+    TRIGGERED - None
+    CONTENT_SET - New content
+    COLOR_SET - New text color
+    TOGGLED - New toggle state
+    SELECTED - Selected item text
+    VALUE_CHANGED - New value
+    RANGE_SET - New value range
     """
 
     source: 'None | GuiWidget'

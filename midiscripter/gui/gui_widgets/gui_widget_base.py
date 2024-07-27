@@ -1,5 +1,5 @@
 import types
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, Any
 
 from PySide6.QtWidgets import *
 
@@ -15,9 +15,18 @@ if TYPE_CHECKING:
 
 
 class GuiWidget(midiscripter.base.port_base.Input):
-    """GUI windows widget which also acts like an input port."""
+    """GUI windows widget which also acts like an input port"""
 
     _qt_widget_class: type[QWidget, 'WrappedQWidgetMixin']
+
+    _content: str | tuple[str, ...] | Any
+    """Current content"""
+
+    _color: str | tuple[int, int, int] | None = None
+    """Current color"""
+
+    _range: tuple[int, int] | None = None
+    """Current range"""
 
     def __init__(
         self,
@@ -25,15 +34,16 @@ class GuiWidget(midiscripter.base.port_base.Input):
         content: str | tuple[str, ...] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
-        value: str | None = None,
+        value: str | int | bool | None = None,
         select: int | str | None = None,
         toggle_state: bool | None = None,
+        range: tuple[int, int] | None = None,
     ):
         """
         Args:
             title (str): Widget's title
             content: Widget's text or text for its items
-            color: Content color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
+            color: Color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
             select: Preselected item
             toggle_state: Initial toggle state
@@ -44,30 +54,29 @@ class GuiWidget(midiscripter.base.port_base.Input):
             content = tuple(content)
 
         self.title = str(title_and_content)
-        """Widget's title."""
+        """Widget's title"""
         super().__init__(self.title)
 
         self.qt_widget = self._qt_widget_class()  # workaround for mkdocstrings issue #607
 
         self.qt_widget: QWidget
-        """Wrapped `PySide6` `QWidget` that can be altered for extra customization."""
+        """Wrapped `PySide6` `QWidget` that can be altered for extra customization"""
 
         self.qt_widget.setObjectName(self.title)
         midiscripter.gui.app.add_qwidget(self.qt_widget)
 
-        self.content = content if content else title_and_content
+        self.content = content if content is not None else title_and_content
 
         if value:
             self.value = value
-
         if select:
             self.select(select)
-
         if toggle_state:
             self.toggle_state = toggle_state
-
         if color:
             self.color = color
+        if range:
+            self.range = range
 
         self.__connect_change_signals()
 
@@ -76,9 +85,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
             lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.TRIGGERED))
         )
         self.qt_widget.content_changed_signal.connect(
-            lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEvent.CONTENT_SET, self.qt_widget.get_content())
-            )
+            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.CONTENT_SET, self._content))
         )
         self.qt_widget.value_changed_signal.connect(
             lambda: self._send_input_msg_to_calls(
@@ -95,33 +102,39 @@ class GuiWidget(midiscripter.base.port_base.Input):
                 GuiEventMsg(GuiEvent.TOGGLED, self.qt_widget.get_toggle_state())
             )
         )
+        self.qt_widget.range_changed_signal.connect(
+            lambda: self._send_input_msg_to_calls(
+                GuiEventMsg(GuiEvent.RANGE_SET, self.qt_widget.get_range())
+            )
+        )
 
     @property
-    def content(self) -> str | tuple[str, ...]:
-        """Widget's text or text for its items."""
-        return self.qt_widget.get_content()
+    def content(self) -> Any | tuple[Any, ...]:
+        """Widget's text or text for its items"""
+        return self._content
 
     @content.setter
-    def content(self, new_content: str | tuple[str, ...]) -> None:
-        self.qt_widget.set_content_signal.emit(new_content)
+    def content(self, content: Any | tuple[Any, ...]) -> None:
+        self._content = content
+        self.qt_widget.set_content_signal.emit(content)
         self.qt_widget.content_changed_signal.emit()
 
     @property
-    def value(self) -> str | None:
-        """Widget's value / selected item text."""
+    def value(self) -> str | int | bool | None:
+        """Widget's value / selected item text"""
         try:
             return self.qt_widget.get_value()
         except NotImplementedError:
             return None
 
     @value.setter
-    def value(self, new_value: str | None) -> None:
-        self.qt_widget.set_value_signal.emit(new_value)
+    def value(self, value: str | int | bool | None) -> None:
+        self.qt_widget.set_value_signal.emit(value)
         self.qt_widget.value_changed_signal.emit()
 
     @property
     def selected_item_text(self) -> str | None:
-        """Widget's currently selected item's text."""
+        """Widget's currently selected item's text"""
         try:
             return self.qt_widget.get_selected_item_text()
         except NotImplementedError:
@@ -146,30 +159,42 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     @property
     def toggle_state(self) -> bool | None:
-        """Toggle state."""
+        """Toggle state"""
         try:
             return self.qt_widget.get_toggle_state()
         except NotImplementedError:
             return None
 
     @toggle_state.setter
-    def toggle_state(self, new_state: bool) -> None:
-        self.qt_widget.set_toggle_state_signal.emit(new_state)
+    def toggle_state(self, state: bool) -> None:
+        self.qt_widget.set_toggle_state_signal.emit(state)
         self.qt_widget.toggle_state_changed_signal.emit()
 
     @property
+    def range(self) -> tuple[int, int] | None:
+        """Value range"""
+        return self._range
+
+    @range.setter
+    def range(self, range: tuple[int, int]) -> None:
+        self._range = range
+        self.qt_widget.set_range_signal.emit(range)
+        self.qt_widget.range_changed_signal.emit()
+
+    @property
     def color(self) -> str | tuple[int, int, int] | None:
-        """Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple"""
-        return self.qt_widget.get_color()
+        """Color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple"""
+        return self._color
 
     @color.setter
-    def color(self, new_color_value: str | tuple[int, int, int]) -> None:
-        self.qt_widget.set_color_signal.emit(new_color_value)
-        self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.COLOR_SET, new_color_value, source=self))
+    def color(self, color: str | tuple[int, int, int]) -> None:
+        self._color = color
+        self.qt_widget.set_color_signal.emit(color)
+        self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.COLOR_SET, color, source=self))
 
     @property
     def is_visible(self) -> bool:
-        """Widget is currently visible."""
+        """Widget is currently visible"""
         return self.qt_widget.isVisible()
 
     @overload
