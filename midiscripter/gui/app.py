@@ -1,4 +1,3 @@
-import os
 import pathlib
 import platform
 import signal
@@ -20,6 +19,7 @@ from .saved_state_controls import SavedCheckedAction
 
 
 class ScripterGUI(QApplication):
+    main_window: midiscripter.gui.main_window.MainWindow
     request_restart = Signal()
 
     RESTART_DELAY = 2
@@ -45,7 +45,7 @@ class ScripterGUI(QApplication):
         self.aboutToQuit.connect(self.__cleanup)
 
         # Action to use before main window creation
-        self.single_instance_only = SavedCheckedAction('Allow only a single instance', shared=True)
+        self.single_instance_only = SavedCheckedAction('Single instance only', shared=True)
         if self.single_instance_only:
             self.__terminate_if_second_instance()
 
