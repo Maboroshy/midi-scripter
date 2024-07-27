@@ -99,7 +99,7 @@ class AdaptiveTextSizeMixin:
         super().resizeEvent(event)
         self.__make_text_size_fit_widget_size()
 
-    def __make_text_size_fit_widget_size(self) -> None:
+    def __make_text_size_fit_widget_size(self: QWidget) -> None:
         if not self.text():
             return
 
@@ -116,7 +116,16 @@ class AdaptiveTextSizeMixin:
             increment = int(1 + (font_size / self.SIZE_CHANGE_INCREMENT_DIVIDER))
             font_size += increment
             font.setPointSize(font_size)
-            text_rect = QFontMetrics(font).boundingRect(self.text())
+            font_metrics = QFontMetrics(font)
+
+            lines_widths = []
+            lines_heights = []
+            for line in self.text().split('\n'):
+                line_rect = font_metrics.boundingRect(line)
+                lines_widths.append(line_rect.width())
+                lines_heights.append(line_rect.height())
+
+            text_rect = QSize(max(lines_widths), sum(lines_heights))
 
         font.setPointSize(font_size - increment)
         self.setFont(font)
