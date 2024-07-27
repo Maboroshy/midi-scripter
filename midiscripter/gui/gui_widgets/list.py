@@ -1,6 +1,7 @@
 from typing import overload
 
 from PySide6.QtWidgets import *
+from PySide6.QtCore import *
 
 from .gui_widget_base import GuiWidget
 from .mixins import WrappedQWidgetMixin
@@ -17,30 +18,31 @@ class ListSelectorWidget(WrappedQWidgetMixin, QListWidget):
         font.setPointSize(self.FONT_SIZE)
         self.setFont(font)
 
-        self.__content = None
+        self.setStyleSheet('border: none; padding: 8px')
+
         self.currentRowChanged.connect(self.selection_changed_signal)
 
-    def get_content(self) -> tuple[str]:
-        return self.__content
-
     def set_content(self, list_items: tuple[str]) -> None:
-        self.__content = list_items
-        self.addItems(self.__content)
+        self.addItems([str(item) for item in list_items])
 
     def set_selection(self, selection: int | str) -> None:
         if isinstance(selection, int):
             self.setCurrentRow(selection)
+        elif isinstance(selection, str):
+            items_for_name = self.findItems(selection, Qt.MatchFlag.MatchExactly)
+            if items_for_name != -1:
+                self.setCurrentItem(items_for_name[0])
         else:
-            try:
-                self.setCurrentRow(self.__content.index(selection))
-            except ValueError:
-                pass
+            raise ValueError('Selection must be int or str')
 
     def get_selected_item_index(self) -> int | None:
         return self.currentRow()
 
     def get_selected_item_text(self) -> str | None:
-        return self.__content[self.currentRow()]
+        if self.currentItem():
+            return self.currentItem().text()
+        else:
+            return None
 
 
 class GuiListSelector(GuiWidget):
