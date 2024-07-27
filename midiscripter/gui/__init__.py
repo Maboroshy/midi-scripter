@@ -9,3 +9,10 @@ from midiscripter.gui.gui_widgets.gui_msg import GuiEventMsg, GuiEvent
 from midiscripter.gui.gui_widgets.layout import GuiWidgetLayout
 from midiscripter.gui.gui_widgets.list import GuiListSelector
 from midiscripter.gui.gui_widgets.text import GuiText
+from midiscripter.gui.gui_widgets.slider import (
+    GuiKnob,
+    GuiSliderVertical,
+    GuiSliderHorizontal,
+    GuiProgressBarHorizontal,
+    GuiProgressBarVertical,
+)
