@@ -7,7 +7,7 @@ from PySide6.QtWidgets import *
 
 import midiscripter.logger.html_sink
 from midiscripter.ableton_remote import AbletonIn, AbletonOut
-from midiscripter.base.port_base import Input, Output, SubscribedCall
+from midiscripter.base.port_base import Input, Output, SubscribedCall, Port
 from midiscripter.logger import log
 from midiscripter.midi import MidiIn, MidiOut
 from midiscripter.keyboard import KeyIn
@@ -16,12 +16,13 @@ from .saved_state_controls import SavedToggleButton
 
 
 class PortWidgetItem(QTreeWidgetItem):
-    def request_state_change(self, new_state: bool) -> bool:
+    def request_state_change(self, state: bool) -> bool:
         raise NotImplementedError
 
 
 class PortItemMixin:
     port_instance: Input | Output
+    is_broken: bool = False
 
     def set_color_by_port_type(
         self: 'GeneralPortItem | MidiPortItem', port_type: type[Input | Output]
@@ -33,36 +34,36 @@ class PortItemMixin:
         self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
 
     def request_state_change(
-        self: 'GeneralPortItem | MidiPortItem | KeyInputPortItem', new_state: bool
+        self: 'GeneralPortItem | MidiPortItem | KeyInputPortItem', state: bool
     ) -> bool:
-        if new_state:
+        if state:
             if not self.port_instance.is_enabled:
                 self.port_instance._open()
 
                 if self.port_instance.is_enabled:
+                    self.set_broken_status(False)
                     log('Enabled {port}', port=self.port_instance)
                     return True
                 else:
-                    # Set "broken port" background
-                    self.setData(
-                        0,
-                        Qt.ItemDataRole.BackgroundRole,
-                        QBrush(QColor().fromRgb(255, 0, 0, 20)),
-                    )
+                    self.set_broken_status(True)
                     log.red("Can't enable {port}", port=self.port_instance)
                     return False
             else:
                 # Clear possible "broken port" background
-                self.setData(
-                    0,
-                    Qt.ItemDataRole.BackgroundRole,
-                    QBrush(QColor(Qt.GlobalColor.transparent)),
-                )
+                self.set_broken_status(False)
                 return True
         else:
             self.port_instance.is_enabled = False
             log('Disabled {port}', port=self.port_instance)
             return False
+
+    def set_broken_status(self, is_broken: bool) -> None:
+        self.is_broken = is_broken
+        if is_broken:
+            item_color = QColor().fromRgb(255, 0, 0, 20)
+        else:
+            item_color = QColor(Qt.GlobalColor.transparent)
+        self.setData(0, Qt.ItemDataRole.BackgroundRole, QBrush(item_color))
 
     def add_calls(self: 'GeneralPortItem | MidiPortItem') -> None:
         for _, call_list in self.port_instance.calls:
@@ -102,21 +103,24 @@ class AlwaysPresentInputPortItem(PortItemMixin, PortWidgetItem):
         self.repr = f'{port_class.__name__}()'
         self.set_color_by_port_type(port_class)
 
-        self.port_instance = self.port_class._instances.get(self.port_class._force_uid, None)
+        self.port_instance = self.port_class._name_to_instance.get(self.port_class._force_uid, None)
         if self.port_instance and self.port_instance.is_enabled:
             self.setCheckState(0, Qt.CheckState.Checked)
         else:
             self.setCheckState(0, Qt.CheckState.Unchecked)
 
-    def request_state_change(self, new_state: bool) -> bool:
+    def request_state_change(self, state: bool) -> bool:
         if not self.port_instance:
             self.port_instance = self.port_class()
-        return PortItemMixin.request_state_change(self, new_state)
+        return PortItemMixin.request_state_change(self, state)
 
 
-class AbsentMidiPortItem(QTreeWidgetItem):
-    def __init__(self, parent_item: QTreeWidgetItem, port_name: str):
-        super().__init__(parent_item, (port_name,))
+class AbsentMidiPortItem(PortWidgetItem):
+    port_instance: Input | Output
+
+    def __init__(self, parent_item: QTreeWidgetItem, port_instance: Input | Output):
+        super().__init__(parent_item, (port_instance._uid,))
+        self.port_instance = port_instance
         self.setDisabled(True)
         self.setCheckState(0, Qt.CheckState.Unchecked)
 
@@ -128,7 +132,7 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
 
     def __init__(self, parent_item: QTreeWidgetItem, port_name: str):
         self.port_name = port_name
-        self.port_instance = self.PORT_CLASS._instances.get(self.port_name, None)
+        self.port_instance = self.PORT_CLASS._name_to_instance.get(self.port_name, None)
         self.repr = f"{self.PORT_CLASS.__name__}('{self.port_name}')"
 
         if self.port_instance and self.port_instance._is_virtual:
@@ -148,10 +152,10 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
             self.setCheckState(0, Qt.CheckState.Unchecked)
             self.setData(0, Qt.ItemDataRole.BackgroundRole, QBrush(QColor().fromRgb(255, 0, 0, 20)))
 
-    def request_state_change(self, new_state: bool) -> bool:
+    def request_state_change(self, state: bool) -> bool:
         if not self.port_instance:
             self.port_instance = self.PORT_CLASS(self.port_name)
-        return PortItemMixin.request_state_change(self, new_state)
+        return PortItemMixin.request_state_change(self, state)
 
 
 class InputMidiPortItem(MidiPortItem):
@@ -172,13 +176,13 @@ class OutputMidiPortItem(MidiPortItem):
 
 
 class PassthroughOutputMidiPortItem(OutputMidiPortItem):
-    def request_state_change(self, new_state: bool) -> bool:
+    def request_state_change(self, state: bool) -> bool:
         parent_port = self.parent().port_instance
-        if new_state:
+        if state:
             parent_port.attached_passthrough_outs.append(self.port_instance)
         else:
             parent_port.attached_passthrough_outs.remove(self.port_instance)
-        return new_state
+        return state
 
 
 class CallItem(PortWidgetItem):
@@ -198,12 +202,12 @@ class CallItem(PortWidgetItem):
         self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
         self.setCheckState(0, Qt.CheckState.Checked)
 
-    def request_state_change(self, new_state: bool) -> bool:
-        if new_state:
+    def request_state_change(self, state: bool) -> bool:
+        if state:
             self.origin_call_list.append(self.call)
         else:
             self.origin_call_list.remove(self.call)
-        return new_state
+        return state
 
 
 class PortsWidget(QWidget):
@@ -220,7 +224,7 @@ class PortsWidget(QWidget):
         layout.addWidget(ports_view)
 
         hide_unused_button = SavedToggleButton(
-            'Show Unused Ports', ports_view.repopulate, default_state=True
+            'Show Unused in Script', ports_view.set_unused_ports_visibility, default_state=True
         )
         layout.addWidget(hide_unused_button)
 
@@ -233,23 +237,35 @@ class PortsView(QTreeWidget):
         self.setHeaderHidden(True)
         self.setFrameStyle(QFrame.Shape.NoFrame)
 
+        self.__populate()
+        self.__ports_declared_in_script = Port._instances
+
         self.setMouseTracking(True)
         self.itemEntered.connect(self.__update_item_tooltip)
-        self.repopulate()
 
         self.itemSelectionChanged.connect(self.__item_selected)
-        # with set blocks on data change itemChanged is emitted only on check state change
+        # with the blocks set itemChanged is emitted only on check state change
         self.itemChanged.connect(self.__item_state_changed)
 
-        self.repopulate()
+    def set_unused_ports_visibility(self, unused_are_visible: bool) -> None:
+        for top_item_index in range(self.topLevelItemCount()):
+            port_type_item = self.topLevelItem(top_item_index)
 
-    def repopulate(self, show_unused: bool = True) -> None:
+            no_port_type_items_visible = True
+            for child_index in range(port_type_item.childCount()):
+                port_item: PortWidgetItem = port_type_item.child(child_index)
+
+                if unused_are_visible or port_item.port_instance in self.__ports_declared_in_script:
+                    port_item.setHidden(False)
+                    no_port_type_items_visible = False
+                else:
+                    port_item.setHidden(True)
+
+            port_type_item.setHidden(no_port_type_items_visible)
+
+    def __populate(self) -> None:
         """Populates the widget with items"""
-        self.__show_unused = show_unused
-
         self.blockSignals(True)
-
-        self.clear()
 
         self.__add_midi_ports()
 
@@ -282,14 +298,10 @@ class PortsView(QTreeWidget):
             top_item = self.__add_top_level_item(title)
             port_class = item_class.PORT_CLASS
 
-            port_instances = port_class._instances.values()
-
-            ableton_port_instances = itertools.chain(
-                AbletonIn._instances.values(), AbletonOut._instances.values()
-            )
+            ableton_port_instances = itertools.chain(AbletonIn._instances, AbletonOut._instances)
             ableton_remote_port_names = [port.name for port in ableton_port_instances]
 
-            virtual_port_names = [port._uid for port in port_instances if port._is_virtual]
+            virtual_port_names = [port._uid for port in port_class._instances if port._is_virtual]
             for port_name in virtual_port_names:
                 if port_name not in ableton_remote_port_names:
                     item_class(top_item, port_name)
@@ -297,22 +309,20 @@ class PortsView(QTreeWidget):
             for port_name in port_class._available_names:
                 if port_name in ableton_remote_port_names:
                     continue
-                if not self.__show_unused and port_name not in port_class._instances:
-                    continue
                 item_class(top_item, port_name)
 
-            for port_instance in port_instances:
+            for port_instance in port_class._instances:
                 if not port_instance._is_available and port_instance._uid not in virtual_port_names:
-                    AbsentMidiPortItem(top_item, port_instance._uid)
+                    AbsentMidiPortItem(top_item, port_instance)
 
     def __add_declared_ports(self, title: str, *port_types: type[Input | Output]) -> None:
         always_present_port_types_to_add = []
         port_instances_to_add = []
         for port_type in port_types:
-            if port_type in self.__ALWAYS_PRESENT_PORT_TYPES and self.__show_unused:
+            if port_type in self.__ALWAYS_PRESENT_PORT_TYPES:
                 always_present_port_types_to_add.append(port_type)
 
-            for port_instance in port_type._instances.values():
+            for port_instance in port_type._instances:
                 if port_type not in always_present_port_types_to_add:
                     port_instances_to_add.append(port_instance)  # noqa: PERF401
 
@@ -362,6 +372,8 @@ class PortsView(QTreeWidget):
         new_item_state = item.request_state_change(target_state)
         item.setCheckState(0, (Qt.CheckState.Unchecked, Qt.CheckState.Checked)[new_item_state])
         self.blockSignals(False)
+
+        QApplication.instance().main_window.message_sender_widget.update_ports()
 
     def __update_item_tooltip(self, item: QTreeWidgetItem) -> None:
         """Updates items tooltip on hover"""
