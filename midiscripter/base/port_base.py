@@ -26,12 +26,12 @@ class CallOn(enum.StrEnum):
 
 @contextlib.contextmanager
 def _all_opened() -> None:
-    for port in Port._instances.values():
+    for port in Port._instances:
         port._open()
 
     yield
 
-    for port in Port._instances.values():
+    for port in Port._instances:
         port._close()
 
     log._flush()
@@ -87,11 +87,15 @@ class Port:
     __port_instance_type = TypeVar('__port_instance_type', bound='Port')
     """Type for correct IDE recognition and code completion for returned port subclasses"""
 
-    _instances: dict[str, __port_instance_type] = {}
-    """Name to instances registry for each port type filled by `__new__`"""
+    _name_to_instance: dict[str, __port_instance_type] = {}
+    """Name to instances registry filled by `__new__`"""
+
+    _instances: list['Port'] = []
+    """Class and subclasses instances filled by `__new__`"""
 
     def __init_subclass__(cls, **kwargs):
-        cls._instances = {}
+        cls._name_to_instance = {}
+        cls._instances = []
 
     def __new__(cls, *args, **kwargs) -> __port_instance_type:
         uid = cls._force_uid or args[0]
@@ -99,7 +103,7 @@ class Port:
         init_args.pop('self')
 
         try:
-            instance = cls._instances[uid]
+            instance = cls._name_to_instance[uid]
             if instance._inited_with_args == init_args:
                 return instance
             else:
@@ -110,10 +114,11 @@ class Port:
         except KeyError:
             instance = super().__new__(cls)
             instance._inited_with_args = init_args
+            cls._name_to_instance[uid] = instance
 
-            for parent_class in cls.mro()[:-1]:
+            for parent_class in cls.mro()[:-1]:  # exclude `object`
                 try:
-                    parent_class._instances[uid] = instance
+                    parent_class._instances.append(instance)
                 except AttributeError:  # not a Port subclass in mro
                     pass
 
@@ -185,8 +190,8 @@ class Input(Port):
 
     def subscribe(
         self,
-        *msg_matches_args: 'tuple[None | Container[Any] | Any]',
-        **msg_matches_kwargs: 'dict[str, None | Container[Any] | Any]',
+        *msg_matches_args: 'None | Container[Any] | Any',
+        **msg_matches_kwargs: 'str, None | Container[Any] | Any',
     ) -> 'Callable':
         """Decorator to subscribe a callable to the input's messages.
 
@@ -296,6 +301,7 @@ class Input(Port):
             call: Subscribed callable.
             msg: Received message to use as callable only argument.
         """
+        log('{call} called', call=call)
         try:
             call(msg)
         except Exception as exc:
