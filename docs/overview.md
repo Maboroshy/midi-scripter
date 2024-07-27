@@ -77,8 +77,8 @@ Widget's state can be read or set by reading or changing its properties.
 Check the widgets description in API documentation for declaration arguments and
 properties for each widget.
 
-GUI widgets can be rearranged inside or even outside of GUI window by dragging
-their titles. At first run widget layout can be messy, but it's easy to
+GUI widgets can be rearranged by dragging their titles. 
+At first run widget layout can be messy, but it's easy to
 arrange it as you want. The GUI will save the widget layout for each script.
 
 GUI widgets act like input ports. They can subscribe callables that will

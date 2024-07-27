@@ -67,6 +67,7 @@ class MainWindow(QMainWindow):
         self, widget: QWidget, *, fix_width: bool = False, hidden_by_default: bool = False
     ) -> None:
         dock = QDockWidget(self)
+        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
         dock.setObjectName(widget.objectName())
         dock.setWindowTitle(widget.objectName())
         dock.setWidget(widget)
