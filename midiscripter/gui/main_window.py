@@ -70,6 +70,7 @@ class MainWindow(QMainWindow):
         dock.setObjectName(widget.objectName())
         dock.setWindowTitle(widget.objectName())
         dock.setWidget(widget)
+        dock.setMinimumSize(QSize(30, 30))
 
         if fix_width:
             dock.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)

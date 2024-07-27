@@ -79,8 +79,7 @@ class AdaptiveTextSizeMixin:
     SIZE_CHANGE_INCREMENT_DIVIDER: int = 20
     """Sets the balance between CPU load and size change smoothness. Less divider - less load."""
 
-    def __init__(self):
-        self.setMinimumSize(QSize(30, 30))
+    def __init__(self: QWidget):
         self.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored))
         self.setContentsMargins(10, 5, 10, 5)
         self.__longest_text_rect_size = QFontMetrics(self.font()).boundingRect(self.text()).size()
