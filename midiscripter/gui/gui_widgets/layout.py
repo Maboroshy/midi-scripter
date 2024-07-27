@@ -9,21 +9,6 @@ if TYPE_CHECKING:
     from gui_widget_base import GuiWidget
 
 
-def _populate_layout(
-    layout: QBoxLayout, items: 'Sequence[GuiWidget, GuiWidgetLayout, Sequence]'
-) -> None:
-    for gui_widget_or_seq in items:
-        if not isinstance(gui_widget_or_seq, Sequence):
-            layout.addWidget(gui_widget_or_seq.qt_widget)
-            midiscripter.gui.app.remove_qwidget(gui_widget_or_seq.qt_widget)
-        else:
-            # Flip layout type
-            child_layout = [QHBoxLayout, QVBoxLayout][isinstance(layout, QHBoxLayout)]()
-            child_layout.setContentsMargins(0, 0, 0, 0)
-            layout.addLayout(child_layout)
-            _populate_layout(child_layout, gui_widget_or_seq)
-
-
 class GuiWidgetLayout:
     """Layout for grouping and positioning widgets."""
 
@@ -31,6 +16,7 @@ class GuiWidgetLayout:
         self,
         title: str,
         *rows: Sequence['GuiWidget | GuiWidgetLayout | Sequence[GuiWidget | GuiWidgetLayout]'],
+        spacing: int = 6,
     ):
         """
         Args:
@@ -38,6 +24,7 @@ class GuiWidgetLayout:
             rows: A tuple of items to put in a row.
                   Items can be widgets, layouts or tuples of widgets or layouts.
                   If item is a tuple it's a column of items inside the tuple.
+            spacing: space between layout items
 
         Example:
             ``` python
@@ -72,9 +59,26 @@ class GuiWidgetLayout:
         self.qt_widget = QWidget()
         self.qt_widget.setObjectName(title)
 
+        self.__spacing = spacing
+
         qt_widget_layout = QVBoxLayout()
-        qt_widget_layout.setContentsMargins(0, 0, 0, 0)
         self.qt_widget.setLayout(qt_widget_layout)
 
-        _populate_layout(qt_widget_layout, rows)
+        self.__populate_layout(qt_widget_layout, rows)
         midiscripter.gui.app.add_qwidget(self.qt_widget)
+
+    def __populate_layout(
+        self, layout: QBoxLayout, items: 'Sequence[GuiWidget, GuiWidgetLayout, Sequence]'
+    ) -> None:
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(self.__spacing)
+
+        for gui_widget_or_seq in items:
+            if not isinstance(gui_widget_or_seq, Sequence):
+                layout.addWidget(gui_widget_or_seq.qt_widget)
+                midiscripter.gui.app.remove_qwidget(gui_widget_or_seq.qt_widget)
+            else:
+                # Flip layout type
+                child_layout = QVBoxLayout() if isinstance(layout, QHBoxLayout) else QHBoxLayout()
+                layout.addLayout(child_layout)
+                self.__populate_layout(child_layout, gui_widget_or_seq)
