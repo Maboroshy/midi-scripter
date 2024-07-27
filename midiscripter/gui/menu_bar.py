@@ -70,7 +70,10 @@ class MenuBar(QMenuBar):
             key_shortcut=QKeySequence('Ctrl+T'),
         )
         widgets_menu.insertAction(QAction(), self.lock_dock_widgets)
+        main_window.set_dock_titles_visibility(self.lock_dock_widgets)
+
         widgets_menu.addSeparator()
+
         widgets_menu.aboutToShow.connect(
             lambda: widgets_menu.addActions(main_window.createPopupMenu().actions())
         )
@@ -98,7 +101,7 @@ class MenuBar(QMenuBar):
             QApplication.instance().restart()
 
     @Slot(bool)
-    def __set_autostart(self, new_state: bool) -> None:
+    def __set_autostart(self, state: bool) -> None:
         if self.autostart._check_if_other_scripts_present():
             remove_other_dialog = QMessageBox()
             remove_other_dialog.setText(
@@ -114,13 +117,13 @@ class MenuBar(QMenuBar):
             elif remove_other_dialog_pressed_button == QMessageBox.Yes:
                 self.autostart._disable_others()
 
-        if new_state:
+        if state:
             self.autostart._enable()
         else:
             self.autostart._disable()
 
-    def __set_watching_script_file(self, new_state: bool) -> None:
-        if new_state:
+    def __set_watching_script_file(self, state: bool) -> None:
+        if state:
             self.file_watcher_port = midiscripter.file_event.FileEventIn(
                 midiscripter.shared.script_path
             )
@@ -129,8 +132,8 @@ class MenuBar(QMenuBar):
         else:
             self.file_watcher_port.is_enabled = False
 
-    def __set_watching_midi_ports(self, new_state: bool) -> None:
-        if new_state:
+    def __set_watching_midi_ports(self, state: bool) -> None:
+        if state:
             self.midi_port_watcher_port = midiscripter.midi.midi_ports_update.MidiPortsChangedIn()
 
             @self.midi_port_watcher_port.subscribe
