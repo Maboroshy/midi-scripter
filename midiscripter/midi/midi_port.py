@@ -54,16 +54,23 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
     name: str
     """MIDI port name"""
 
+    _is_virtual: bool
+
     # Attrs provided by the class that inherits from MidiPortMixin
     is_enabled: bool
     _available_names: list[str]
-    _is_virtual = False
 
     # noinspection PyMissingConstructor
-    def __init__(self, port_name: str, input_callback: 'Callable | None' = None):
+    def __init__(
+        self,
+        port_name: str,
+        virtual: bool,
+        input_callback: 'Callable | None' = None,
+    ):
         self.name = port_name
         self.name: str
         """MIDI port name"""
+        self._is_virtual = virtual
 
         if input_callback:
             self._rtmidi_port = rtmidi.MidiIn()
@@ -83,18 +90,24 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
             return
 
         try:
-            port_index = self._available_names.index(self.name)
-            self._rtmidi_port.open_port(port_index)
-            self.is_enabled = True
-            log('Opened {port}', port=self)
-        except ValueError:
-            if platform.system() == 'Windows':
-                log.red("Can't find port {port}. Check the port name.", port=self)
-            else:
+            if self._is_virtual:
+                if platform.system() == 'Windows':
+                    log.red('Failed to open {port}', port=self)
+                    log.red('Virtual ports are not available on Windows. Use loopMIDI.')
+                    return
+
                 self._rtmidi_port.open_virtual_port(self.name)
-                self._is_virtual = True
-                self.is_enabled = True
                 log('Created and opened virtual port {port}', port=self)
+
+            else:
+                port_index = self._available_names.index(self.name)
+                self._rtmidi_port.open_port(port_index)
+                log('Opened {port}', port=self)
+
+            self.is_enabled = True
+
+        except ValueError:
+            log.red("Can't find port {port}. Check the port name.", port=self)
         except Exception:
             log.red('Failed to open {port}', port=self)
 
@@ -116,12 +129,13 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
 
     _available_names: list[str] = _get_available_midi_port_names(rtmidi.MidiIn)
 
-    def __init__(self, port_name: str):
+    def __init__(self, port_name: str, *, virtual: bool = False):
         """
         Args:
             port_name: MIDI input port name
+            virtual: Create virtual port (Linux and macOS only)
         """
-        _MidiPortMixin.__init__(self, port_name, self._callback)
+        _MidiPortMixin.__init__(self, port_name, virtual, self._callback)
         midiscripter.base.port_base.Input.__init__(self, port_name)
 
         self.attached_passthrough_outs: list[MidiOut] = []
@@ -201,12 +215,13 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
 
     _available_names: list[str] = _get_available_midi_port_names(rtmidi.MidiOut)
 
-    def __init__(self, port_name: str):
+    def __init__(self, port_name: str, *, virtual: bool = False):
         """
         Args:
             port_name: MIDI output port name
+            virtual: Create virtual port (Linux and macOS only)
         """
-        _MidiPortMixin.__init__(self, port_name)
+        _MidiPortMixin.__init__(self, port_name, virtual)
         midiscripter.base.port_base.Output.__init__(self, port_name)
 
     def send(self, msg: MidiMsg) -> None:
