@@ -12,9 +12,10 @@ class AdaptablePushButtonWidget(AdaptiveTextSizeMixin, WrappedQWidgetMixin, QPus
         QPushButton.__init__(self)
         WrappedQWidgetMixin.__init__(self)
         AdaptiveTextSizeMixin.__init__(self)
-
-        self.get_content = self.text
         self.set_content = self.setText
+
+    def set_content(self, content: str) -> None:
+        raise self.setText(str(content))
 
 
 class ButtonWidget(AdaptablePushButtonWidget):
@@ -131,6 +132,9 @@ class GuiToggleButton(GuiWidget):
         """
         super().__init__(title_and_content, content, color=color, toggle_state=toggle_state)
 
+    def __bool__(self):
+        return self.toggle_state
+
 
 class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
     layout_class = QHBoxLayout
@@ -140,14 +144,8 @@ class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
         WrappedQWidgetMixin.__init__(self)
         self.qt_button_group = QButtonGroup()
         self.wrapped_qt_buttons_map = {}
-        self.__content = None
-
-    def get_content(self) -> list[str]:
-        return self.__content
 
     def set_content(self, button_labels: list[str]) -> None:
-        self.__content = button_labels
-
         self.qt_button_group.deleteLater()
         self.qt_button_group = QButtonGroup()
         self.wrapped_qt_buttons_map: dict[str | int, AdaptablePushButtonWidget] = {}
@@ -157,6 +155,8 @@ class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
         self.setLayout(layout)
 
         for index, text in enumerate(button_labels):
+            text = str(text)
+
             qt_button = AdaptablePushButtonWidget()
             qt_button.setText(text)
             qt_button.setCheckable(True)

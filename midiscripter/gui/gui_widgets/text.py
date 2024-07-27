@@ -15,14 +15,14 @@ class AdaptableLabelWidget(AdaptiveTextSizeMixin, WrappedQWidgetMixin, QLabel):
         AdaptiveTextSizeMixin.__init__(self)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.get_content = self.text
-        self.set_content = self.setText
+    def set_content(self, content: str) -> None:
+        self.setText(str(content))
 
     def get_toggle_state(self) -> bool:
         return self.isEnabled()
 
-    def set_toggle_state(self, new_state: bool) -> None:
-        self.setEnabled(new_state)
+    def set_toggle_state(self, state: bool) -> None:
+        self.setEnabled(state)
 
 
 class GuiText(GuiWidget):
