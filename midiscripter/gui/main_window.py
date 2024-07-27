@@ -90,6 +90,16 @@ class MainWindow(QMainWindow):
             else:
                 dock.setTitleBarWidget(None)
 
+        if are_hidden:
+            self.setStyleSheet("""
+                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
+            """)
+        else:
+            self.setStyleSheet("""
+                QMainWindow::separator { background: lightgrey }
+                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
+            """)
+
     def show_from_tray(self) -> None:
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
         self.resize(QSettings().value('win size', QSize(800, 500)))
