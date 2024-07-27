@@ -32,6 +32,7 @@ nav:
         - GUI Widgets:
             - Text: api/gui_text.md
             - Buttons: api/gui_buttons.md
+            - Knob and Sliders: api/gui_sliders.md
             - List Selector: api/gui_list.md
             - Layout: api/gui_layout.md
             - GUI Event Message: api/gui_msg.md

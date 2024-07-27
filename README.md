@@ -50,34 +50,34 @@ should work on macOS.
 
 ## Features
 
-The basics:
+#### The basics:
 
 - Receive MIDI, OSC, keyboard and mouse input messages.
 - Filter, modify and do anything Python can with the messages.
 - Send out modified or generated MIDI, OSC, keyboard and mouse messages.
 
-For music performance MIDI setups:
+#### For music performance MIDI setups:
 
 - Make extra banks and layers to multiply MIDI controls.
 - Organize mappings into sets / scenes with GUI dashboard.
 - Make an extra overlay mappings on top of MIDI controller's DAW integration by
   using proxies.
+- Combine multiple MIDI controllers into one with any logic.
 - Control Ableton Live by [special remote script or AbletonOSC]().
 
-For software control and automation:
+#### For software control and automation:
 
 - Map or convert the messages to each other with any conditions and logic.
 - Use MIDI controllers or keyboard shortcuts to run any Python code.
 - Use keyboard and mouse macros.
 
-For writing MIDI related Python code:
+#### For writing MIDI related Python code:
 
 - Prepare MIDI, OSC keyboard and mouse inputs and outputs with a single line,
   without boilerplate code.
 - Feed input messages to functions or any callables by decorators.
-- Work with message objects instead of raw data different for each input type.
+- Work with message objects instead of raw data different for each port type.
 - Create GUI widgets with a single line and arrange them with mouse.
-- Write basic MIDI related GUI applications with very little Python code.
 - Fully type annotated API.
 
 ## Installation

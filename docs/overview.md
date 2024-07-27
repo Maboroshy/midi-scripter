@@ -32,8 +32,8 @@ Port is typically declared as `port_class(name_or_adress)` or `port_class
 ()` for those that don't need a name. For more information on specific port 
 declaration check its description in API documentation.
 
-On Linux and macOS port declaration for unavailable MIDI port name will 
-create a virtual port (prepended with `[v]` in GUI). On Windows you'll have to
+On Linux and macOS it's possible to create virtual MIDI ports with 
+`MidiIn('Virtual port name', virtual=True)`. On Windows you'll have to
 use [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) to
 manually create virtual ports. Virtual MIDI ports can be used to write proxy
 scripts, like the one above.
@@ -207,8 +207,7 @@ There are 3 starter functions:
 - [`start_gui`][midiscripter.start_gui] - starts the script with GUI and routes
   log messages to its Log widget. The preferred starter.
 - [`start_silent`][midiscripter.start_silent] - starts the script with no
-  logging
-  or GUI. The fastest.
+  logging or GUI. The fastest.
 - [`start_cli_debug`][midiscripter.start_cli_debug] - starts the script with
   logging to console. That increases latency and jitter. Use only while
   debugging the script with no access to GUI.

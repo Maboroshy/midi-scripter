@@ -14,7 +14,7 @@ with minimal changes.
 3. Install the script following 
    [the official guide](https://help.ableton.com/hc/en-us/articles/209072009-Installing-third-party-remote-scripts):
    copy the folder from .zip file to your Ableton Live User Library, assign 
-   virtual MIDI ports and enable the script 
+   virtual MIDI ports and enable the script.
 
 ## Usage
 

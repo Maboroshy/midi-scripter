@@ -1,1 +1,1 @@
-This file will be replaced by README.md by GitHub action on docs publish.
+This file will be replaced with README.md by GitHub action on docs publish.
