@@ -46,16 +46,7 @@ class MainWindow(QMainWindow):
             QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
         """)
 
-        self.ports_widget = midiscripter.gui.ports_widget.PortsWidget()
-        self.log_widget = midiscripter.gui.log_widget.LogWidget()
-        self.message_sender_widget = midiscripter.gui.message_sender.MessageSender()
-
-        self.add_widget_as_dock(self.ports_widget, fix_width=True)
-        self.add_widget_as_dock(self.log_widget)
-        self.add_widget_as_dock(self.message_sender_widget, hidden_by_default=True)
-
-        for widget in widgets_to_add:
-            self.add_widget_as_dock(widget)
+        self.__prepare_dock_widgets(widgets_to_add)
 
         self.menu_bar = midiscripter.gui.menu_bar.MenuBar(self)
         self.setMenuBar(self.menu_bar)
@@ -63,11 +54,70 @@ class MainWindow(QMainWindow):
         self.tray = TrayIcon(self.windowIcon(), self)
         self.tray.show()
 
-    def add_widget_as_dock(
+        self.__load_state()
+
+    def set_dock_titles_visibility(self, are_hidden: bool) -> None:
+        # Can't make full lock with setFixedSize due to AdaptiveTextSizeWidgets
+        # that has "Ignore" size policy and always restore at maximum size after that
+        for dock in self.dock_widgets:
+            dock_title_widget = QWidget() if are_hidden else None
+            dock.setTitleBarWidget(dock_title_widget)
+
+        if are_hidden:
+            self.setStyleSheet("""
+                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
+            """)
+        else:
+            self.setStyleSheet("""
+                QMainWindow::separator { background: lightgrey }
+                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
+            """)
+
+    def set_always_on_top(self, state: bool) -> None:
+        if state:
+            self.setWindowFlags(self.__always_on_top_flags)
+        else:
+            self.setWindowFlags(self.__normal_flags)
+        self.show()
+
+    def show_from_tray(self) -> None:
+        if QSettings().value('win maximized', False, type=bool):
+            self.showMaximized()
+        else:
+            self.showNormal()
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        event.ignore()
+
+        QSettings().setValue('win state', self.saveState())
+        QSettings().setValue('win maximized', self.isMaximized())
+
+        if not self.isMaximized():
+            QSettings().setValue('win size', self.size())
+            QSettings().setValue('win position', self.pos())
+
+        self.hide()
+
+    def __prepare_dock_widgets(self, widgets_to_add: list[QWidget]) -> None:
+        self.ports_widget = midiscripter.gui.ports_widget.PortsWidget()
+        self.log_widget = midiscripter.gui.log_widget.LogWidget()
+        self.message_sender_widget = midiscripter.gui.message_sender.MessageSender()
+
+        self.__add_widget_as_dock(self.ports_widget, fix_width=True)
+        self.__add_widget_as_dock(self.log_widget)
+        self.__add_widget_as_dock(self.message_sender_widget, hidden_by_default=True)
+
+        for widget in widgets_to_add:
+            self.__add_widget_as_dock(widget)
+
+    def __add_widget_as_dock(
         self, widget: QWidget, *, fix_width: bool = False, hidden_by_default: bool = False
     ) -> None:
         dock = QDockWidget(self)
-        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
+        dock.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetMovable
+            | QDockWidget.DockWidgetFeature.DockWidgetClosable
+        )
         dock.setObjectName(widget.objectName())
         dock.setWindowTitle(widget.objectName())
         dock.setWidget(widget)
@@ -82,66 +132,11 @@ class MainWindow(QMainWindow):
         if hidden_by_default:
             dock.hide()
 
-    def set_dock_titles_visibility(self, are_hidden: bool) -> None:
-        # Can't make full lock with setFixedSize due to AdaptiveTextSizeWidgets
-        # that has "Ignore" size policy and always restore at maximum size after that
-        for dock in self.dock_widgets:
-            if are_hidden:
-                dock.setTitleBarWidget(QWidget())
-            else:
-                dock.setTitleBarWidget(None)
-
-        if are_hidden:
-            self.setStyleSheet("""
-                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
-            """)
-        else:
-            self.setStyleSheet("""
-                QMainWindow::separator { background: lightgrey }
-                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
-            """)
-
-    def show_from_tray(self) -> None:
+    def __load_state(self) -> None:
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
-        self.resize(QSettings().value('win size', QSize(800, 500)))
-        self.move(QSettings().value('win position', self.__get_screen_center()))
         self.restoreState(QSettings().value('win state'))
-
-        if QSettings().value('restart win minimized', False, type=bool):
-            self.showMinimized()
-            # 'win minimized' set by restart request, cleared for the next normal start
-            QSettings().setValue('restart win minimized', False)
-        elif QSettings().value('win maximized', False, type=bool):
-            self.showMaximized()
-        else:
-            self.show()
-
-        # Somewhere in window preparation the window size changes, second resize makes it stick.
         self.resize(QSettings().value('win size', QSize(800, 500)))
         self.move(QSettings().value('win position', self.__get_screen_center()))
-
-        # 'win visible' set by restart request, cleared for the next normal start
-        if QSettings().value('restart closed to tray', False, type=bool):
-            QSettings().setValue('restart closed to tray', False)
-            self.close()
-
-    def closeEvent(self, event: QCloseEvent) -> None:
-        event.ignore()
-        QSettings().setValue('win state', self.saveState())
-        QSettings().setValue('win maximized', self.isMaximized())
-
-        if not self.isMaximized():
-            QSettings().setValue('win size', self.size())
-            QSettings().setValue('win position', self.pos())
-
-        self.hide()
-
-    def set_always_on_top(self, state: bool) -> None:
-        if state:
-            self.setWindowFlags(self.__always_on_top_flags)
-        else:
-            self.setWindowFlags(self.__normal_flags)
-        self.show()
 
     def __get_screen_center(self) -> QPoint:
         return (

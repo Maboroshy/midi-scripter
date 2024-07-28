@@ -19,7 +19,7 @@ from .saved_state_controls import SavedCheckedAction
 
 
 class ScripterGUI(QApplication):
-    main_window: midiscripter.gui.main_window.MainWindow
+    main_window: 'midiscripter.gui.main_window.MainWindow'
     request_restart = Signal()
 
     RESTART_DELAY = 2
@@ -52,10 +52,15 @@ class ScripterGUI(QApplication):
     def prepare_main_window(self, minimized_to_tray: bool = False) -> None:
         self.main_window = midiscripter.gui.main_window.MainWindow(self.widgets_to_add)
 
-        if not minimized_to_tray:
-            self.main_window.show_from_tray()
-        else:
+        if minimized_to_tray or QSettings().value('restart closed to tray', False, type=bool):
+            QSettings().setValue('restart closed to tray', False)
             self.main_window.close()
+        elif QSettings().value('restart win minimized', False, type=bool):
+            self.main_window.showMinimized()
+            # 'win minimized' set by restart request, cleared for the next normal start
+            QSettings().setValue('restart win minimized', False)
+        else:
+            self.main_window.show_from_tray()
 
     def restart_at_file_change(self, msg: midiscripter.file_event.FileEventMsg) -> None:
         if msg.type not in (
@@ -136,6 +141,7 @@ def start_gui() -> NoReturn:
         exit_status = app_instance.exec()
 
     if exit_status == 1467:  # exit status for restart request
+        time.sleep(0.1)
         midiscripter.shared.restart_script()
     else:
         exit(exit_status)
