@@ -1,4 +1,4 @@
-from typing import overload
+from typing import overload, Any
 
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import *
@@ -31,8 +31,8 @@ class GuiButton(GuiWidget):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
     ):
@@ -40,15 +40,15 @@ class GuiButton(GuiWidget):
         **Overloads:**
             ``` python
             GuiToggleButton(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
             )
             ```
             ``` python
             GuiToggleButton(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
             )
@@ -80,8 +80,8 @@ class GuiToggleButton(GuiWidget):
     @overload
     def __init__(
         self,
-        title: str,
-        content: str,
+        title: Any,
+        content: Any,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
@@ -90,7 +90,7 @@ class GuiToggleButton(GuiWidget):
     @overload
     def __init__(
         self,
-        content: str,
+        content: Any,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
@@ -98,8 +98,8 @@ class GuiToggleButton(GuiWidget):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
@@ -108,8 +108,8 @@ class GuiToggleButton(GuiWidget):
         **Overloads:**
             ``` python
             GuiToggleButton(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 toggle_state: bool = False
@@ -117,7 +117,7 @@ class GuiToggleButton(GuiWidget):
             ```
             ``` python
             GuiToggleButton(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 toggle_state: bool = False
@@ -125,7 +125,7 @@ class GuiToggleButton(GuiWidget):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Button text
             color: Button text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             toggle_state: Button initial toggle state
@@ -219,8 +219,8 @@ class GuiButtonSelectorH(GuiWidget):
 
     def __init__(
         self,
-        title_and_content: str | tuple[str, ...] = None,
-        content: tuple[str, ...] | None = None,
+        title_and_content: Any | tuple[Any, ...] = None,
+        content: tuple[Any, ...] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
@@ -246,7 +246,7 @@ class GuiButtonSelectorH(GuiWidget):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Buttons' texts
             color: Selector button's text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: text or index of button to select initially
@@ -284,8 +284,8 @@ class GuiButtonSelectorV(GuiWidget):
 
     def __init__(
         self,
-        title_and_content: str | tuple[str, ...] = None,
-        content: tuple[str, ...] | None = None,
+        title_and_content: Any | tuple[Any, ...] = None,
+        content: tuple[Any, ...] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
@@ -311,7 +311,7 @@ class GuiButtonSelectorV(GuiWidget):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Buttons' texts
             color: Selector button's text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: text or index of button to select initially

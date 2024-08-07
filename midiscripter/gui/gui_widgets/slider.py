@@ -1,4 +1,4 @@
-from typing import overload
+from typing import overload, Any
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -191,8 +191,8 @@ class _GuiSliderWidgetBase(GuiWidget):
     @overload
     def __init__(
         self,
-        title: str,
-        content: str,
+        title: Any,
+        content: Any,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -202,7 +202,7 @@ class _GuiSliderWidgetBase(GuiWidget):
     @overload
     def __init__(
         self,
-        content: str,
+        content: Any,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -211,8 +211,8 @@ class _GuiSliderWidgetBase(GuiWidget):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -228,8 +228,8 @@ class GuiKnob(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -239,8 +239,8 @@ class GuiKnob(_GuiSliderWidgetBase):
         **Overloads:**
             ``` python
             GuiKnob(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -249,7 +249,7 @@ class GuiKnob(_GuiSliderWidgetBase):
             ```
             ``` python
             GuiKnob(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -258,7 +258,7 @@ class GuiKnob(_GuiSliderWidgetBase):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Knob label
             color: Knob color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
@@ -274,8 +274,8 @@ class GuiSliderVertical(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -285,8 +285,8 @@ class GuiSliderVertical(_GuiSliderWidgetBase):
         **Overloads:**
             ``` python
             GuiSliderVertical(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -295,7 +295,7 @@ class GuiSliderVertical(_GuiSliderWidgetBase):
             ```
             ``` python
             GuiSliderVertical(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -304,7 +304,7 @@ class GuiSliderVertical(_GuiSliderWidgetBase):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Slider label
             color: Slider handle color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
@@ -320,8 +320,8 @@ class GuiSliderHorizontal(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -331,8 +331,8 @@ class GuiSliderHorizontal(_GuiSliderWidgetBase):
         **Overloads:**
             ``` python
             GuiSliderHorizontal(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -341,7 +341,7 @@ class GuiSliderHorizontal(_GuiSliderWidgetBase):
             ```
             ``` python
             GuiSliderHorizontal(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -350,7 +350,7 @@ class GuiSliderHorizontal(_GuiSliderWidgetBase):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Slider label
             color: Slider handle color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
@@ -366,8 +366,8 @@ class GuiProgressBarHorizontal(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -377,8 +377,8 @@ class GuiProgressBarHorizontal(_GuiSliderWidgetBase):
         **Overloads:**
             ``` python
             GuiProgressBarHorizontal(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -387,7 +387,7 @@ class GuiProgressBarHorizontal(_GuiSliderWidgetBase):
             ```
             ``` python
             GuiProgressBarHorizontal(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -396,7 +396,7 @@ class GuiProgressBarHorizontal(_GuiSliderWidgetBase):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Progress bar label
             color: Progress color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
@@ -412,8 +412,8 @@ class GuiProgressBarVertical(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
@@ -423,8 +423,8 @@ class GuiProgressBarVertical(_GuiSliderWidgetBase):
         **Overloads:**
             ``` python
             GuiProgressBarVertical(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -433,7 +433,7 @@ class GuiProgressBarVertical(_GuiSliderWidgetBase):
             ```
             ``` python
             GuiProgressBarVertical(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 value: int = 0,
@@ -442,7 +442,7 @@ class GuiProgressBarVertical(_GuiSliderWidgetBase):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Progress bar label
             color: Progress color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value

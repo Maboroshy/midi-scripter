@@ -1,4 +1,4 @@
-from typing import overload
+from typing import overload, Any
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -37,8 +37,8 @@ class GuiText(GuiWidget):
     @overload
     def __init__(
         self,
-        title: str,
-        content: str,
+        title: Any,
+        content: Any,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
@@ -47,7 +47,7 @@ class GuiText(GuiWidget):
     @overload
     def __init__(
         self,
-        content: str,
+        content: Any,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
@@ -55,8 +55,8 @@ class GuiText(GuiWidget):
 
     def __init__(
         self,
-        title_and_content: str,
-        content: str | None = None,
+        title_and_content: Any,
+        content: Any | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool = False,
@@ -65,8 +65,8 @@ class GuiText(GuiWidget):
         **Overloads:**
             ``` python
             GuiText(
-                title: str,
-                content: str,
+                title: Any,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 toggle_state: bool = False
@@ -74,7 +74,7 @@ class GuiText(GuiWidget):
             ```
             ``` python
             GuiText(
-                content: str,
+                content: Any,
                 *,
                 color: str | tuple[int, int, int] | None = None,
                 toggle_state: bool = False
@@ -82,7 +82,7 @@ class GuiText(GuiWidget):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Widget's text
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             toggle_state: Text "grey out" state

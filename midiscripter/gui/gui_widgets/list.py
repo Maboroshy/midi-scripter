@@ -1,4 +1,4 @@
-from typing import overload
+from typing import overload, Any
 
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
@@ -71,8 +71,8 @@ class GuiListSelector(GuiWidget):
 
     def __init__(
         self,
-        title_and_content: str | tuple[str, ...],
-        content: tuple[str, ...] | None = None,
+        title_and_content: Any | tuple[Any, ...],
+        content: tuple[Any, ...] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
@@ -98,7 +98,7 @@ class GuiListSelector(GuiWidget):
             ```
 
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Items' texts
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: Text or index of item to select initially

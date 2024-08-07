@@ -19,7 +19,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     _qt_widget_class: type[QWidget, 'WrappedQWidgetMixin']
 
-    _content: str | tuple[str, ...] | Any
+    _content: Any | tuple[Any, ...]
     """Current content"""
 
     _color: str | tuple[int, int, int] | None = None
@@ -30,8 +30,8 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     def __init__(
         self,
-        title_and_content: str | tuple[str, ...],
-        content: str | tuple[str, ...] | None = None,
+        title_and_content: Any | tuple[Any, ...],
+        content: Any | tuple[Any, ...] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: str | int | bool | None = None,
@@ -41,7 +41,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
     ):
         """
         Args:
-            title (str): Widget's title
+            title (Any): Widget's title
             content: Widget's text or text for its items
             color: Color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
