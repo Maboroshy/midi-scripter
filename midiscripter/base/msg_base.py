@@ -4,6 +4,7 @@ from collections.abc import Container
 
 import midiscripter.shared
 
+
 if TYPE_CHECKING:
     from midiscripter.base.port_base import Input
 
@@ -32,6 +33,9 @@ class Msg:
     """Input port instance that generated the message"""
 
     __match_args__: tuple[str] = ('type',)
+
+    _gui_color: str = 'blue'
+    _log_show_link: bool = True
 
     def __init__(self, type: str, source: 'Input | None' = None):
         """

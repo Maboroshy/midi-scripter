@@ -1,3 +1,3 @@
-from midiscripter.logger.log import Log as _Log
+from midiscripter.logger.log_obj import Log as _Log
 
 log = _Log()

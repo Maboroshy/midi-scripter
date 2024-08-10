@@ -1,26 +1,36 @@
 import collections
 import threading
 import time
-from typing import TYPE_CHECKING, NamedTuple, Protocol
+from typing import TYPE_CHECKING, NamedTuple, Any
 
 import midiscripter.shared
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from midiscripter.logger.console_sink import ConsoleSink
-    from midiscripter.logger.html_sink import HtmlSink
 
 
-class LogObj(Protocol):
-    log_str: str
-    log_repr: str
+class LogObjRef:
+    __slots__ = ('text', 'color', 'link')
+    text: str
+    color: None | str
+    link: None | str
+
+    def __init__(self, obj: Any):
+        self.text = str(obj)
+        try:
+            self.color = obj._gui_color
+            self.link = repr(obj) if obj._log_show_link else None
+        except AttributeError:
+            self.color = None
+            self.link = None
 
 
 class LogEntry(NamedTuple):
     text: str
-    kwargs: dict
+    format_args: tuple[LogObjRef, ...]
+    format_kwargs: dict[str, LogObjRef]
     timestamp: str
-    color: str
+    color: None | str
 
 
 class Log:
@@ -44,61 +54,64 @@ class Log:
     BUFFER_SIZE = 200
     """Max size of message buffer to flush to log widget when it becomes visible"""
 
-    def __init__(self):
-        self.__sink_call = None
-        self.is_enabled = True
+    _formatter: 'Callable[list[[LogEntry | None]], str]'
+    _sink: 'Callable[[str], None]'
+    _accepts_messages: bool
+    _flushing_is_enabled: bool
 
-        self.__buffer: collections.deque[None | LogEntry]
+    def __init__(self):
+        self._accepts_messages = True
+        self.__flushing_is_enabled = False
+
+        self.__buffer: collections.deque[LogEntry]
         self.__buffer = collections.deque(maxlen=self.BUFFER_SIZE)
         self.__last_entry_time = time.time()
 
-    def __call__(self, text: str, **kwargs):
+    def __call__(self, text: str, *args, **kwargs):
         """Print log message.
 
         Args:
-            text: Log entry to print. Use `.format` style string to insert kwargs.
-            **kwargs: Optional variables to `.format` text with.
-                      Passed [inputs][midiscripter.base.port_base.Input],
-                      [outputs][midiscripter.base.port_base.Output],
-                      [messages][midiscripter.base.msg_base.Msg] and callables are highlighted.
+            text: Log entry to print. Use `.format` style string to insert kwargs
+            args: Optional arguments to `.format` text with
+            kwargs: Optional arguments to `.format` text with
+
+        [inputs][midiscripter.base.port_base.Input],
+        [outputs][midiscripter.base.port_base.Output],
+        [messages][midiscripter.base.msg_base.Msg] and callables arguments are highlighted.
         """
-        if not self.is_enabled:
+        if not self._accepts_messages:
             return
 
         try:
-            color = kwargs.pop('_color')
+            entry_color = kwargs.pop('_color')
         except KeyError:
-            color = None
+            entry_color = None
 
-        # str and repr are created on call because object can be altered while entry is in buffer
-        for obj in kwargs.values():
-            obj: LogObj
-            obj.log_str = str(obj)
-            obj.log_repr = repr(obj)
+        format_args = tuple(LogObjRef(obj) for obj in args)
+        format_kwargs = {arg: LogObjRef(obj) for arg, obj in kwargs.items()}
 
         now_time = midiscripter.shared.precise_epoch_time()
         timestamp = self._get_precise_timestamp(now_time)
 
-        log_entry = LogEntry(text, kwargs, timestamp, color)
+        log_entry = LogEntry(text, format_args, format_kwargs, timestamp, entry_color)
 
         if now_time - self.__last_entry_time > self.ADD_SPACER_THRESHOLD_SEC:
-            self.__buffer.append(None)
+            self.__buffer.append(LogEntry('', (), {}, timestamp, entry_color))
         self.__last_entry_time = now_time
 
         self.__buffer.append(log_entry)
 
     @property
-    def _sink(self) -> 'None | HtmlSink | ConsoleSink | Callable[[list[str]], None]':
-        """A callable that receives a list of log strings to print them for user.
-        Set by starter. Can be altered to customize the logger."""
-        return self.__sink_call
+    def _flushing_is_enabled(self) -> bool:
+        return self.__flushing_is_enabled
 
-    @_sink.setter
-    def _sink(
-        self, sink_obj: 'None | HtmlSink | ConsoleSink | Callable[[list[str]], None]'
-    ) -> None:
-        self.__sink_call = sink_obj
-        if self.__sink_call:
+    @_flushing_is_enabled.setter
+    def _flushing_is_enabled(self, state: bool) -> None:
+        if not self._formatter or not self._sink:
+            raise ValueError('Log is not prepared to enable it')
+
+        self.__flushing_is_enabled = state
+        if state:
             self.__start_buffer_flush_thread()
 
     def __start_buffer_flush_thread(self) -> None:
@@ -106,31 +119,26 @@ class Log:
 
     def _buffer_flush_worker(self) -> None:
         """Thread worker loop that flushes buffered messages"""
-        while self._sink:
+        while self.__flushing_is_enabled:
             if self.__buffer:
                 self._flush()
             time.sleep(self.FLUSH_DELAY)
 
     def _flush(self) -> None:
         """Sends buffered messages to sink"""
-        if not self.__sink_call:
-            return
-
         output_entries = []
-
         while self.__buffer:
             output_entries.append(self.__buffer.popleft())  # for thread safety
 
         try:
-            self._sink(output_entries)
+            self._sink(self._formatter(output_entries))
         except RuntimeError:  # ignore Qt error on widget destruction at app exit
             pass
 
     @staticmethod
     def _get_precise_timestamp(precise_epoch_time: None | float = None) -> str:
         """Returns current timestamp with microsecond precision as a string
-
-        The argument is there to not get current time two times during log call"""
+        The argument is to don't get current time two times during log call"""
         precise_time = precise_epoch_time or midiscripter.shared.precise_epoch_time()
         time_string = time.strftime('%H:%M:%S', time.localtime(precise_time))
 
@@ -140,26 +148,26 @@ class Log:
         microsec_part = after_dot[3:]
         return f'{time_string}.{milisec_part},{microsec_part}'
 
-    def red(self, text: str, **kwargs) -> None:
+    def red(self, text: str, *args, **kwargs) -> None:
         """Print red log message."""
-        self(text, _color='red', **kwargs)
+        self(text, *args, _color='red', **kwargs)
 
-    def blue(self, text: str, **kwargs) -> None:
+    def blue(self, text: str, *args, **kwargs) -> None:
         """Print blue log message."""
-        self(text, _color='blue', **kwargs)
+        self(text, *args, _color='blue', **kwargs)
 
-    def cyan(self, text: str, **kwargs) -> None:
+    def cyan(self, text: str, *args, **kwargs) -> None:
         """Print cyan log message."""
-        self(text, _color='cyan', **kwargs)
+        self(text, *args, _color='cyan', **kwargs)
 
-    def magenta(self, text: str, **kwargs) -> None:
+    def magenta(self, text: str, *args, **kwargs) -> None:
         """Print magenta log message."""
-        self(text, _color='magenta', **kwargs)
+        self(text, *args, _color='magenta', **kwargs)
 
-    def green(self, text: str, **kwargs) -> None:
+    def green(self, text: str, *args, **kwargs) -> None:
         """Print green log message."""
-        self(text, _color='green', **kwargs)
+        self(text, *args, _color='green', **kwargs)
 
-    def yellow(self, text: str, **kwargs) -> None:
+    def yellow(self, text: str, *args, **kwargs) -> None:
         """Print yellow log message."""
-        self(text, _color='yellow', **kwargs)
+        self(text, *args, _color='yellow', **kwargs)

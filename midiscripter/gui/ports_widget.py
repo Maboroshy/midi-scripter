@@ -24,15 +24,6 @@ class PortItemMixin:
     port_instance: Input | Output
     is_broken: bool = False
 
-    def set_color_by_port_type(
-        self: 'GeneralPortItem | MidiPortItem', port_type: type[Input | Output]
-    ) -> None:
-        if issubclass(port_type, Input):
-            item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Input]
-        else:
-            item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Output]
-        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
-
     def request_state_change(
         self: 'GeneralPortItem | MidiPortItem | KeyInputPortItem', state: bool
     ) -> bool:
@@ -81,7 +72,7 @@ class GeneralPortItem(PortItemMixin, PortWidgetItem):
         item_text = self.port_instance._force_uid or str(self.port_instance._uid)
         super().__init__(parent_item, (item_text,))
 
-        self.set_color_by_port_type(type(self.port_instance))
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(f'dark{port_instance._gui_color}'))
 
         if self.port_instance.is_enabled:
             self.setCheckState(0, Qt.CheckState.Checked)
@@ -101,7 +92,7 @@ class AlwaysPresentInputPortItem(PortItemMixin, PortWidgetItem):
         super().__init__(parent_item, (self.port_class._force_uid,))
 
         self.repr = f'{port_class.__name__}()'
-        self.set_color_by_port_type(port_class)
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(f'dark{port_class._gui_color}'))
 
         self.port_instance = self.port_class._name_to_instance.get(self.port_class._force_uid, None)
         if self.port_instance and self.port_instance.is_enabled:
@@ -142,7 +133,7 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
 
         super().__init__(parent_item, (item_name,))
 
-        self.set_color_by_port_type(self.PORT_CLASS)
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(f'dark{self.PORT_CLASS._gui_color}'))
 
         if not self.port_instance:
             self.setCheckState(0, Qt.CheckState.Unchecked)
@@ -198,8 +189,7 @@ class CallItem(PortWidgetItem):
         self.origin_call_list = origin_call_list
         self.call = call
 
-        item_color = midiscripter.logger.html_sink.HtmlSink.COLOR_MAP[Callable]
-        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(f'dark{call._gui_color}'))
         self.setCheckState(0, Qt.CheckState.Checked)
 
     def request_state_change(self, state: bool) -> bool:

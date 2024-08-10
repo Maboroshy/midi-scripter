@@ -2,7 +2,7 @@
 
 ## log
 
-## :::midiscripter.logger.log.Log
+## :::midiscripter.logger.log_obj.Log
     options:
       show_root_heading: false
       members:

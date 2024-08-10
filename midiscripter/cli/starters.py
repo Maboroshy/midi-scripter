@@ -3,8 +3,8 @@ from typing import NoReturn
 
 import midiscripter.base.port_base
 import midiscripter.shared
-import midiscripter.logger.console_sink
-import midiscripter.logger.log
+import midiscripter.logger.log_obj
+import midiscripter.logger.console
 import midiscripter.midi
 from midiscripter.logger import log
 
@@ -13,7 +13,8 @@ def start_cli_debug() -> NoReturn:
     """Starts the script with log output to console.
     Console prints increase latency and jitter. Use for debugging only.
     """
-    log._sink = midiscripter.logger.console_sink.ConsoleSink()
+    log._formatter = midiscripter.logger.console.console_log_formatter
+    log._sink = midiscripter.logger.console.console_sink
     log('')
     log('Available MIDI inputs:')
     [log.green(port_name) for port_name in midiscripter.midi.MidiIn._available_names]
@@ -26,7 +27,7 @@ def start_cli_debug() -> NoReturn:
 
 def start_silent() -> NoReturn:
     """Starts the script without logging. The fastest way to run the script."""
-    log.is_enabled = False
+    log._accepts_messages = False
     _run_cli_loop()
 
 

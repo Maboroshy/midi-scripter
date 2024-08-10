@@ -48,6 +48,9 @@ class SubscribedCall:
     statistics: collections.deque
     """Last 20 call execution durations in milliseconds"""
 
+    _gui_color: str = 'cyan'
+    _log_show_link: bool = False
+
     def __init__(self, conditions: 'None | tuple[tuple, dict]', callable_: 'Callable'):
         self.conditions = conditions
         self.statistics = collections.deque(maxlen=20)
@@ -179,6 +182,9 @@ class Input(Port):
     """Message match arguments and callables that will be called with matching incoming messages.
     `None` conditions matches any message."""
 
+    _gui_color: str = 'green'
+    _log_show_link: bool = True
+
     def __init__(self, uid: 'Hashable'):
         super().__init__(uid)
         self.calls: list[None | tuple[tuple, dict], list[SubscribedCall]] = []
@@ -301,7 +307,7 @@ class Input(Port):
             call: Subscribed callable.
             msg: Received message to use as callable only argument.
         """
-        log('{call} called', call=call)
+        log('Calling {call}', call=call)
         try:
             call(msg)
         except Exception as exc:
@@ -339,6 +345,9 @@ class Output(Port):
 
     is_enabled: bool
     """`True` if port is ready to send messages"""
+
+    _gui_color: str = 'magenta'
+    _log_show_link: bool = True
 
     def send(self, msg: Msg) -> None:
         """Send message using the output port.
