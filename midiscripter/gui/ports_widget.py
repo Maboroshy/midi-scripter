@@ -1,17 +1,18 @@
 import itertools
-from collections.abc import Callable
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-import midiscripter.logger.html_sink
-from midiscripter.ableton_remote import AbletonIn, AbletonOut
 from midiscripter.base.port_base import Input, Output, SubscribedCall, Port
+from midiscripter.midi import MidiIn, MidiOut, MidiPortsChangedIn
+from midiscripter.osc import OscIn, OscOut
+from midiscripter.ableton_remote import AbletonIn, AbletonOut
+from midiscripter.keyboard import KeyIn, KeyOut
+from midiscripter.mouse import MouseIn, MouseOut
+from midiscripter.file_event import FileEventIn
+from midiscripter.metronome import MetronomeIn
 from midiscripter.logger import log
-from midiscripter.midi import MidiIn, MidiOut
-from midiscripter.keyboard import KeyIn
-from midiscripter.mouse import MouseIn
 from .saved_state_controls import SavedToggleButton
 
 
@@ -259,14 +260,14 @@ class PortsView(QTreeWidget):
 
         self.__add_midi_ports()
 
-        self.__add_declared_ports('OSC', midiscripter.OscIn, midiscripter.OscOut)
-        self.__add_declared_ports('Ableton Live', midiscripter.AbletonIn, midiscripter.AbletonOut)
-        self.__add_declared_ports('Keyboard', KeyIn, midiscripter.KeyOut)
-        self.__add_declared_ports('Mouse', MouseIn, midiscripter.MouseOut)
+        self.__add_declared_ports('OSC', OscIn, OscOut)
+        self.__add_declared_ports('Ableton Live', AbletonIn, AbletonOut)
+        self.__add_declared_ports('Keyboard', KeyIn, KeyOut)
+        self.__add_declared_ports('Mouse', MouseIn, MouseOut)
 
-        self.__add_declared_ports('Metronome', midiscripter.MetronomeIn)
-        self.__add_declared_ports('File Event Watcher', midiscripter.FileEventIn)
-        self.__add_declared_ports('MIDI Port Changes Watcher', midiscripter.MidiPortsChangedIn)
+        self.__add_declared_ports('Metronome', MetronomeIn)
+        self.__add_declared_ports('File Event Watcher', FileEventIn)
+        self.__add_declared_ports('MIDI Port Changes Watcher', MidiPortsChangedIn)
 
         self.blockSignals(False)
 
