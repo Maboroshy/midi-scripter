@@ -46,8 +46,11 @@ class MessageSender(QWidget):
         self.update_ports()
         self.output_selector.currentIndexChanged.connect(self.__set_output)
 
-        self.send_button = QPushButton('Send')
+        self.send_button = QPushButton('&Send')
         self.send_button.setFixedWidth(50)
+        self.send_button.setShortcut(
+            QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_S)
+        )
         layout.addWidget(self.send_button, 1, 1)
         self.send_button.setDisabled(True)
         self.send_button.clicked.connect(self.__send_message)
