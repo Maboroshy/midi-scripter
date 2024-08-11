@@ -215,7 +215,7 @@ class PortsWidget(QWidget):
         layout.addWidget(ports_view)
 
         hide_unused_button = SavedToggleButton(
-            'Show Unused in Script', ports_view.set_unused_ports_visibility, default_state=True
+            'Show Unused Ports', ports_view.set_unused_ports_visibility, default_state=True
         )
         layout.addWidget(hide_unused_button)
 

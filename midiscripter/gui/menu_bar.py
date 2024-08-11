@@ -65,7 +65,7 @@ class MenuBar(QMenuBar):
         widgets_menu = self.addMenu('Widgets')
 
         self.lock_dock_widgets = SavedCheckedAction(
-            'Hide widgets titles',
+            'Hide widgets &titles',
             main_window.set_dock_titles_visibility,
             key_shortcut=QKeySequence('Ctrl+T'),
         )
