@@ -4,7 +4,6 @@ from typing import overload
 import midiscripter.base.port_base
 import midiscripter.shared
 from midiscripter.base.msg_base import Msg
-from midiscripter.base.port_base import Output
 from midiscripter.logger import log
 
 
