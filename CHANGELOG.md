@@ -7,6 +7,7 @@
 - Log history and separators handling while using log filters
 - Log entry object representations are prepared on log call, not display
 - OSC message representation in log
+- AbletonMsg representation in log
 - Autostart imports issues
 - MIDI port's broken status is now reset after successful opening
 - Port instance registry handling

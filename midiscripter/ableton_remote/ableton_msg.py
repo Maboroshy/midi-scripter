@@ -219,7 +219,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
             self.value = value
 
     def __repr__(self):
-        present_attrs = (str(attr) for attr in self._as_tuple() if attr is not None)
+        present_attrs = (repr(attr) for attr in self._as_tuple() if attr is not None)
         return f'{self.__class__.__name__}({", ".join(present_attrs)})'
 
     def matches(
