@@ -21,12 +21,13 @@ class AbletonIn(midiscripter.midi.MidiIn):
     and produces [`AbletonMsg`][midiscripter.AbletonMsg] objects.
     """
 
-    def __init__(self, proxy_midi_port_name: str):
+    def __init__(self, proxy_midi_port_name: str, *, virtual: bool = False):
         """
         Args:
             proxy_midi_port_name: The name of proxy MIDI input port enabled in Ableton Live
+            virtual: Create virtual port (Linux and macOS only)
         """
-        super().__init__(proxy_midi_port_name)
+        super().__init__(proxy_midi_port_name, virtual=virtual)
 
     def _convert_to_msg(self, rt_midi_data: tuple[hex, ...]) -> 'AbletonMsg':
         msg_atts = self._raw_channel_midi_to_attrs(rt_midi_data)
@@ -72,12 +73,13 @@ class AbletonOut(midiscripter.midi.MidiOut):
     as MIDI message to Ableton Live remote script.
     """
 
-    def __init__(self, proxy_midi_port_name: str):
+    def __init__(self, proxy_midi_port_name: str, *, virtual: bool = False):
         """
         Args:
             proxy_midi_port_name: The name of proxy MIDI output port enabled in Ableton Live
+            virtual: Create virtual port (Linux and macOS only)
         """
-        super().__init__(proxy_midi_port_name)
+        super().__init__(proxy_midi_port_name, virtual=virtual)
 
     def send(self, msg: AbletonMsg) -> None:
         """Send message to Ableton remote script.
