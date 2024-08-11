@@ -34,8 +34,6 @@ def _all_opened() -> None:
     for port in Port._instances:
         port._close()
 
-    log._flush()
-    log._sink = None
     midiscripter.shared.thread_executor.shutdown(wait=False)
 
 

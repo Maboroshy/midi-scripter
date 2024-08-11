@@ -1,5 +1,4 @@
 import collections
-import threading
 import time
 from typing import TYPE_CHECKING, NamedTuple, Any
 
@@ -108,14 +107,11 @@ class Log:
     @_flushing_is_enabled.setter
     def _flushing_is_enabled(self, state: bool) -> None:
         if not self._formatter or not self._sink:
-            raise ValueError('Log is not prepared to enable it')
+            raise AttributeError('Set `log._formatter` and `log._sink` before enabling flushing')
 
         self.__flushing_is_enabled = state
         if state:
-            self.__start_buffer_flush_thread()
-
-    def __start_buffer_flush_thread(self) -> None:
-        threading.Thread(target=self._buffer_flush_worker, daemon=True).start()
+            midiscripter.shared.thread_executor.submit(self._buffer_flush_worker)
 
     def _buffer_flush_worker(self) -> None:
         """Thread worker loop that flushes buffered messages"""
