@@ -4,12 +4,13 @@
 
 ### Fixed
 - Log filter spaces handling
-- Log entry separators handling while using log filters
-- Log entry object representations are made on log call
+- Log history and separators handling while using log filters
+- Log entry object representations are prepared on log call, not display
 - OSC message representation in log
 - Autostart imports issues
 - MIDI port's broken status is now reset after successful opening
 - Port instance registry handling
+- Window state handling
 
 ### Added
 - Message Sender widget 
@@ -19,8 +20,8 @@
 
 ### Changed
 - Virtual MIDI ports now require dedicated `virtual=True` init argument
-- Any type can be used as GUI widget content, `str(content)` will be applied 
-  automatically
+- Any type object can be used as GUI widget content, `str(content)` will be 
+  applied automatically
 - Minor GUI widgets updates
 
 ## **v0.5** - 30.06.2024
