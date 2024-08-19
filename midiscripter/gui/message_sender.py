@@ -6,7 +6,7 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 from midiscripter.base.port_base import Output
-from midiscripter.base.msg_base import Msg
+from midiscripter.base.msg_base import AttrEnum, Msg
 
 # Imports used by `eval`
 from midiscripter.midi import MidiMsg, ChannelMsg, SysexMsg, MidiType
@@ -65,17 +65,40 @@ class MessageSender(QWidget):
             self.input_line.setText(current_text)
 
     def wheelEvent(self, event: QWheelEvent) -> None:
-        for match in re.finditer(r'-?\d+', self.input_line.text()):
-            start_pos, end_pos = match.span()
-            if start_pos <= self.input_line.cursorPosition() <= end_pos:
-                value = int(match.group(0))
-                value += 1 if event.angleDelta().y() > 0 else -1
-                text = self.input_line.text()
-                self.input_line.setText(text[:start_pos] + str(value) + text[end_pos:])
-                self.input_line.setCursorPosition(start_pos + len(str(value)))
-                return
+        text = self.input_line.text()
+        cursor_pos = self.input_line.cursorPosition()
+
+        for item_match in re.finditer(r'[^,() ]+', text):
+            start_pos, end_pos = item_match.span()
+            if start_pos <= cursor_pos <= end_pos:
+                item_text = item_match.group(0)
+                break
         else:
-            super().wheelEvent(event)
+            return
+
+        try:
+            item_obj = eval(item_text)
+        except (NameError, AttributeError):
+            return
+
+        if isinstance(item_obj, bool):
+            new_item_obj = not item_obj
+        elif isinstance(item_obj, int):
+            new_item_obj = item_obj + 1 if event.angleDelta().y() > 0 else item_obj - 1
+        elif isinstance(item_obj, AttrEnum):
+            enum_class = item_obj.__class__
+            enum_members = list(enum_class.__members__)
+            member_index = enum_members.index(item_obj)
+            new_index = member_index + 1 if event.angleDelta().y() > 0 else member_index - 1
+            if new_index == -1 or new_index == len(enum_members):
+                return
+            new_item_obj = enum_class[enum_members[new_index]]
+        else:
+            return
+
+        new_item_obj_repr = repr(new_item_obj)
+        self.input_line.setText(text[:start_pos] + new_item_obj_repr + text[end_pos:])
+        self.input_line.setCursorPosition(start_pos + len(new_item_obj_repr))
 
     def update_ports(self) -> None:
         self.output_selector.clear()
