@@ -4,13 +4,15 @@ MIDI Scripter is a framework for filtering, modifying, routing and any other
 scripting of MIDI, Open Sound Control (OSC), keyboard and mouse input and
 output with Python.
 
-MIDI Scripter listens to the input ports and feeds incoming messages to
-subscribed callables (functions, methods, etc.). These callables or any
-other Python code can send modified or created messages with output ports. 
-MIDI Scripter can act as a proxy to filter, transform and convert the input.
+MIDI Scripter monitors input ports and processes incoming messages 
+by sending them to subscribed callables such as functions or methods. 
+These callables, along with any other Python code, can send out modified 
+or newly created messages through output ports. Essentially, MIDI Scripter 
+serves as a proxy that can filter, transform, and convert incoming data.
 
-MIDI Scripter includes customizable GUI for message logging, coding
-assistance and GUI controls and indicators to use in scripts.
+In addition, MIDI Scripter features a customizable graphical user interface (GUI) 
+that provides message logging, coding assistance, 
+and various controls and indicators to use in the script.
 
 An octave transposer with GUI controls in 10 lines of code:
 
@@ -48,37 +50,36 @@ should work on macOS.
 
 [You can find more examples here.](https://github.com/Maboroshy/midi-scripter/tree/master/examples)
 
+
 ## Features
 
-#### The basics:
+#### Basic Functionality:
 
-- Receive MIDI, OSC, keyboard and mouse input messages.
-- Filter, modify and do anything Python can with the messages.
-- Send out modified or generated MIDI, OSC, keyboard and mouse messages.
+- Receive input messages from MIDI, OSC, keyboard and mouse.
+- Filter, modify, and manipulate messages using Python.
+- Send modified or newly generated MIDI, OSC, keyboard, and mouse messages.
 
-#### For music performance MIDI setups:
+#### For Music Performance MIDI Setups:
 
-- Make extra banks and layers to multiply MIDI controls.
-- Organize mappings into sets / scenes with GUI dashboard.
-- Make an extra overlay mappings on top of MIDI controller's DAW integration by
-  using proxies.
-- Combine multiple MIDI controllers into one with any logic.
-- Control Ableton Live by [special remote script or AbletonOSC]().
+- Create additional banks and layers to enhance MIDI controllers.
+- Organize mappings into sets or scenes using with GUI dashboard.
+- Add overlay mappings on top of your MIDI controller’s DAW integration using proxies.
+- Combine multiple MIDI controllers into a single unit with any logic.
+- Control Ableton Live through a [special remote script or AbletonOSC]().
 
-#### For software control and automation:
+#### For Software Control and Automation:
 
-- Map or convert the messages to each other with any conditions and logic.
+- Map or convert messages to one another based on specific conditions and logic.
 - Use MIDI controllers or keyboard shortcuts to run any Python code.
-- Use keyboard and mouse macros.
+- Implement keyboard and mouse macros.
 
-#### For writing MIDI related Python code:
+#### For Writing MIDI-Related Python Code:
 
-- Prepare MIDI, OSC keyboard and mouse inputs and outputs with a single line,
-  without boilerplate code.
-- Feed input messages to functions or any callables by decorators.
-- Work with message objects instead of raw data different for each port type.
-- Create GUI widgets with a single line and arrange them with mouse.
-- Fully type annotated API.
+- Prepare MIDI, OSC, keyboard, and mouse inputs and outputs with a single line of code, without boilerplate code.
+- Use decorators to feed input messages to functions or other callables.
+- Work with message objects rather than raw data, which varies by port type.
+- Create GUI widgets with just one line of code and arrange them with mouse.
+- Fully type-annotated API for better code clarity.
 
 ## Installation
 
@@ -91,23 +92,15 @@ Extra steps for Windows:
 2. Install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html)
    and set required virtual MIDI ports inside it.
 
-## Quick Start
+## Quick Start Guide
 
-1. Paste [script template](examples/script_template.py) to Python IDE or plain
-   text editor. IDE is recommended.
-2. Run template script as-is from IDE or by `python your_script.py` command to
-   open GUI (like on screenshot below) for more info on available ports and 
-   incoming input.
-3. Make sure `Show Unused Ports` button under the port list is on. 
-   Turn on available ports' checkboxes to enable them, watch the log 
-   for input messages.
-4. Click on port names and messages in log to copy their declarations to the
-   clipboard. Paste the declarations to your script.
-5. Modify the template function to make it do what you want.
-   Use `log('messages')` for debugging.
-6. Restart the script from GUI to check how in works.
-7. Write more complex scripts. Use more inputs, outputs and functions
-   (callables). Subscribe callables to input messages with
-   `@input_port.subscribe` decorator.
+1. Paste the [script template](examples/script_template.py) into your Python IDE or a plain text editor. Using an IDE is recommended.
+2. Run the template script directly from the IDE or by `python your_script.py`. This will open the GUI (as shown in the screenshot below), providing information about available ports and incoming input.
+3. Ensure that the “Show Unused Ports” button located under the port list is activated. Enable the checkboxes for any available ports to activate them, monitor the log for incoming messages.
+4. Click on the port names and messages in the log to copy their 
+   declarations to the clipboard. Paste the declarations into your script.
+5. Adjust the template function to achieve desired functionality. Use `log('messages')` for debugging purposes.
+6. Restart the script from the GUI to see how it performs.
+7. Develop more complex scripts by utilizing additional inputs, outputs, and functions (callables). Subscribe callables to input messages using the `@input_port.subscribe` decorator.
 
 ![Screenshot](https://github.com/Maboroshy/midi-scripter/blob/master/docs/screenshot.png?raw=true)

@@ -1,6 +1,6 @@
 # Changelog
 
-## **v0.6** - __________
+## **v0.6** - 19.08.2024
 
 ### Fixed
 - Log filter spaces handling
