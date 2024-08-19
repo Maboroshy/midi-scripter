@@ -267,7 +267,7 @@ class GuiKnob(_GuiSliderWidgetBase):
         super().__init__(title_and_content, content, color=color, value=value, range=range)
 
 
-class GuiSliderVertical(_GuiSliderWidgetBase):
+class GuiSliderV(_GuiSliderWidgetBase):
     """Vertical slider to set value."""
 
     _qt_widget_class = VerticalSliderWidget
@@ -313,7 +313,7 @@ class GuiSliderVertical(_GuiSliderWidgetBase):
         super().__init__(title_and_content, content, color=color, value=value, range=range)
 
 
-class GuiSliderHorizontal(_GuiSliderWidgetBase):
+class GuiSliderH(_GuiSliderWidgetBase):
     """Horizontal slider to set value."""
 
     _qt_widget_class = HorizontalSliderWidget
@@ -359,7 +359,7 @@ class GuiSliderHorizontal(_GuiSliderWidgetBase):
         super().__init__(title_and_content, content, color=color, value=value, range=range)
 
 
-class GuiProgressBarHorizontal(_GuiSliderWidgetBase):
+class GuiProgressBarH(_GuiSliderWidgetBase):
     """Horizontal slider to set value."""
 
     _qt_widget_class = HorizontalProgressBarWidget
@@ -405,7 +405,7 @@ class GuiProgressBarHorizontal(_GuiSliderWidgetBase):
         super().__init__(title_and_content, content, color=color, value=value, range=range)
 
 
-class GuiProgressBarVertical(_GuiSliderWidgetBase):
+class GuiProgressBarV(_GuiSliderWidgetBase):
     """Horizontal slider to set value."""
 
     _qt_widget_class = VerticalProgressBarWidget

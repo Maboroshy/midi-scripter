@@ -12,7 +12,7 @@
         - calls
         - subscribe
 
-## :::midiscripter.GuiSliderVertical
+## :::midiscripter.GuiSliderV
     options:
       members:
         - content
@@ -26,7 +26,7 @@
         - calls
         - subscribe
 
-## :::midiscripter.GuiSliderHorizontal
+## :::midiscripter.GuiSliderH
     options:
       members:
         - content
@@ -40,7 +40,7 @@
         - calls
         - subscribe
 
-## :::midiscripter.GuiProgressBarVertical
+## :::midiscripter.GuiProgressBarV
     options:
       members:
         - content
@@ -54,7 +54,7 @@
         - calls
         - subscribe
 
-## :::midiscripter.GuiProgressBarHorizontal
+## :::midiscripter.GuiProgressBarH
     options:
       members:
         - content

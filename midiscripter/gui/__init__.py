@@ -11,8 +11,8 @@ from midiscripter.gui.gui_widgets.list import GuiListSelector
 from midiscripter.gui.gui_widgets.text import GuiText
 from midiscripter.gui.gui_widgets.slider import (
     GuiKnob,
-    GuiSliderVertical,
-    GuiSliderHorizontal,
-    GuiProgressBarHorizontal,
-    GuiProgressBarVertical,
+    GuiSliderV,
+    GuiSliderH,
+    GuiProgressBarH,
+    GuiProgressBarV,
 )
