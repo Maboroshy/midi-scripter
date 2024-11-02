@@ -4,8 +4,8 @@
         - content
         - title
         - color
-        - selected_text
-        - selected_index
+        - selected_item_text
+        - selected_item_index
         - is_visible
         - qt_widget
         - is_enabled
