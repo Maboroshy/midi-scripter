@@ -2,12 +2,19 @@ from midiscripter.logger import log
 from midiscripter.logger.log_obj import LogEntry, LogObjRef
 
 
+def _color_to_html_color_name(color: str) -> str:
+    if color == 'yellow':
+        return 'gold'
+    else:
+        return f'dark{color}'
+
+
 def _to_html_link(text: str, color: str, link_text: str) -> str:
-    return f'<a href="{link_text}" style="color: dark{color};">{text}</a>'
+    return f'<a href="{link_text}" style="color: {_color_to_html_color_name(color)};">{text}</a>'
 
 
 def _to_html_colored_text(text: str, color: str) -> str:
-    return f'<font color="dark{color}">{text}</font>'
+    return f'<font color="{_color_to_html_color_name(color)}">{text}</font>'
 
 
 def _obj_ref_to_html(obj_ref: LogObjRef) -> str:
