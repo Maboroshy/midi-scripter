@@ -35,7 +35,7 @@ def console_log_formatter(log_entries: list[LogEntry]) -> str:
             }
             text = text.format(*args, **kwargs)
         except (KeyError, IndexError):
-            log.red(f'Wrong arguments for log message: {text}')
+            pass
 
         ctime_text = f'{colorama.Style.DIM}{timestamp}: {colorama.Style.RESET_ALL}'
         entry_text = ctime_text + text + '\n'

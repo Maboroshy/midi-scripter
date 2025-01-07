@@ -40,7 +40,7 @@ def html_log_formatter(log_entries: list[LogEntry]) -> str:
             kwargs = {arg: _obj_ref_to_html(obj_ref) for arg, obj_ref in format_kwargs.items()}
             text = text.format(*args, **kwargs)
         except (KeyError, IndexError):
-            log.red(f'Wrong arguments for log message: {text}')
+            pass
 
         ctime_text = _to_html_colored_text(f'{timestamp}: ', 'grey')
 
@@ -50,4 +50,4 @@ def html_log_formatter(log_entries: list[LogEntry]) -> str:
         html_entry = f'<p>{ctime_text}{text.replace('\n', '<br>')}</p>'
         html_entries.append(html_entry)
 
-    return ''.join(html_entries)
+    return html_entries
