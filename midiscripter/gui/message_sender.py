@@ -110,7 +110,7 @@ class MessageSender(QWidget):
             self.output_selector.setDisabled(True)
             return
 
-        self.output_selector.setPlaceholderText('Output Port')
+        self.output_selector.setPlaceholderText('Select Output Port')
         self.output_selector.setDisabled(False)
 
         for port in enabled_ports:
