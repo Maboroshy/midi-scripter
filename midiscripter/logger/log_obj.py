@@ -66,7 +66,7 @@ class Log:
         self.__buffer = collections.deque(maxlen=self.BUFFER_SIZE)
         self.__last_entry_time = time.time()
 
-    def __call__(self, text: str, *args, **kwargs):
+    def __call__(self, text: str | Any, *args, **kwargs):
         """Print log message.
 
         Args:
@@ -76,7 +76,7 @@ class Log:
 
         [inputs][midiscripter.base.port_base.Input],
         [outputs][midiscripter.base.port_base.Output],
-        [messages][midiscripter.base.msg_base.Msg] and callables arguments are highlighted.
+        [messages][midiscripter.base.msg_base.Msg] and callable arguments are highlighted.
         """
         if not self._accepts_messages:
             return
@@ -92,6 +92,7 @@ class Log:
         now_time = midiscripter.shared.precise_epoch_time()
         timestamp = self._get_precise_timestamp(now_time)
 
+        text = str(text)
         log_entry = LogEntry(text, format_args, format_kwargs, timestamp, entry_color)
 
         if now_time - self.__last_entry_time > self.ADD_SPACER_THRESHOLD_SEC:
@@ -144,26 +145,26 @@ class Log:
         microsec_part = after_dot[3:]
         return f'{time_string}.{milisec_part},{microsec_part}'
 
-    def red(self, text: str, *args, **kwargs) -> None:
+    def red(self, text: str | Any, *args, **kwargs) -> None:
         """Print red log message."""
         self(text, *args, _color='red', **kwargs)
 
-    def blue(self, text: str, *args, **kwargs) -> None:
+    def blue(self, text: str | Any, *args, **kwargs) -> None:
         """Print blue log message."""
         self(text, *args, _color='blue', **kwargs)
 
-    def cyan(self, text: str, *args, **kwargs) -> None:
+    def cyan(self, text: str | Any, *args, **kwargs) -> None:
         """Print cyan log message."""
         self(text, *args, _color='cyan', **kwargs)
 
-    def magenta(self, text: str, *args, **kwargs) -> None:
+    def magenta(self, text: str | Any, *args, **kwargs) -> None:
         """Print magenta log message."""
         self(text, *args, _color='magenta', **kwargs)
 
-    def green(self, text: str, *args, **kwargs) -> None:
+    def green(self, text: str | Any, *args, **kwargs) -> None:
         """Print green log message."""
         self(text, *args, _color='green', **kwargs)
 
-    def yellow(self, text: str, *args, **kwargs) -> None:
+    def yellow(self, text: str | Any, *args, **kwargs) -> None:
         """Print yellow log message."""
         self(text, *args, _color='yellow', **kwargs)
