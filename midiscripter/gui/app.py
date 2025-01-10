@@ -141,7 +141,7 @@ def start_gui() -> NoReturn:
         exit_status = app_instance.exec()
 
     if exit_status == 1467:  # exit status for restart request
-        time.sleep(0.1)
+        time.sleep(0.3)
         midiscripter.shared.restart_script()
     else:
         exit(exit_status)
