@@ -15,11 +15,11 @@ Degree for chords out of scale will be printed red.
 - Replace `'From DAW'` with your MIDI controller port name to get input
   directly.
 - Or use 'From DAW' virtual port, then set this port as an output from your DAW.
-- Arrange the widgets in script's GUI.
+- Arrange the widgets in the script's GUI.
 
 ## Notes
 
-The script shouldn't be a proxy since music21 introduces too much latency.
+The script shouldn't be a proxy because music21 introduces too much latency.
 
 The latency can be reduced to normal by using passthrough
 and moving music21 functions to another Python process,

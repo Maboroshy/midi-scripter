@@ -9,7 +9,6 @@ and sending it to Ableton Live as soon as session record starts.
 ## Prerequisites
 
 - `To DAW` virtual port.
-- [My fork of AbletonOSC](https://github.com/Maboroshy/AbletonOSC) 
-to detect session record status.
+- [AbletonOSC](https://github.com/ideoforms/AbletonOSC)
 - Replace `'MIDI Keyboard'` with your MIDI controller port name.
 - Set `To DAW` virtual port as an input in Ableton Live.
