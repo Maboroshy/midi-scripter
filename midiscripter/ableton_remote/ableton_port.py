@@ -1,14 +1,10 @@
 from typing import overload, TYPE_CHECKING
 
-import midiscripter.midi
+from midiscripter.midi import MidiIn, MidiOut, ChannelMsg
 from midiscripter.base.port_base import Input
 from midiscripter.logger import log
 from midiscripter.ableton_remote.ableton_msg import AbletonEvent, AbletonMsg
-from midiscripter.ableton_remote.remote_script_midi_mapping import (
-    ableton_event_to_midi_map,
-    midi_to_ableton_button_map,
-    midi_to_ableton_slider_map,
-)
+from midiscripter.ableton_remote.remote_script_midi_mapping import ableton_event_to_midi_map, midi_to_ableton_button_map, midi_to_ableton_slider_map
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
@@ -16,7 +12,7 @@ if TYPE_CHECKING:
 
 
 # noinspection PyMethodOverriding
-class AbletonIn(midiscripter.midi.MidiIn):
+class AbletonIn(MidiIn):
     """Receives MIDI messages from Ableton Live remote script
     and produces [`AbletonMsg`][midiscripter.AbletonMsg] objects.
     """
@@ -68,7 +64,7 @@ class AbletonIn(midiscripter.midi.MidiIn):
         return Input.subscribe(self, type, index, value)  # bypassing MidiIn method
 
 
-class AbletonOut(midiscripter.midi.MidiOut):
+class AbletonOut(MidiOut):
     """Sends [`AbletonMsg`][midiscripter.AbletonMsg] objects
     as MIDI message to Ableton Live remote script.
     """
@@ -81,17 +77,20 @@ class AbletonOut(midiscripter.midi.MidiOut):
         """
         super().__init__(proxy_midi_port_name, virtual=virtual)
 
-    def send(self, msg: AbletonMsg) -> None:
+    def send(self, msg: AbletonMsg | ChannelMsg) -> None:
         """Send message to Ableton remote script.
 
         Args:
             msg: object to send
         """
+        if isinstance(msg, ChannelMsg):
+            super().send(msg)
+            super()._log_msg_sent(msg)
+            return
+
         try:
             if msg.index is None:
                 midi_lead_attrs = ableton_event_to_midi_map[msg.type]
-            elif isinstance(msg.index, tuple) and len(msg.index) == 2:
-                midi_lead_attrs = ableton_event_to_midi_map[msg.type][msg.index[0]][msg.index[1]]
             else:
                 midi_lead_attrs = ableton_event_to_midi_map[msg.type][msg.index]
 
@@ -102,7 +101,7 @@ class AbletonOut(midiscripter.midi.MidiOut):
             else:
                 value = msg.value
 
-            super().send(midiscripter.midi.ChannelMsg(*midi_lead_attrs, value))
+            super().send(ChannelMsg(*midi_lead_attrs, value))
             super()._log_msg_sent(msg)
 
         except (IndexError, KeyError):

@@ -8,36 +8,34 @@ if TYPE_CHECKING:
 
 
 class AbletonEvent(midiscripter.base.msg_base.AttrEnum):
-    CLIP_LAUNCH = 'CLIP_LAUNCH'
-    """Clip launch by (x, y) index"""
-    CUE_LEVEL = 'CUE_LEVEL'
+    CUE_VOL = 'CUE_VOL'
     """Cue level control"""
     CROSSFADER = 'CROSSFADER'
     """Crossfader control"""
 
     DEVICE_BANK = 'DEVICE_BANK'
-    """Select Device bank by index"""
+    """Select device encoder bank by index"""
+    DEVICE_BANK_NEXT = 'DEVICE_BANK_NEXT'
+    """Select next device encoder bank"""
+    DEVICE_BANK_PREV = 'DEVICE_BANK_PREV'
+    """Select previous device encoder bank"""
     DEVICE_LOCK = 'DEVICE_LOCK'
     """Device lock (lock "blue hand")"""
-    DEVICE_NAV_LEFT = 'DEVICE_NAV_LEFT'
-    """Device nav left"""
-    DEVICE_NAV_RIGHT = 'DEVICE_NAV_RIGHT'
-    """Device nav right"""
-    DEVICE_BANK_NAV_LEFT = 'DEVICE_BANK_NAV_LEFT'
-    """Device bank nav left"""
-    DEVICE_BANK_NAV_RIGHT = 'DEVICE_BANK_NAV_RIGHT'
-    """Device bank nav right"""
     DEVICE_TOGGLE = 'DEVICE_TOGGLE'
     """Toggle selected device on/off"""
-    DRUM_PAD = 'DRUM_PAD'
-    """Drum pad Trigger by index"""
+
+    ENCODER = 'ENCODER'
+    """Parameters control"""
+
+    FORWARD = 'FORWARD'
+    """Fast forward"""
 
     LOOP = 'LOOP'
     """Loop on/off"""
 
     MASTER_SEL = 'MASTER_SEL'
     """Master track select"""
-    MASTER_VOLUME = 'MASTER_VOLUME'
+    MASTER_VOL = 'MASTER_VOL'
     """Master track volume"""
     METRONOME = 'METRONOME'
     """Metronome on/off"""
@@ -50,8 +48,6 @@ class AbletonEvent(midiscripter.base.msg_base.AttrEnum):
     OVERDUB = 'OVERDUB'
     """Overdub on/off"""
 
-    PARAM_CONTROL = 'PARAM_CONTROL'
-    """Parameters control"""
     PLAY = 'PLAY'
     """Global play"""
     PUNCH_IN = 'PUNCH_IN'
@@ -61,47 +57,13 @@ class AbletonEvent(midiscripter.base.msg_base.AttrEnum):
 
     REC = 'REC'
     """Global record"""
-    REC_QUANT_TOGGLE = 'REC_QUANT_TOGGLE'
-    """Record quantization on/off"""
-    REDO = 'REDO'
-    """Redo"""
+    REWIND = 'REWIND'
+    """Rewind"""
 
-    SCENE_UP = 'SCENE_UP'
-    """Scene down"""
-    SCENE_DOWN = 'SCENE_DOWN'
-    """Scene up"""
-    SCENE_LAUNCH = 'SCENE_LAUNCH'
-    """Scene launch by index"""
-
-    SEEK_FWD = 'SEEK_FWD'
-    """Seek forward"""
-    SEEK_RWD = 'SEEK_RWD'
-    """Seek rewind"""
-
-    SESSION_LEFT = 'SESSION_LEFT'
-    """Session left"""
-    SESSION_RIGHT = 'SESSION_RIGHT'
-    """Session right"""
-    SESSION_UP = 'SESSION_UP'
-    """Session up"""
-    SESSION_DOWN = 'SESSION_DOWN'
-    """Session down"""
-
-    SEL_CLIP_LAUNCH = 'SEL_CLIP_LAUNCH'
-    """Selected clip launch"""
-    SEL_SCENE_LAUNCH = 'SEL_SCENE_LAUNCH'
-    """Selected scene launch"""
-    SEL_TRACK_MUTE = 'SEL_TRACK_MUTE'
-    """Mute Selected Track"""
-    SEL_TRACK_REC = 'SEL_TRACK_REC'
-    """Arm Selected Track"""
-    SEL_TRACK_SOLO = 'SEL_TRACK_SOLO'
-    """Solo Selected Track"""
-
+    SESSION_REC = 'SESSION_REC'
+    """Session record"""
     STOP = 'STOP'
     """Global stop"""
-    STOP_ALL_CLIPS = 'STOP_ALL_CLIPS'
-    """Stop all clips"""
 
     TAP_TEMPO = 'TAP_TEMPO'
     """Tap tempo"""
@@ -116,35 +78,22 @@ class AbletonEvent(midiscripter.base.msg_base.AttrEnum):
     """Track right"""
     TRACK_MUTE = 'TRACK_MUTE'
     """Track On/Off by index"""
-    TRACK_PAN = 'TRACK_PAN'
-    """Track Pan"""
+    TRACK_NEXT_8 = 'TRACK_NEXT_8'
+    """Select next 8 tracks to control with track controls"""
+    TRACK_PREV_8 = 'TRACK_PREV_8'
+    """Select previous 8 tracks to control with track controls"""
     TRACK_SELECT = 'TRACK_SELECT'
     """Track select by index"""
-    TRACK_SEND = 'TRACK_SEND'
-    """Track Send"""
+    TRACK_SEND_A = 'TRACK_SEND_A'
+    """Track Send A"""
+    TRACK_SEND_B = 'TRACK_SEND_B'
+    """Track Send B"""
     TRACK_SOLO = 'TRACK_SOLO'
     """Track solo by index"""
     TRACK_STOP = 'TRACK_STOP'
     """Track clip stop by track index"""
     TRACK_VOL = 'TRACK_VOL'
     """Track Volume"""
-
-    UNDO = 'UNDO'
-    """Undo"""
-
-    VIEW_DETAIL = 'VIEW_DETAIL'
-    """Detail view switch"""
-    VIEW_CLIPTRACK = 'VIEW_CLIPTRACK'
-    """Clip/Track view switch"""
-
-    ZOOM_UP = 'ZOOM_UP'
-    """Session Zoom up"""
-    ZOOM_DOWN = 'ZOOM_DOWN'
-    """Session Zoom down"""
-    ZOOM_LEFT = 'ZOOM_LEFT'
-    """Session Zoom left"""
-    ZOOM_RIGHT = 'ZOOM_RIGHT'
-    """Session Zoom right"""
 
 
 class AbletonMsg(midiscripter.base.msg_base.Msg):

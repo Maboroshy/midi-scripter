@@ -4,11 +4,11 @@ of Ableton Live without getting into rewriting its complex built-in MIDI remote 
 MIDI Scripter has two ways to communicate directly with Ableton Live internals. 
 Both has own limitations, so some use cases may require to use both.
 
-## 1. Ableton MIDI Remote Script
+## 1. Ableton MIDI User Remote Script
 
-The idea behind this method is to use the existing Ableton Live remote 
+The idea behind this method is to use Ableton Live user remote 
 script and communicate with it by MIDI. 
-[Special remote script](https://github.com/Maboroshy/midi-scripter/tree/master/extra/Ableton%20Remote%20Script) should be 
+[Pre-mapped user remote script](https://github.com/Maboroshy/midi-scripter/tree/master/extra/Ableton%20Remote%20Script) should be 
 installed to Ableton Live and assigned to virtual MIDI ports in its settings.
 
 The script has its raw MIDI messages mapped to 
@@ -19,9 +19,9 @@ All available events are listed in [API documentation][midiscripter.AbletonEvent
 
 The messages are received and sent by [`AbletonIn`][midiscripter.AbletonIn] and 
 [`AbletonOut`][midiscripter.AbletonOut] ports that are wrappers for virtual 
-MIDI ports used for communication.
+MIDI ports used for communication. The script uses MIDI channel 15.
 
-These ports should be declared with virtual MIDI port name as an argument.
+These ports should be declared with virtual MIDI port name as an argument. 
 
 Example: [Select armed track script with Ableton MIDI Remote Script](https://github.com/Maboroshy/midi-scripter/blob/master/examples/ableton_select_armed_track_with_remote_script)
 
