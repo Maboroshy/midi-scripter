@@ -211,13 +211,14 @@ class PortsWidget(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        ports_view = PortsView()
-        layout.addWidget(ports_view)
+        self.ports_view = PortsView()
+        layout.addWidget(self.ports_view)
 
-        hide_unused_button = SavedToggleButton(
-            'Show Unused Ports', ports_view.set_unused_ports_visibility, default_state=True
+        show_unused_button = SavedToggleButton(
+            'Show Unused Ports', self.__set_unused_ports_visibility, default_state=True
         )
-        layout.addWidget(hide_unused_button)
+        layout.addWidget(show_unused_button)
+        self.__set_unused_ports_visibility(bool(show_unused_button))
 
 
 class PortsView(QTreeWidget):
