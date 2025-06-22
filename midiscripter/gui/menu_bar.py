@@ -1,5 +1,4 @@
 import pathlib
-from typing import TYPE_CHECKING
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -10,9 +9,6 @@ import midiscripter.file_event
 import midiscripter.gui.main_window
 import midiscripter.midi.midi_ports_update
 from .saved_state_controls import SavedCheckedAction
-
-if TYPE_CHECKING:
-    from base.msg_base import Msg
 
 
 class MenuBar(QMenuBar):
@@ -55,11 +51,6 @@ class MenuBar(QMenuBar):
             'Restart on script file change', self.__set_watching_script_file
         )
         options_menu.insertAction(QAction(), self.watch_script_file)
-
-        self.watch_midi_ports = SavedCheckedAction(
-            'Restart on MIDI port changes', self.__set_watching_midi_ports
-        )
-        options_menu.insertAction(QAction(), self.watch_midi_ports)
 
         # Dock widgets
         widgets_menu = self.addMenu('Widgets')
@@ -130,16 +121,4 @@ class MenuBar(QMenuBar):
             self.file_watcher_port.subscribe(QApplication.instance().restart_at_file_change)
             self.file_watcher_port._open()
         else:
-            self.file_watcher_port.is_enabled = False
-
-    def __set_watching_midi_ports(self, state: bool) -> None:
-        if state:
-            self.midi_port_watcher_port = midiscripter.midi.midi_ports_update.MidiPortsChangedIn()
-
-            @self.midi_port_watcher_port.subscribe
-            def restart_on_midi_port_change(_: 'Msg') -> None:
-                QApplication.instance().request_restart.emit()
-
-            self.midi_port_watcher_port._open()
-        else:
-            self.midi_port_watcher_port.is_enabled = False
+            self.file_watcher_port._close()

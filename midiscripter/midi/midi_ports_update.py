@@ -1,12 +1,11 @@
 import time
 from typing import ClassVar
 
-import rtmidi
-
 import midiscripter.base.port_base
 import midiscripter.shared
 import midiscripter.logger
 from midiscripter.base.msg_base import Msg
+from midiscripter.midi.midi_port import MidiIn, MidiOut
 
 
 class MidiPortsChangedIn(midiscripter.base.port_base.Input):
@@ -23,11 +22,8 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
     def __init__(self):
         """"""
         super().__init__(self._force_uid)
-        self.__dummy_midi_input = rtmidi.MidiIn()
-        self.__dummy_midi_output = rtmidi.MidiOut()
-
-        self.__last_check_inputs = self.__dummy_midi_input.get_ports()
-        self.__last_check_outputs = self.__dummy_midi_output.get_ports()
+        self.__last_check_inputs = MidiIn._get_available_names()
+        self.__last_check_outputs = MidiOut._get_available_names()
 
     def _open(self) -> None:
         self.is_enabled = True
@@ -36,13 +32,17 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
 
     def _close(self) -> None:
         self.is_enabled = False
+        midiscripter.logger.log('Stopped MIDI ports change watcher')
 
     def __updater_worker(self) -> None:
+        n = 0
         while self.is_enabled:
+            n += 1
+
             time.sleep(self.refresh_rate_sec)
 
-            current_inputs = self.__dummy_midi_input.get_ports()
-            current_outputs = self.__dummy_midi_output.get_ports()
+            current_inputs = MidiIn._get_available_names()
+            current_outputs = MidiOut._get_available_names()
 
             if (
                 self.__last_check_inputs != current_inputs

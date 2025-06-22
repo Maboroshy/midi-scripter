@@ -35,21 +35,6 @@ TYPE_TO_DATA_BYTES_COUNT = {
 }
 
 
-def _get_available_midi_port_names(
-    rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut],
-) -> list[str]:
-    raw_port_names = rtmidi_port_class().get_ports()
-    persistent_port_names = [port_name[: port_name.rfind(' ')] for port_name in raw_port_names]
-
-    if platform.system() == 'Windows':
-        return persistent_port_names
-    else:
-        port_names_without_prefixes = [
-            port_name[port_name.find(':') + 1 :] for port_name in persistent_port_names
-        ]
-        return port_names_without_prefixes
-
-
 class _MidiPortMixin(midiscripter.base.port_base.Port):
     name: str
     """MIDI port name"""
@@ -58,7 +43,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 
     # Attrs provided by the class that inherits from MidiPortMixin
     is_enabled: bool
-    _available_names: list[str]
+    _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut]
 
     # noinspection PyMissingConstructor
     def __init__(
@@ -71,23 +56,35 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
         self.name: str
         """MIDI port name"""
         self._is_virtual = virtual
+        self._input_callback = input_callback
+        self._rtmidi_port = None
 
-        if input_callback:
-            self._rtmidi_port = rtmidi.MidiIn()
-            self._rtmidi_port.ignore_types(sysex=False)
-            self._rtmidi_port.set_callback(input_callback)
+    @classmethod
+    def _get_available_names(cls) -> list[str]:
+        """Get available MIDI port names. Must be implemented in MIDI port class."""
+        rtmidi_port = cls._rtmidi_port_class()
+        raw_port_names = rtmidi_port.get_ports()
+        rtmidi_port.delete()
+        persistent_port_names = [port_name[: port_name.rfind(' ')] for port_name in raw_port_names]
+
+        if platform.system() == 'Windows':
+            return persistent_port_names
         else:
-            self._rtmidi_port = rtmidi.MidiOut()
+            port_names_without_prefixes = [
+                port_name[port_name.find(':') + 1 :] for port_name in persistent_port_names
+            ]
+            return port_names_without_prefixes
 
     @property
     def _is_available(self) -> bool:
         """Port is available and can be opened."""
-        return self.name in self._available_names
+        return self.name in self._get_available_names()
 
     def _open(self) -> None:
-        if self._rtmidi_port.is_port_open():
-            self.is_enabled = True
-            return
+        self._rtmidi_port = self._rtmidi_port_class()
+        if self._input_callback:
+            self._rtmidi_port.ignore_types(sysex=False)
+            self._rtmidi_port.set_callback(self._input_callback)
 
         try:
             if self._is_virtual:
@@ -100,7 +97,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
                 log('Created and opened virtual port {port}', port=self)
 
             else:
-                port_index = self._available_names.index(self.name)
+                port_index = self._get_available_names().index(self.name)
                 self._rtmidi_port.open_port(port_index)
                 log('Opened {port}', port=self)
 
@@ -112,12 +109,10 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
             log.red('Failed to open {port}', port=self)
 
     def _close(self) -> None:
-        if not self._rtmidi_port.is_port_open():
-            return
-
         try:
             self._rtmidi_port.close_port()
             self._rtmidi_port.delete()
+            self._rtmidi_port = None
             self.is_enabled = False
             log('Closed {port}', port=self)
         except Exception:
@@ -127,7 +122,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
     """MIDI input port. Produces [`MidiMsg`][midiscripter.MidiMsg] objects."""
 
-    _available_names: list[str] = _get_available_midi_port_names(rtmidi.MidiIn)
+    _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut] = rtmidi.MidiIn
 
     def __init__(self, port_name: str, *, virtual: bool = False):
         """
@@ -212,7 +207,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
 class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
     """MIDI output port. Sends [`MidiMsg`][midiscripter.MidiMsg] objects."""
 
-    _available_names: list[str] = _get_available_midi_port_names(rtmidi.MidiOut)
+    _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut] = rtmidi.MidiOut
 
     def __init__(self, port_name: str, *, virtual: bool = False):
         """
