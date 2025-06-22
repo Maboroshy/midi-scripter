@@ -27,7 +27,8 @@ class CallOn(enum.StrEnum):
 @contextlib.contextmanager
 def _all_opened() -> None:
     for port in Port._instances:
-        port._open()
+        if not port.is_enabled:
+            port._open()
 
             if isinstance(port, Input):
                 port._call_on_port_init()
@@ -35,7 +36,8 @@ def _all_opened() -> None:
     yield
 
     for port in Port._instances:
-        port._close()
+        if port.is_enabled:
+            port._close()
 
     midiscripter.shared.thread_executor.shutdown(wait=False)
 
@@ -157,9 +159,8 @@ class Port:
         """Prepares and activates the port
 
         Notes:
-            Supposed to be overridden in subclasses
-            Should have a check against second opening
-            Must set `is_enabled` parameter to `True`
+            Supposed to be overridden in subclasses.
+            Must set `is_enabled` parameter to `True` on success.
         """
         self.is_enabled = True
 
@@ -338,18 +339,6 @@ class Input(Port):
                             log.red(''.join(traceback.format_exception(exc)))
 
                     midiscripter.shared.thread_executor.submit(__call_runner)
-
-    def _open(self) -> None:
-        """Prepares and activates the port
-
-        Notes:
-            Supposed to be overridden in subclasses.
-            Should have a check against second opening.
-            Must set `is_enabled` parameter to `True`.
-            Must run `_call_on_port_open`.
-        """
-        self.is_enabled = True
-        self._call_on_port_open()
 
 
 class Output(Port):

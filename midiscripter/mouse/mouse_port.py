@@ -41,15 +41,9 @@ class MouseIn(midiscripter.base.port_base.Input):
         self.__pynput_listener = None
 
     def __on_move(self, x: int, y: int) -> None:
-        if not self.is_enabled:
-            return
-
         self._send_input_msg_to_calls(MouseMsg(MouseEvent.MOVE, x, y, source=self))
 
     def __on_click(self, x: int, y: int, button: pynput.mouse.Button, pressed: bool) -> None:
-        if not self.is_enabled:
-            return
-
         try:
             msg_type = pynput_buttons_to_msg_type_map[button][pressed]
         except KeyError:
@@ -58,9 +52,6 @@ class MouseIn(midiscripter.base.port_base.Input):
         self._send_input_msg_to_calls(MouseMsg(msg_type, x, y, source=self))
 
     def __on_scroll(self, x: int, y: int, dx: int, dy: int) -> None:
-        if not self.is_enabled:
-            return
-
         if dy == -1:
             self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_UP, x, y, source=self))
         elif dy == 1:
@@ -72,10 +63,6 @@ class MouseIn(midiscripter.base.port_base.Input):
             self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_RIGHT, x, y, source=self))
 
     def _open(self) -> None:
-        if self.__pynput_listener:
-            self.is_enabled = True
-            return
-
         self.__pynput_listener = pynput.mouse.Listener(
             self.__on_move, self.__on_click, self.__on_scroll
         )
@@ -86,6 +73,7 @@ class MouseIn(midiscripter.base.port_base.Input):
 
     def _close(self) -> None:
         self.__pynput_listener.stop()
+        self.__pynput_listener = None
         self.is_enabled = False
         log('Stopped mouse input listener')
 

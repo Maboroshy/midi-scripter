@@ -43,28 +43,19 @@ class OscIn(midiscripter.base.port_base.Input):
         """
         super().__init__(listener_ip_port)
         self.listener_ip_address, self.listener_port = _parse_ip_port(listener_ip_port)
-        self.__dispatcher = None
-
-    def __osc_server_msg_handler(self, address: str, *data) -> None:
-        if not self.is_enabled:
-            return
-
-        if len(data) == 1:
-            data = data[0]
-        input_msg = OscMsg(address, data, source=self)
-        self._send_input_msg_to_calls(input_msg)
-
-    def _open(self) -> None:
-        if self.__dispatcher:
-            self.is_enabled = True
-            return
-
         self.__dispatcher = pythonosc.osc_server.Dispatcher()
         self.__dispatcher.set_default_handler(self.__osc_server_msg_handler)
         self._osc_server = pythonosc.osc_server.BlockingOSCUDPServer(
             (self.listener_ip_address, self.listener_port), self.__dispatcher
         )
 
+    def __osc_server_msg_handler(self, address: str, *data) -> None:
+        if len(data) == 1:
+            data = data[0]
+        input_msg = OscMsg(address, data, source=self)
+        self._send_input_msg_to_calls(input_msg)
+
+    def _open(self) -> None:
         midiscripter.shared.thread_executor.submit(self._osc_server.serve_forever)
         self.is_enabled = True
         log('Opened {input}', input=self)

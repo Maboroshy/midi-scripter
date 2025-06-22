@@ -38,9 +38,6 @@ class KeyIn(midiscripter.base.port_base.Input):
         self.pressed_keys = []
 
     def __on_press(self, key: pynput.keyboard.Key) -> None:
-        if not self.is_enabled:
-            return
-
         if type(key) is pynput.keyboard.KeyCode:
             key = self.__pynput_listener.canonical(key)
 
@@ -51,9 +48,6 @@ class KeyIn(midiscripter.base.port_base.Input):
         self._send_input_msg_to_calls(msg)
 
     def __on_release(self, key: pynput.keyboard.Key) -> None:
-        if not self.is_enabled:
-            return
-
         if type(key) is pynput.keyboard.KeyCode:
             key = self.__pynput_listener.canonical(key)
 
@@ -67,10 +61,6 @@ class KeyIn(midiscripter.base.port_base.Input):
             pass
 
     def _open(self) -> None:
-        if self.__pynput_listener:
-            self.is_enabled = True
-            return
-
         self.__pynput_listener = pynput.keyboard.Listener(
             self.__on_press, self.__on_release, suppress=self.__supress_input
         )
@@ -81,6 +71,7 @@ class KeyIn(midiscripter.base.port_base.Input):
 
     def _close(self) -> None:
         self.__pynput_listener.stop()
+        self.__pynput_listener = None
         self.is_enabled = False
         log('Stopped keyboard input listener')
 

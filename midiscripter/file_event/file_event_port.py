@@ -68,9 +68,6 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
     def on_any_event(self, event: watchdog.events.FileSystemEvent) -> None:
         # Override for `watchdog.events.FileSystemEventHandler` method.
         # Runs on each file system change in `_path`.
-        if not self.is_enabled:
-            return
-
         event_path = pathlib.Path(event.src_path)
 
         if self.__watch_dir_changes or event_path == self.__path:
