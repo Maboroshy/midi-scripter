@@ -177,7 +177,6 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
 
     def _open(self) -> None:
         _MidiPortMixin._open(self)
-        midiscripter.base.port_base.Input._call_on_port_open(self)
 
     def _callback(self, rt_midi_input: list[list[hex, ...], float], _: list) -> None:
         if not self.is_enabled:

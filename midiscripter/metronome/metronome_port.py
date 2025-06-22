@@ -62,7 +62,6 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         self.is_enabled = True
         midiscripter.shared.thread_executor.submit(self.__send_clicks_worker)
         log('Started {input} at {bpm}', input=self, bpm=self.bpm)
-        self._call_on_port_open()
 
     def __send_clicks_worker(self) -> None:
         msg_counter = 1

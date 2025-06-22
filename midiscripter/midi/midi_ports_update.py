@@ -31,7 +31,6 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
 
     def _open(self) -> None:
         self.is_enabled = True
-        self._call_on_port_open()
         midiscripter.shared.thread_executor.submit(self.__updater_worker)
         midiscripter.logger.log('Started MIDI ports change watcher')
 

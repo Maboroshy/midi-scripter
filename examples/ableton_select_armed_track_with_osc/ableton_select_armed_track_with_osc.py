@@ -8,7 +8,7 @@ osc_query = OscQueryMaker(ableton_osc_in, ableton_osc_out)
 reset_track_lister_button = GuiButton('Reset track listener')
 
 
-@ableton_osc_in.subscribe(CallOn.PORT_OPEN)
+@ableton_osc_in.subscribe(CallOn.PORT_INIT)
 @reset_track_lister_button.subscribe(GuiEvent.TRIGGERED)
 @ableton_osc_in.subscribe(address='/live/startup')
 def set_armed_track_listener() -> None:

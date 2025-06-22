@@ -57,8 +57,7 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
         if not shared_observer.is_alive():
             shared_observer.start()
         self.is_enabled = True
-        self._call_on_port_open()
-        midiscripter.logger.log('Opened {input}', input=self)
+        midiscripter.logger.log('Started {input}', input=self)
 
     def _close(self) -> None:
         if self.__watch:

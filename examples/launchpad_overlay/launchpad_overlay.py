@@ -24,7 +24,7 @@ from_daw_lpx.passthrough_out(to_LPX)  # proxies all MIDI feedback back to LPX
 overlay_toggle = GuiToggleButton('LPX OVERLAY ON', toggle_state=True)
 
 
-@ableton_osc_in.subscribe(CallOn.PORT_OPEN)
+@ableton_osc_in.subscribe(CallOn.PORT_INIT)
 @ableton_osc_in.subscribe(address='/live/startup')
 def start_selected_scene_listener(_: OscMsg = None) -> None:
     """Sets selected scene listener on script start or Ableton Live start while script is running"""

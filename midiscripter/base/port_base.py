@@ -20,14 +20,17 @@ class CallOn(enum.StrEnum):
     NOT_MATCHED_BY_ANY_CALL = 'NOT MATCHED BY ANY CALLS'
     """Call when a message is not matched by any other call"""
 
-    PORT_OPEN = 'PORT OPEN'
-    """Call after port is opened"""
+    PORT_INIT = 'PORT INIT'
+    """Call after port is initially opened"""
 
 
 @contextlib.contextmanager
 def _all_opened() -> None:
     for port in Port._instances:
         port._open()
+
+            if isinstance(port, Input):
+                port._call_on_port_init()
 
     yield
 
@@ -182,6 +185,7 @@ class Input(Port):
 
     _gui_color: str = 'green'
     _log_show_link: bool = True
+    __port_init_called: bool = False
 
     def __init__(self, uid: 'Hashable'):
         super().__init__(uid)
@@ -311,9 +315,19 @@ class Input(Port):
         except Exception as exc:
             log.red(''.join(traceback.format_exception(exc)))
 
-    def _call_on_port_open(self) -> None:
+    def _call_on_port_init(self) -> None:
+        """Called after input port is opened for the first time.
+
+        Notes:
+            Not supposed to be overridden in subclasses.
+        """
+        if self.__port_init_called:
+            return
+
+        self.__port_init_called = True
+
         for conditions, call_list in self.calls:
-            if conditions == CallOn.PORT_OPEN:
+            if conditions == CallOn.PORT_INIT:
                 for call in call_list:
 
                     def __call_runner() -> None:

@@ -78,7 +78,6 @@ class KeyIn(midiscripter.base.port_base.Input):
         self.__pynput_listener.wait()
         self.is_enabled = True
         log('Started keyboard input listener')
-        self._call_on_port_open()
 
     def _close(self) -> None:
         self.__pynput_listener.stop()

@@ -11,7 +11,7 @@ ableton_osc_out = OscOut(11000)
 sustain_value = 0  # A global variable
 
 
-@ableton_osc_in.subscribe(CallOn.PORT_OPEN)
+@ableton_osc_in.subscribe(CallOn.PORT_INIT)
 @ableton_osc_in.subscribe(address='/live/startup')
 def start_listener() -> None:
     """Sets session record listener on script start or Ableton Live start while script is running"""
