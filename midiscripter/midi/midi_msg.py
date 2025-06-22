@@ -41,7 +41,9 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
     source: 'None | MidiIn'
 
     def __new__(cls, *args, **kwargs):
-        if args and isinstance(args[0], tuple) or not args and 'combined_data' in kwargs:
+        if (args and isinstance(args[0], tuple)) or (
+            not args and isinstance(kwargs.get('combined_data'), tuple)
+        ):
             return SysexMsg.__new__(SysexMsg, *args, **kwargs)
         else:
             return ChannelMsg.__new__(ChannelMsg, *args, **kwargs)
