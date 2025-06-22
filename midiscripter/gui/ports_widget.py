@@ -156,7 +156,7 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
         if state:
             try:
                 self.__items_disabled_by_user.remove(self.port_name)
-            except AttributeError:
+            except KeyError:
                 pass
         else:
             self.__items_disabled_by_user.add(self.port_name)
