@@ -50,10 +50,12 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
         return f"{self.__class__.__name__}('{str(self._uid)}')"
 
     def __str__(self):
-        return f"'{self.__path.relative_to(self.__path.parent.parent)}' watcher"
+        return f"File system path '{self.__path.relative_to(self.__path.parent.parent)}' watcher"
 
     def _open(self) -> None:
-        self.__watch = shared_observer.schedule(self, str(self.__path_to_watch), self.__recursive)
+        self.__watch = shared_observer.schedule(
+            self, str(self.__path_to_watch), recursive=self.__recursive
+        )
         if not shared_observer.is_alive():
             shared_observer.start()
         self.is_enabled = True
