@@ -17,7 +17,7 @@ class KeyIn(midiscripter.base.port_base.Input):
     
     Warning: 
         Enable with caution! 
-        You'll loose the keyboard input unless you're proxying it to [KeyOut][midiscripter.KeyOut]
+        You'll loose the keyboard input unless you're proxying it to [KeyOut][midiscripter.KeyOut]!
     """
 
     pressed_keys: list[pynput.keyboard.Key]

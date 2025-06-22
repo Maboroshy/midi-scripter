@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class CallOn(enum.StrEnum):
-    """Special conditions to use as `@input_port.subscribe(argument)`"""
+    """Special conditions to use as `@input_port.subscribe(argument)`."""
 
     NOT_MATCHED_BY_ANY_CALL = 'NOT MATCHED BY ANY CALLS'
     """Call when a message is not matched by any other call"""
@@ -43,7 +43,7 @@ def _all_opened() -> None:
 
 
 class SubscribedCall:
-    """Wrapper object created for subscribed callable"""
+    """Wrapper object created for subscribed callable."""
 
     conditions: None | tuple[tuple, dict]
     """Message match conditions for call"""
@@ -73,10 +73,10 @@ class SubscribedCall:
 
 
 class Port:
-    """Port base class
+    """Port base class.
 
     Notes:
-        Port declarations with the same arguments will return the same instance port (singleton)
+        Port declarations with the same arguments will return the same instance port (singleton).
     """
 
     _force_uid: ClassVar[None | str] = None
@@ -168,14 +168,14 @@ class Port:
         """Deactivates the port.
 
         Notes:
-            Supposed to be overridden in subclasses
-            Must set `is_enabled` parameter to `False`
+            Supposed to be overridden in subclasses.
+            Must set `is_enabled` parameter to `False`.
         """
         self.is_enabled = False
 
 
 class Input(Port):
-    """Input port base class"""
+    """Input port base class."""
 
     is_enabled: bool
     """`True` if port is listening and generating messages"""
@@ -355,6 +355,11 @@ class Output(Port):
 
         Args:
             msg: Message to send.
+
+        Notes:
+            Supposed to be overridden in subclasses.
+            Should use `self._validate_msg_send(msg)` before sending
+            and `self._log_msg_sent(msg)` after.
         """
         if not self._validate_msg_send(msg):
             return

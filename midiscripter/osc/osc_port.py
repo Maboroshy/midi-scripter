@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 def _parse_ip_port(ip_port: str | int) -> (str, int):
-    """Parses 'ip:port' or local port to get ip and port
+    """Parses 'ip:port' or local port to get ip and port.
 
     Args:
         ip_port: 'ip:port' or local port
@@ -97,7 +97,7 @@ class OscOut(midiscripter.base.port_base.Output):
         self.is_enabled = True
 
     def send(self, msg: OscMsg) -> None:
-        """Send the OSC message
+        """Send the OSC message.
 
         Args:
             msg: object to send
