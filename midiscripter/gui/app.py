@@ -41,7 +41,7 @@ class ScripterGUI(QApplication):
         self.setPalette(palette)
 
         self.__time_until_restart_sec = self.RESTART_DELAY
-        self.request_restart.connect(self, self.restart)
+        self.request_restart.connect(self.restart)
         self.aboutToQuit.connect(self.__cleanup)
 
         # Action to use before main window creation

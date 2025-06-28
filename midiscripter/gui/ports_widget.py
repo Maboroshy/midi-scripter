@@ -386,7 +386,7 @@ class PortsView(QTreeWidget):
             QGuiApplication.clipboard().setText(text_for_clipboard)
             QTimer.singleShot(
                 200,
-                lambda: QToolTip().showText(
+                lambda: QToolTip.showText(
                     self.cursor().pos(), f'Copied {text_for_clipboard}', self, msecShowTime=2000
                 ),
             )  # Don't hide on mouse button release
