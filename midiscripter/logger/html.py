@@ -26,7 +26,7 @@ def _obj_ref_to_html(obj_ref: LogObjRef) -> str:
         return _to_html_link(obj_ref.text, obj_ref.color, obj_ref.link)
 
 
-def html_log_formatter(log_entries: list[LogEntry]) -> str:
+def html_log_formatter(log_entries: list[LogEntry]) -> list[str]:
     html_entries = []
     for entry in log_entries:
         text, format_args, format_kwargs, timestamp, color = entry
@@ -47,7 +47,9 @@ def html_log_formatter(log_entries: list[LogEntry]) -> str:
         if color:
             text = _to_html_colored_text(text, color)
 
-        html_entry = f'<p>{ctime_text}{text.replace('\n', '<br>')}</p>'
+        text = text.replace('\n', '<br>')
+
+        html_entry = f'<p>{ctime_text}{text}</p>'
         html_entries.append(html_entry)
 
     return html_entries
