@@ -1,4 +1,3 @@
-from midiscripter.logger import log
 from midiscripter.logger.log_obj import LogEntry, LogObjRef
 
 

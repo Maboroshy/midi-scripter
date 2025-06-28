@@ -2,7 +2,6 @@ import sys
 
 import colorama
 
-from midiscripter import log
 from midiscripter.logger.log_obj import LogEntry
 
 

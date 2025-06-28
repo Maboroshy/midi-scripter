@@ -122,6 +122,7 @@ class Port:
             instance._inited_with_args = init_args
             cls._name_to_instance[uid] = instance
 
+            parent_class: Port
             for parent_class in cls.mro()[:-1]:  # exclude `object`
                 try:
                     parent_class._instances.append(instance)
@@ -190,10 +191,10 @@ class Input(Port):
 
     def __init__(self, uid: 'Hashable'):
         super().__init__(uid)
-        self.calls: list[None | tuple[tuple, dict], list[SubscribedCall]] = []
+        self.calls: list[tuple[None | tuple[tuple, dict], list[SubscribedCall]]] = []
 
         # workarounds for mkdocstrings issue #607
-        self.calls: list[None | tuple[tuple, dict], list[SubscribedCall]]
+        self.calls: list[tuple[None | tuple[tuple, dict], list[SubscribedCall]]]
         """Message match arguments and callables that will be called with matching incoming messages.
            `None` conditions matches any message."""
 
@@ -212,9 +213,9 @@ class Input(Port):
 
         1. If condition is `None` or omitted it matches anything.
 
-        2. If condition equals attribute it matches the attribute.
+        2. If condition equals the message's attribute value it matches the attribute.
 
-        3. If condition is a container and contains the attribute it matches the attribute.
+        3. If condition is a container and contains the message's attribute value it matches the attribute.
 
         ??? Examples
             1. Calls function for all MIDI port's messages:

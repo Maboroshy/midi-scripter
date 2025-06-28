@@ -35,6 +35,7 @@ import weakref
 from ctypes import wintypes as wintypes
 from collections.abc import Callable
 
+
 py_bitness = struct.calcsize('P') * 8
 libName = 'teVirtualMIDI64.dll' if py_bitness == 64 else 'teVirtualMIDI.dll'
 try:

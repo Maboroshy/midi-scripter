@@ -27,7 +27,9 @@ class PortItemMixin:
     VIRTUAL_PORT_MARKER = 'ⓥ'
     port_instance: Input | Output
 
-    def request_state_change(self: 'GeneralPortItem | MidiPortItem', state: bool) -> bool:
+    def request_state_change(
+        self: 'GeneralPortItem | MidiPortItem | AlwaysPresentInputPortItem', state: bool
+    ) -> bool:
         if state:
             self.port_instance._open()
 
