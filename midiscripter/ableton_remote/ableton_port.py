@@ -42,7 +42,7 @@ class AbletonIn(MidiIn):
         except KeyError:
             pass
 
-        raise ValueError(f'{self} got invalid MIDI input: {msg_atts}')
+        return AbletonMsg(AbletonEvent.UNSUPPORTED, lead_msg_atts[1], lead_msg_atts[2])
 
     @overload
     def subscribe(self, call: 'Callable[[AbletonMsg], None]') -> 'Callable': ...

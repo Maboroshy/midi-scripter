@@ -95,6 +95,9 @@ class AbletonEvent(midiscripter.base.msg_base.AttrEnum):
     TRACK_VOL = 'TRACK_VOL'
     """Track Volume"""
 
+    UNSUPPORTED = 'UNSUPPORTED'
+    """Unknown message"""
+
 
 class AbletonMsg(midiscripter.base.msg_base.Msg):
     """Ableton Live remote script event message"""
