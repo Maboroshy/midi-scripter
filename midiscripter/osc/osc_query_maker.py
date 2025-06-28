@@ -58,4 +58,4 @@ class OscQueryMaker:
             ):
                 return self.__last_msg.data
             else:
-                raise TimeoutError(f"OSC query to '{address}' got no response")
+                log.red(f"OSC query to '{address}' got no response")
