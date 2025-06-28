@@ -100,6 +100,7 @@ class ScripterGUI(QApplication):
     def __cleanup(self) -> None:
         self.main_window.close()
         self.main_window.tray.hide()
+        self.__single_instance_socket.close()
 
 
 # Creating app at import to allow QWidget instance init in other modules
@@ -141,7 +142,6 @@ def start_gui() -> NoReturn:
         exit_status = app_instance.exec()
 
     if exit_status == 1467:  # exit status for restart request
-        time.sleep(0.3)
         midiscripter.shared.restart_script()
     else:
         exit(exit_status)
