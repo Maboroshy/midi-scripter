@@ -1,5 +1,29 @@
 # Changelog
 
+## **v0.7** - 29.06.2025
+
+### Fixed
+- OscQueryMaker stability
+- GUI logging issues
+- `Show Unused Ports` button state loading
+- Errors introduced by using newer pyside6 and Qt versions
+- Leaving open sockets after script close
+- Script restart stability issues
+
+### Added
+- MIDI ports changes detection and handling in GUI
+- Virtual MIDI port creation on Windows
+- `log` can now print representation of an object passed as an argument
+
+### Changed
+- [BREAKING] Reimplemented Ableton port with a User Remote Script 
+  because previously used script wasn't feature complete
+- [BREAKING] Replaced `CallOn.PORT_OPEN` flag with `CallOn.PORT_INIT`
+- Reimplemented MIDI ports' opening/closing
+- Reimplemented virtual MIDI ports
+- `AbletonIn` creates message with `AbletonEvent.UNSUPPORTED` instead 
+  of throwing an exception
+
 ## **v0.6** - 19.08.2024
 
 ### Fixed
