@@ -51,7 +51,7 @@ class LogWidget(QWidget):
         pause_button.setToolTip('Pause the logging')
         pause_button.setCheckable(True)
         pause_button.setShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_P))
-        pause_button.toggled.connect(lambda state: setattr(log, 'flushing_is_enabled', not state))
+        pause_button.toggled.connect(lambda state: setattr(log, '_flushing_is_enabled', not state))
         pause_button.setFixedWidth(50)
         layout.addWidget(pause_button, 3, 5, 1, 1, Qt.AlignmentFlag.AlignRight)
 
