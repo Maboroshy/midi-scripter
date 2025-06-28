@@ -241,7 +241,7 @@ class LogView(QPlainTextEdit):
         QGuiApplication.clipboard().setText(text_for_clipboard)
         QApplication.instance().main_window.message_sender_widget.paste(text_for_clipboard)
 
-        QToolTip().showText(
+        QToolTip.showText(
             event.globalPosition().toPoint(),
             f'Copied {text_for_clipboard}',
             self,
