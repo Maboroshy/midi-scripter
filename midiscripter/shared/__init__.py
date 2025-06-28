@@ -34,8 +34,7 @@ def precise_epoch_time() -> float:
 
 def restart_script() -> None:
     """Restart the current script"""
-
-    os.spawnl(os.P_DETACH, sys.executable, 'python', script_path)  # TODO TEST
+    os.spawnl(os.P_DETACH, sys.executable, 'python', script_path)
     sys.exit(0)
 
 

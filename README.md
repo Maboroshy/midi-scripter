@@ -67,17 +67,17 @@ should work on macOS.
 - Add overlay mappings on top of your MIDI controller’s DAW integration 
   using proxy ports.
 - Combine multiple MIDI controllers into a single unit with any logic.
-- Control Ableton Live through a [special remote script or AbletonOSC]().
+- Control Ableton Live through a [special remote script or AbletonOSC](https://github.com/Maboroshy/midi-scripter/tree/master/extra/Ableton%20Remote%20Script).
 
 #### For Software Control and Automation:
 
-- Map or convert messages to one another based on specific conditions and logic.
+- Map or convert messages on specific conditions and logic.
 - Use MIDI controllers or keyboard shortcuts to run any Python code.
 - Implement keyboard and mouse macros.
 
 #### For Writing MIDI-Related Python Code:
 
-- Prepare MIDI, OSC, keyboard, and mouse inputs and outputs with a single line of code, without boilerplate code.
+- Prepare MIDI, OSC, keyboard, and mouse inputs and outputs with a single line of code, without boilerplate.
 - Use decorators to feed input messages to functions or other callables.
 - Work with message objects rather than raw data, which varies by port type.
 - Create GUI widgets with just one line of code and arrange them with mouse.
@@ -99,10 +99,10 @@ Extra steps for Windows:
 1. Paste the [script template](examples/script_template.py) into your Python IDE or a plain text editor. Using an IDE is recommended.
 2. Run the template script directly from the IDE or by `python your_script.py`. This will open the GUI (as shown in the screenshot below), providing information about available ports and incoming input.
 3. Ensure that the “Show Unused Ports” button located under the port list is activated. Enable the checkboxes for any available ports to activate them, monitor the log for incoming messages.
-4. Click on the port names and messages in the log to copy their 
-   declarations to the clipboard. Paste the declarations into your script.
+4. Click on the port names and messages in the log to copy their declarations 
+ to the clipboard. You can paste the declarations into your script.
 5. Adjust the template function to achieve desired functionality. Use `log('messages')` for debugging purposes.
 6. Restart the script from the GUI to see how it performs.
-7. Develop more complex scripts by utilizing additional inputs, outputs, and functions (callables). Subscribe callables to input messages using the `@input_port.subscribe` decorator.
+7. Develop more complex scripts by utilizing additional inputs, outputs and functions (callables). Subscribe callables to input messages using the `@input_port.subscribe` decorator.
 
 ![Screenshot](https://github.com/Maboroshy/midi-scripter/blob/master/docs/screenshot.png?raw=true)
