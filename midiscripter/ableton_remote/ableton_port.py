@@ -4,7 +4,11 @@ from midiscripter.midi import MidiIn, MidiOut, ChannelMsg
 from midiscripter.base.port_base import Input
 from midiscripter.logger import log
 from midiscripter.ableton_remote.ableton_msg import AbletonEvent, AbletonMsg
-from midiscripter.ableton_remote.remote_script_midi_mapping import ableton_event_to_midi_map, midi_to_ableton_button_map, midi_to_ableton_slider_map
+from midiscripter.ableton_remote.remote_script_midi_mapping import (
+    ableton_event_to_midi_map,
+    midi_to_ableton_button_map,
+    midi_to_ableton_slider_map,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
@@ -21,7 +25,7 @@ class AbletonIn(MidiIn):
         """
         Args:
             proxy_midi_port_name: The name of proxy MIDI input port enabled in Ableton Live
-            virtual: Create virtual port (Linux and macOS only)
+            virtual: Create virtual MIDI port
         """
         super().__init__(proxy_midi_port_name, virtual=virtual)
 
@@ -73,7 +77,7 @@ class AbletonOut(MidiOut):
         """
         Args:
             proxy_midi_port_name: The name of proxy MIDI output port enabled in Ableton Live
-            virtual: Create virtual port (Linux and macOS only)
+            virtual: Create virtual MIDI port
         """
         super().__init__(proxy_midi_port_name, virtual=virtual)
 

@@ -8,19 +8,15 @@ _BUTTONS_CC_VALUES = {
     AbletonEvent.DEVICE_BANK_PREV: 26,
     AbletonEvent.DEVICE_TOGGLE: 27,
     AbletonEvent.DEVICE_LOCK: 28,
-
     AbletonEvent.TRACK_MUTE: list(range(53, 61)),
     AbletonEvent.TRACK_SOLO: list(range(61, 69)),
-    AbletonEvent.TRACK_SELECT: list(range(69, 76)),
+    AbletonEvent.TRACK_SELECT: list(range(69, 77)),
     AbletonEvent.TRACK_ARM: list(range(77, 85)),
-
     AbletonEvent.TRACK_NEXT_8: 85,
     AbletonEvent.TRACK_PREV_8: 86,
-
     AbletonEvent.MASTER_VOL: 87,
     AbletonEvent.CUE_VOL: 88,
     AbletonEvent.CROSSFADER: 89,
-
     AbletonEvent.STOP: 90,
     AbletonEvent.PLAY: 91,
     AbletonEvent.REC: 92,
@@ -34,7 +30,7 @@ _BUTTONS_CC_VALUES = {
     AbletonEvent.PUNCH_OUT: 100,
     AbletonEvent.NUDGE_UP: 101,
     AbletonEvent.NUDGE_DOWN: 102,
-    AbletonEvent.TAP_TEMPO: 103
+    AbletonEvent.TAP_TEMPO: 103,
 }
 
 _SLIDERS_CC_VALUES = {
@@ -48,8 +44,9 @@ _MESSAGETYPE = MidiType.CONTROL_CHANGE
 _CHANNEL = 15
 
 
-def _cc_map_to_msg_map(cc_map: dict[AbletonEvent, int | list]) \
-        -> dict[AbletonEvent, tuple[MidiType, int, int] | list[tuple[MidiType, int, int]]]:
+def _cc_map_to_msg_map(
+    cc_map: dict[AbletonEvent, int | list],
+) -> dict[AbletonEvent, tuple[MidiType, int, int] | list[tuple[MidiType, int, int]]]:
     msg_map = {}
     for event, value in cc_map.items():
         if isinstance(value, int):
@@ -59,8 +56,9 @@ def _cc_map_to_msg_map(cc_map: dict[AbletonEvent, int | list]) \
     return msg_map
 
 
-def _reversed_event_to_msg_map(source_map: dict[AbletonEvent, tuple[MidiType, int, int] | list]) \
-        -> dict[tuple[MidiType, int, int], tuple[AbletonEvent, int | None]]:
+def _reversed_event_to_msg_map(
+    source_map: dict[AbletonEvent, tuple[MidiType, int, int] | list],
+) -> dict[tuple[MidiType, int, int], tuple[AbletonEvent, int | None]]:
     reversed_map = {}
     for event, item in source_map.items():
         if isinstance(item, tuple):
