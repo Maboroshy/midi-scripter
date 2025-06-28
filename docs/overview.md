@@ -5,7 +5,7 @@ from midiscripter import *
 
 # 1. Ports
 midi_keyboard = MidiIn('MIDI Keyboard')
-proxy_output = MidiOut('To DAW')
+proxy_output = MidiOut('To DAW', virtual=True)
 
 # 2. GUI widgets
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
@@ -32,11 +32,10 @@ Port are typically declared as `port_class(name_or_adress)` or `port_class
 ()` for those that don't need a name. For detailed information 
 on how to declare specific ports, refer to the API documentation.
 
-On Linux and macOS it's possible to create virtual MIDI ports with 
-`MidiIn('Virtual port name', virtual=True)`. On Windows you'll have to manually 
-create virtual ports using [loopMIDI](https://www.tobias-erichsen.
-de/software/loopmidi.html). 
-Virtual MIDI ports can be used to write proxy scripts, like the one above.
+Virtual MIDI ports can be created with `MidiIn('Virtual port name', 
+virtual=True)` (installed 
+[loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) 
+required for Windows). Virtual MIDI ports can be used to write proxy scripts, like the one above.
 
 Port declaration is all you need to use the port, the starter
 function does the rest.

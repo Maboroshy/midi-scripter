@@ -1,7 +1,8 @@
 from midiscripter import *
 
+
 input_port = MidiIn('Enter port name')
-output_port = MidiOut('loopMIDI')
+output_port = MidiOut('To DAW', virtual=True)
 
 
 @input_port.subscribe

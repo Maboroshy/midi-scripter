@@ -9,7 +9,6 @@ and a GUI button to disable the overlay.
 
 ## Prerequisites
 
-- 'To DAW LPX' and 'From DAW LPX' virtual ports.
 - [AbletonOSC](https://github.com/ideoforms/AbletonOSC) 
 to set and get the selected scene.
 - Set virtual ports as proxies for Launchpad X:

@@ -10,7 +10,6 @@ controller on bank selection.
 
 ## Prerequisites
 
-- 'To DAW' and 'From DAW' virtual ports.
 - Replace `'MIDI Controller'` with your MIDI controller port name.
 - Set 'To DAW' virtual port as an input in your DAW.
 - Set 'From DAW' virtual port as an output from your DAW.

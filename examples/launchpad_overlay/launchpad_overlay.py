@@ -13,8 +13,8 @@ send_to_overlay_msg_conditions = (MidiType.CONTROL_CHANGE, LPX_CHANNEL, SCENES_C
 from_LPX = MidiIn('LPX MIDI')
 to_LPX = MidiOut('LPX MIDI')
 
-to_daw_lpx = MidiOut('To DAW LPX')
-from_daw_lpx = MidiIn('From DAW LPX')
+to_daw_lpx = MidiOut('To DAW LPX', virtual=True)
+from_daw_lpx = MidiIn('From DAW LPX', virtual=True)
 
 ableton_osc_in = OscIn(11001)
 ableton_osc_out = OscOut(11000)

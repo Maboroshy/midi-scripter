@@ -7,6 +7,7 @@ from PySide6.QtWidgets import *
 
 from midiscripter.base.port_base import Input, Output, SubscribedCall, Port
 from midiscripter.midi import MidiIn, MidiOut, MidiPortsChangedIn
+from midiscripter.midi.midi_port import _MidiPortMixin
 from midiscripter.osc import OscIn, OscOut
 from midiscripter.ableton_remote import AbletonIn, AbletonOut
 from midiscripter.keyboard import KeyIn, KeyOut
@@ -23,11 +24,10 @@ class PortWidgetItem(QTreeWidgetItem):
 
 
 class PortItemMixin:
+    VIRTUAL_PORT_MARKER = 'ⓥ'
     port_instance: Input | Output
 
-    def request_state_change(
-        self: 'GeneralPortItem | MidiPortItem | KeyInputPortItem', state: bool
-    ) -> bool:
+    def request_state_change(self: 'GeneralPortItem | MidiPortItem', state: bool) -> bool:
         if state:
             self.port_instance._open()
 
@@ -62,8 +62,15 @@ class GeneralPortItem(PortItemMixin, PortWidgetItem):
         self.port_instance = port_instance
         self.repr = self.port_instance.__repr__()
 
-        item_text = self.port_instance._force_uid or str(self.port_instance._uid)
-        super().__init__(parent_item, (item_text,))
+        item_name = self.port_instance._force_uid or str(self.port_instance._uid)
+
+        try:
+            if self.port_instance._is_virtual:
+                item_name = f'{item_name} {self.VIRTUAL_PORT_MARKER}'
+        except AttributeError:
+            pass
+
+        super().__init__(parent_item, (item_name,))
 
         self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(f'dark{port_instance._gui_color}'))
 
@@ -118,7 +125,6 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
 
     port_instance: None | MidiIn | MidiOut
     PORT_CLASS: type[MidiIn | MidiOut]
-    VIRTUAL_PORT_PREFIX = '[v]'
 
     def __init__(self, parent_item: QTreeWidgetItem, port_name: str):
         self.port_name = port_name
@@ -126,7 +132,7 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
         self.repr = f"{self.PORT_CLASS.__name__}('{self.port_name}')"
 
         if self.port_instance and self.port_instance._is_virtual:
-            item_name = f'{self.VIRTUAL_PORT_PREFIX} {self.port_name}'
+            item_name = f'{self.port_name} {self.VIRTUAL_PORT_MARKER}'
         else:
             item_name = self.port_name
 
@@ -317,6 +323,10 @@ class PortsView(QTreeWidget):
         return top_item
 
     def __add_midi_ports(self) -> None:
+        virtual_port_names = [port._uid for port in _MidiPortMixin._instances if port._is_virtual]
+        ableton_port_instances = itertools.chain(AbletonIn._instances, AbletonOut._instances)
+        ableton_remote_port_names = [port.name for port in ableton_port_instances]
+
         for title, item_class in [
             ('MIDI Inputs', InputMidiPortItem),
             ('MIDI Outputs', OutputMidiPortItem),
@@ -324,18 +334,13 @@ class PortsView(QTreeWidget):
             top_item = self.__add_top_level_item(title)
             port_class = item_class.PORT_CLASS
 
-            ableton_port_instances = itertools.chain(AbletonIn._instances, AbletonOut._instances)
-            ableton_remote_port_names = [port.name for port in ableton_port_instances]
-
-            virtual_port_names = [port._uid for port in port_class._instances if port._is_virtual]
-            for port_name in virtual_port_names:
-                if port_name not in ableton_remote_port_names:
-                    item_class(top_item, port_name)
+            for port in port_class._instances:
+                if port._is_virtual and port._uid not in ableton_remote_port_names:
+                    item_class(top_item, port._uid)
 
             for port_name in port_class._get_available_names():
-                if port_name in ableton_remote_port_names:
-                    continue
-                item_class(top_item, port_name)
+                if port_name not in virtual_port_names:
+                    item_class(top_item, port_name)
 
             for port_instance in port_class._instances:
                 if not port_instance._is_available and port_instance._uid not in virtual_port_names:

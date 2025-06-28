@@ -46,18 +46,14 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
     _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut]
 
     # noinspection PyMissingConstructor
-    def __init__(
-        self,
-        port_name: str,
-        virtual: bool,
-        input_callback: 'Callable | None' = None,
-    ):
+    def __init__(self, port_name: str, virtual: bool, input_callback: 'Callable | None' = None):
         self.name = port_name
         self.name: str
         """MIDI port name"""
         self._is_virtual = virtual
         self._input_callback = input_callback
-        self._rtmidi_port = None
+        self._rtmidi_port: rtmidi.MidiIn | rtmidi.MidiOut | None = None
+        self._pytemidi_port: 'midiscripter.midi.teVirtualMIDI.Device' | None = None  # noqa: UP037
 
     @classmethod
     def _get_available_names(cls) -> list[str]:
@@ -82,18 +78,32 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 
     def _open(self) -> None:
         self._rtmidi_port = self._rtmidi_port_class()
-        if self._input_callback:
+        is_input = bool(self._input_callback)
+
+        if is_input:
             self._rtmidi_port.ignore_types(sysex=False)
             self._rtmidi_port.set_callback(self._input_callback)
 
         try:
             if self._is_virtual:
                 if platform.system() == 'Windows':
-                    log.red('Failed to open {port}', port=self)
-                    log.red('Virtual ports are not available on Windows. Use loopMIDI.')
-                    return
+                    import midiscripter.midi.teVirtualMIDI
 
-                self._rtmidi_port.open_virtual_port(self.name)
+                    if self.name in midiscripter.midi.teVirtualMIDI.Device.opened_port_names:
+                        log.red(
+                            "Can't create virtual port {port}. "
+                            'Virtual MIDI port with the same name already exists.',
+                            port=self,
+                        )
+                        raise AttributeError
+
+                    self._pytemidi_port = midiscripter.midi.teVirtualMIDI.Device(
+                        self.name, self._input_callback, no_input=not is_input, no_output=is_input
+                    )
+                    self._pytemidi_port.create()
+                else:
+                    self._rtmidi_port.open_virtual_port(self.name)
+
                 log('Created and opened virtual port {port}', port=self)
 
             else:
@@ -110,10 +120,15 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 
     def _close(self) -> None:
         try:
-            self._rtmidi_port.close_port()
-            self._rtmidi_port.delete()
-            self._rtmidi_port = None
+            if self._pytemidi_port:
+                self._pytemidi_port.close()
+            else:
+                self._rtmidi_port.close_port()
+                self._rtmidi_port.delete()
+                self._rtmidi_port = None
+
             self.is_enabled = False
+
             log('Closed {port}', port=self)
         except Exception:
             log.red('Failed to close {port}', port=self)
@@ -128,10 +143,10 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         """
         Args:
             port_name: MIDI input port name
-            virtual: Create virtual port (Linux and macOS only)
+            virtual: Create virtual port
         """
         _MidiPortMixin.__init__(self, port_name, virtual, self._callback)
-        midiscripter.base.port_base.Input.__init__(self, port_name)
+        midiscripter.base.port_base.Input.__init__(self, self.name)
 
         self.attached_passthrough_outs: list[MidiOut] = []
         """[`MidiOut`][midiscripter.MidiOut] ports attached as pass-through ports
@@ -173,12 +188,19 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
     def _open(self) -> None:
         _MidiPortMixin._open(self)
 
-    def _callback(self, rt_midi_input: list[list[hex, ...], float], _: list) -> None:
+    @overload
+    def _callback(self, rtmidi_input: list[list[hex, ...], float], _: list) -> None: ...
+
+    @overload
+    def _callback(self, pytemidi_input: list[hex, ...]) -> None: ...
+
+    def _callback(self, *args) -> None:
         if not self.is_enabled:
             return
-        rt_midi_data, _ = rt_midi_input
-        [output._passthrough_send(rt_midi_data) for output in self.attached_passthrough_outs]
-        self._send_input_msg_to_calls(self._convert_to_msg(rt_midi_data))
+
+        raw_midi_data = args[0] if self._pytemidi_port else args[0][0]
+        [output._passthrough_send(raw_midi_data) for output in self.attached_passthrough_outs]
+        self._send_input_msg_to_calls(self._convert_to_msg(raw_midi_data))
 
     @staticmethod
     def _raw_channel_midi_to_attrs(rt_midi_data: list[hex, ...]) -> tuple[MidiType, int, ...]:
@@ -213,10 +235,10 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
         """
         Args:
             port_name: MIDI output port name
-            virtual: Create virtual port (Linux and macOS only)
+            virtual: Create virtual port
         """
         _MidiPortMixin.__init__(self, port_name, virtual)
-        midiscripter.base.port_base.Output.__init__(self, port_name)
+        midiscripter.base.port_base.Output.__init__(self, self.name)
 
     def send(self, msg: MidiMsg) -> None:
         """Send the MIDI message.
@@ -228,25 +250,31 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
             return
 
         if msg.type == MidiType.SYSEX:
-            rt_midi_output = msg.combined_data
+            raw_midi_output = msg.combined_data
         else:
             status_byte = (TYPE_TO_BYTE_MAP[msg.type] & 0xF0) | (msg.channel - 1 & 0xF)
             msg_raw_data = status_byte, msg.data1, msg.data2
-            rt_midi_output = msg_raw_data[: TYPE_TO_DATA_BYTES_COUNT[msg.type]]
+            raw_midi_output = msg_raw_data[: TYPE_TO_DATA_BYTES_COUNT[msg.type]]
 
         try:
-            self._rtmidi_port.send_message(rt_midi_output)
+            if self._pytemidi_port:
+                self._pytemidi_port.send(raw_midi_output)
+            else:
+                self._rtmidi_port.send_message(raw_midi_output)
         except Exception:
-            # For _rtmidi.SystemError: MidiOutWinMM::sendMessage: error sending MIDI message
+            # For _rtmidi.SystemError or teVirtualMIDI.DriverError
             log.red(f'Failed to send message: {msg}')
             return
 
         self._log_msg_sent(msg)
 
-    def _passthrough_send(self, rt_midi_data: tuple[hex, hex, hex]) -> None:
+    def _passthrough_send(self, raw_midi_data: tuple[hex, ...]) -> None:
         if self.is_enabled:
             try:
-                self._rtmidi_port.send_message(rt_midi_data)
+                if self._pytemidi_port:
+                    self._pytemidi_port.send(raw_midi_data)
+                else:
+                    self._rtmidi_port.send_message(raw_midi_data)
             except Exception:
-                # For _rtmidi.SystemError: MidiOutWinMM::sendMessage: error sending MIDI message
-                log.red(f'Failed to send message data: {rt_midi_data}')
+                # For _rtmidi.SystemError or teVirtualMIDI.DriverError
+                log.red(f'Failed to send message data: {raw_midi_data}')

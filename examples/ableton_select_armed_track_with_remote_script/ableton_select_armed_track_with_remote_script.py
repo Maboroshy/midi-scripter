@@ -2,8 +2,8 @@ from midiscripter import *
 from ableton_remote import *
 
 
-ableton_in = AbletonIn('From Ableton Script')
-ableton_out = AbletonOut('To Ableton Script')
+ableton_in = AbletonIn('Ableton Script', virtual=True)
+ableton_out = AbletonOut('Ableton Script', virtual=True)
 
 
 @ableton_in.subscribe(AbletonEvent.TRACK_ARM, value=True)

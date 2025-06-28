@@ -1,7 +1,7 @@
 from midiscripter import *
 
 piano = MidiIn('MIDI Keyboard')
-midi_output_to_ableton = MidiOut('To DAW')
+midi_output_to_ableton = MidiOut('To DAW', virtual=True)
 piano.passthrough_out(midi_output_to_ableton)
 
 ableton_osc_in = OscIn(11001)

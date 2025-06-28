@@ -20,7 +20,7 @@ An octave transposer with GUI controls in 10 lines of code:
 from midiscripter import *
 
 midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you with port names
-proxy_output = MidiOut('To DAW')  # using virtual proxy port for output
+proxy_output = MidiOut('To DAW', virtual=True)  # virtual proxy port for output
 
 # GUI control in a single line
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
@@ -55,15 +55,17 @@ should work on macOS.
 
 #### Basic Functionality:
 
+- Create proxy MIDI ports.
 - Receive input messages from MIDI, OSC, keyboard and mouse.
-- Filter, modify, and manipulate messages using Python.
-- Send modified or newly generated MIDI, OSC, keyboard, and mouse messages.
+- Filter, modify and manipulate messages using Python.
+- Send modified or generated MIDI, OSC, keyboard, and mouse messages.
 
 #### For Music Performance MIDI Setups:
 
 - Create additional banks and layers to enhance MIDI controllers.
 - Organize mappings into sets or scenes using with GUI dashboard.
-- Add overlay mappings on top of your MIDI controller’s DAW integration using proxies.
+- Add overlay mappings on top of your MIDI controller’s DAW integration 
+  using proxy ports.
 - Combine multiple MIDI controllers into a single unit with any logic.
 - Control Ableton Live through a [special remote script or AbletonOSC]().
 
@@ -89,8 +91,8 @@ should work on macOS.
 Extra steps for Windows:
 
 1. Enable `Add python .exe to PATH` option in Python installer.
-2. Install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html)
-   and set required virtual MIDI ports inside it.
+2. Install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) 
+   for virtual ports support.
 
 ## Quick Start Guide
 

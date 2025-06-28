@@ -6,7 +6,7 @@ import music21.roman
 from midiscripter import *
 
 
-midi_input_from_daw = MidiIn('From DAW')  # MIDI input from (after) DAW
+midi_input_from_daw = MidiIn('From DAW', virtual=True)  # MIDI input from (after) DAW
 
 pressed_notes_midi_data = []  # A global variable
 

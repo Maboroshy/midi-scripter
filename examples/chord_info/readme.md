@@ -14,7 +14,7 @@ Degree for chords out of scale will be printed red.
 - music21 library: `pip install music21` in console.
 - Replace `'From DAW'` with your MIDI controller port name to get input
   directly.
-- Or use 'From DAW' virtual port, then set this port as an output from your DAW.
+- Or use 'From DAW' virtual port as an output from your DAW.
 - Arrange the widgets in the script's GUI.
 
 ## Notes

@@ -11,8 +11,8 @@ BANK_SELECTOR_CC_CONTROL = 1
 from_midi_controller = MidiIn('MIDI Controller')
 to_midi_controller = MidiOut('MIDI Controller')
 
-to_daw = MidiOut('To DAW')
-from_daw = MidiIn('From DAW')
+to_daw = MidiOut('To DAW', virtual=True)
+from_daw = MidiIn('From DAW', virtual=True)
 
 bank_selector_widget = GuiButtonSelectorH(
     'Bank Selector', tuple(str(n) for n in range(1, NUMBER_OF_BANKS + 1))
