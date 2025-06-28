@@ -33,9 +33,10 @@ def precise_epoch_time() -> float:
 
 
 def restart_script() -> None:
-    """Exit and restart the current script"""
-    os.execv(sys.executable, ['python', script_path])
-    exit(0)
+    """Restart the current script"""
+
+    os.spawnl(os.P_DETACH, sys.executable, 'python', script_path)  # TODO TEST
+    sys.exit(0)
 
 
 def _raise_current_process_cpu_priority() -> None:
