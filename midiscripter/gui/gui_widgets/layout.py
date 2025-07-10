@@ -22,8 +22,8 @@ class GuiWidgetLayout:
         Args:
             title: Layout title in GUI
             rows: A tuple of items to put in a row.
-                  Items can be widgets, layouts or tuples of widgets or layouts.
-                  If item is a tuple it's a column of items inside the tuple.
+                  Items can be widgets, layouts, `None` for spacers or tuples of all above.
+                  If item is a tuple, it's a column of items in the tuple.
             spacing: space between layout items
 
         Example:
@@ -54,7 +54,7 @@ class GuiWidgetLayout:
 
         Note:
             Calls can't be subscribed to `GuiWidgetLayout`.
-            Pre-declare widgets and subscribe calls to them.
+            Subscribe calls to widgets.
         """
         self.qt_widget = QWidget()
         self.qt_widget.setObjectName(title)
@@ -68,17 +68,19 @@ class GuiWidgetLayout:
         midiscripter.gui.app.add_qwidget(self.qt_widget)
 
     def __populate_layout(
-        self, layout: QBoxLayout, items: 'Sequence[GuiWidget, GuiWidgetLayout, Sequence]'
+        self, layout: QBoxLayout, items: 'Sequence[GuiWidget, GuiWidgetLayout, Sequence, None]'
     ) -> None:
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(self.__spacing)
 
-        for gui_widget_or_seq in items:
-            if not isinstance(gui_widget_or_seq, Sequence):
-                layout.addWidget(gui_widget_or_seq.qt_widget)
-                midiscripter.gui.app.remove_qwidget(gui_widget_or_seq.qt_widget)
+        for item in items:
+            if item is None:
+                layout.addStretch(1)
+            elif not isinstance(item, Sequence):
+                layout.addWidget(item.qt_widget, 1)
+                midiscripter.gui.app.remove_qwidget(item.qt_widget)
             else:
                 # Flip layout type
                 child_layout = QVBoxLayout() if isinstance(layout, QHBoxLayout) else QHBoxLayout()
-                layout.addLayout(child_layout)
-                self.__populate_layout(child_layout, gui_widget_or_seq)
+                layout.addLayout(child_layout, 1)
+                self.__populate_layout(child_layout, item)
