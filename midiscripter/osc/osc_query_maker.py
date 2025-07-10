@@ -18,11 +18,10 @@ class OscQueryMaker:
         """
         self.__osc_in = osc_in
         self.__osc_out = osc_out
-
-        self.__last_msg = OscMsg('')
-        self.__new_msg_condition = threading.Condition()
-
         osc_in.subscribe(self.__osc_query_listener)
+
+        self.__new_msg_condition = threading.Condition()
+        self.__last_msg = OscMsg('')
 
     def __osc_query_listener(self, msg: OscMsg) -> None:
         with self.__new_msg_condition:
@@ -48,6 +47,8 @@ class OscQueryMaker:
             Response OSC message data
         """
         with self.__new_msg_condition:
+            self.__last_msg = OscMsg('')
+
             log(
                 "Requesting '{address}' data from OSC {input}", address=address, input=self.__osc_in
             )
