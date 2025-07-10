@@ -15,7 +15,7 @@ class AdaptablePushButtonWidget(AdaptiveTextSizeMixin, WrappedQWidgetMixin, QPus
         self.set_content = self.setText
 
     def set_content(self, content: str) -> None:
-        raise self.setText(str(content))
+        self.setText(str(content))
 
 
 class ButtonWidget(AdaptablePushButtonWidget):

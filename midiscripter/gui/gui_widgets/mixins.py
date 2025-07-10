@@ -34,10 +34,6 @@ class WrappedQWidgetMixin:
         self.set_range_signal.connect(self.set_range)
 
     # Setters only, getters not used
-
-    def set_content(self, content: Any | Sequence[Any]) -> None:
-        raise NotImplementedError
-
     def set_range(self, range: tuple[int | float, int | float]) -> None:
         raise NotImplementedError
 
@@ -50,6 +46,11 @@ class WrappedQWidgetMixin:
         self.setPalette(palette)
 
     # Getters and setters
+    def get_content(self) -> Any | Sequence[Any]:
+        raise NotImplementedError
+
+    def set_content(self, content: Any | Sequence[Any]) -> None:
+        raise NotImplementedError
 
     def get_value(self) -> str | None:
         raise NotImplementedError
@@ -91,14 +92,14 @@ class AdaptiveTextSizeMixin:
             text_rect.height() > self.__longest_text_rect_size.height()
             or text_rect.width() > self.__longest_text_rect_size.width()
         ):
-            self.__make_text_size_fit_widget_size()
+            self._make_text_size_fit_widget_size()
             self.__longest_text_rect_size = text_rect
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
-        self.__make_text_size_fit_widget_size()
+        self._make_text_size_fit_widget_size()
 
-    def __make_text_size_fit_widget_size(self: QWidget) -> None:
+    def _make_text_size_fit_widget_size(self: QWidget) -> None:
         if not self.text():
             return
 

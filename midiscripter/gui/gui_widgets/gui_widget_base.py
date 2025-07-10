@@ -83,32 +83,26 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
         self.__connect_change_signals_to_msgs()
 
-    def __connect_change_signals_to_msgs(self) -> None:  # TODO TEST
+    def __connect_change_signals_to_msgs(self) -> None:
         self.qt_widget.triggered_signal.connect(
             lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.TRIGGERED))
         )
         self.qt_widget.content_changed_signal.connect(
-            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.CONTENT_SET, self._content))
+            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.CONTENT_SET, self.content))
         )
         self.qt_widget.value_changed_signal.connect(
-            lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEvent.VALUE_CHANGED, self.qt_widget.get_value())
-            )
+            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.VALUE_CHANGED, self.value))
         )
         self.qt_widget.selection_changed_signal.connect(
             lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEvent.SELECTED, self.qt_widget.get_selected_item_text())
+                GuiEventMsg(GuiEvent.SELECTED, self.selected_item_text)
             )
         )
         self.qt_widget.toggle_state_changed_signal.connect(
-            lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEvent.TOGGLED, self.qt_widget.get_toggle_state())
-            )
+            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.TOGGLED, self.toggle_state))
         )
         self.qt_widget.range_changed_signal.connect(
-            lambda: self._send_input_msg_to_calls(
-                GuiEventMsg(GuiEvent.RANGE_SET, self.qt_widget.get_range())
-            )
+            lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.RANGE_SET, self.range))
         )
 
     @property
