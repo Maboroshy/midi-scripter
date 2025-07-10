@@ -16,9 +16,9 @@ if platform.system() == 'Windows':
 
 
 try:
-    script_path = __main__.__file__
+    script_path_str: None | str = __main__.__file__
 except AttributeError:  # in subprocess or IPython
-    script_path = None
+    script_path_str: None | str = None
 
 
 thread_executor = concurrent.futures.ThreadPoolExecutor(100)
@@ -34,7 +34,7 @@ def precise_epoch_time() -> float:
 
 def restart_script() -> None:
     """Restart the current script"""
-    os.spawnl(os.P_DETACH, sys.executable, 'python', script_path)
+    os.spawnl(os.P_DETACH, sys.executable, 'python', script_path_str)
     sys.exit(0)
 
 
@@ -49,7 +49,7 @@ def _raise_current_process_cpu_priority() -> None:
 class AutostartManager:
     def __init__(self):
         self.__autostart_shortcut_prefix = 'MIDI Scripter - '
-        self.__script_path = pathlib.Path(script_path).resolve()
+        self.__script_path = pathlib.Path(script_path_str).resolve()
         self.__shortcut_name = f'{self.__autostart_shortcut_prefix}{self.__script_path.stem}'
 
         if platform.system() == 'Windows':

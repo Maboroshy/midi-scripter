@@ -28,8 +28,8 @@ class ScripterGUI(QApplication):
     def __init__(self):
         super().__init__()
         self.setOrganizationName('MIDI Scripter')
-        if midiscripter.shared.script_path:
-            self.setApplicationName(pathlib.Path(midiscripter.shared.script_path).name)
+        if midiscripter.shared.script_path_str:
+            self.setApplicationName(pathlib.Path(midiscripter.shared.script_path_str).name)
 
         self.setApplicationDisplayName(f'{self.applicationName()} - {self.organizationName()}')
 
@@ -78,8 +78,8 @@ class ScripterGUI(QApplication):
 
         self.request_restart.emit()
 
-    def restart(self) -> NoReturn:
-        if pathlib.Path(midiscripter.shared.script_path).is_file():
+    def restart(self) -> None:
+        if pathlib.Path(midiscripter.shared.script_path_str).is_file():
             # These settings saved only for restart
             self.processEvents()  # update win status to get correct status
             QSettings().setValue('restart win minimized', self.main_window.isMinimized())
@@ -123,7 +123,7 @@ def remove_qwidget(qwidget: QWidget) -> None:
 
 def start_gui() -> NoReturn:
     """Starts the script and runs GUI. Logging goes to GUI Log widget."""
-    if not midiscripter.shared.script_path:
+    if not midiscripter.shared.script_path_str:
         raise RuntimeError('Starter can only be called from a script')
 
     midiscripter.shared._raise_current_process_cpu_priority()
@@ -141,7 +141,7 @@ def start_gui() -> NoReturn:
         app_instance.prepare_main_window(start_minimized_to_tray)
         exit_status = app_instance.exec()
 
-    if exit_status == 1467:  # exit status for restart request
+    if exit_status == 1467:  # restart request, can't do sys.exit() while Qt app works
         midiscripter.shared.restart_script()
     else:
         exit(exit_status)

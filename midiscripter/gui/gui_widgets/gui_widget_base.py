@@ -20,7 +20,9 @@ class GuiWidget(midiscripter.base.port_base.Input):
     _qt_widget_class: type[QWidget, 'WrappedQWidgetMixin']
 
     _content: Any | tuple[Any, ...]
-    """Current content"""
+    """Current content. 
+    Allows to store `Any` object as content, even if it's `str` for a QWidget.
+    """
 
     _color: str | tuple[int, int, int] | None = None
     """Current color"""
@@ -55,6 +57,7 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
         self.title = str(title_and_content)
         """Widget's title"""
+
         super().__init__(self.title)
 
         self.qt_widget = self._qt_widget_class()  # workaround for mkdocstrings issue #607
@@ -78,9 +81,9 @@ class GuiWidget(midiscripter.base.port_base.Input):
         if range:
             self.range = range
 
-        self.__connect_change_signals()
+        self.__connect_change_signals_to_msgs()
 
-    def __connect_change_signals(self) -> None:
+    def __connect_change_signals_to_msgs(self) -> None:  # TODO TEST
         self.qt_widget.triggered_signal.connect(
             lambda: self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.TRIGGERED))
         )

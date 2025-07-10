@@ -8,8 +8,7 @@ from PySide6.QtWidgets import *
 
 # noinspection PyUnresolvedReferences
 class WrappedQWidgetMixin:
-    # Signals are required to emit them from another thread.
-    # That is not possible for setter methods below.
+    # Setter methods can't be successfully called from another thread, so signals are used
     set_content_signal = Signal(object)
     set_value_signal = Signal(object)
     set_selection_signal = Signal(object)

@@ -84,11 +84,11 @@ class MenuBar(QMenuBar):
         file_path_str = QFileDialog.getOpenFileName(
             self,
             'Select python script',
-            str(pathlib.Path(midiscripter.shared.script_path).parent),
+            str(pathlib.Path(midiscripter.shared.script_path_str).parent),
             'Python script (*.py)',
         )[0]
         if file_path_str:
-            midiscripter.shared.script_path = file_path_str
+            midiscripter.shared.script_path_str = file_path_str
             QApplication.instance().restart()
 
     @Slot(bool)
@@ -116,7 +116,7 @@ class MenuBar(QMenuBar):
     def __set_watching_script_file(self, state: bool) -> None:
         if state:
             self.file_watcher_port = midiscripter.file_event.FileEventIn(
-                midiscripter.shared.script_path
+                midiscripter.shared.script_path_str
             )
             self.file_watcher_port.subscribe(QApplication.instance().restart_at_file_change)
             self.file_watcher_port._open()

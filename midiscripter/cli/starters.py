@@ -39,7 +39,7 @@ def start_silent() -> NoReturn:
 
 def _run_cli_loop() -> NoReturn:
     """Opens the ports and loops until broken by user."""
-    if not midiscripter.shared.script_path:
+    if not midiscripter.shared.script_path_str:
         raise RuntimeError('Starter can only be called from a script')
 
     midiscripter.shared._raise_current_process_cpu_priority()
