@@ -2,11 +2,20 @@
     options:
       members:
         - content
-        - title
         - color
         - toggle_state
         - is_visible
         - qt_widget
-        - is_enabled
+        - calls
+        - subscribe
+
+## :::midiscripter.GuiEditableText
+    options:
+      members:
+        - content
+        - color
+        - toggle_state
+        - is_visible
+        - qt_widget
         - calls
         - subscribe

@@ -1,4 +1,4 @@
-from typing import overload, Any
+from collections.abc import Sequence
 
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import *
@@ -25,41 +25,24 @@ class ButtonWidget(AdaptablePushButtonWidget):
 
 
 class GuiButton(GuiWidget):
-    """Simple button widget."""
+    """Simple button widget"""
 
     _qt_widget_class = ButtonWidget
 
     def __init__(
         self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiToggleButton(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-            )
-            ```
-            ``` python
-            GuiToggleButton(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-            )
-            ```
-
         Args:
-            title_and_content: Widget's title and button text, should be unique among all widgets.
-            content: Button text, if set `title_and_content` is used only for title
+            content: Button text
             color: Button text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color)
+        super().__init__(content, color=color, title=title)
 
 
 class ToggleButtonWidget(AdaptablePushButtonWidget):
@@ -73,64 +56,26 @@ class ToggleButtonWidget(AdaptablePushButtonWidget):
 
 
 class GuiToggleButton(GuiWidget):
-    """Toggleable button."""
+    """Toggleable button"""
 
     _qt_widget_class = ToggleButtonWidget
 
-    @overload
     def __init__(
         self,
-        title: Any,
-        content: Any,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool | None = None,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        content: Any,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool | None = None,
-    ): ...
-
-    def __init__(
-        self,
-        title_and_content: Any,
-        content: Any | None = None,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool | None = None,
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiToggleButton(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                toggle_state: bool = False
-            )
-            ```
-            ``` python
-            GuiToggleButton(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                toggle_state: bool = False
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Button text
             color: Button text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             toggle_state: Button initial toggle state
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, toggle_state=toggle_state)
+        super().__init__(content, color=color, toggle_state=toggle_state, title=title)
 
     def __bool__(self):
         return self.toggle_state
@@ -194,64 +139,26 @@ class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
 
 
 class GuiButtonSelectorH(GuiWidget):
-    """Button group to select value, horizontal layout."""
+    """Button group to select value, horizontal layout"""
 
     _qt_widget_class = ButtonGroupWidgetHorizontal
 
-    @overload
     def __init__(
         self,
-        title: str,
-        content: tuple[str, ...],
+        content: Sequence[str] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        content: tuple[str, ...],
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        select: int | str | None = None,
-    ): ...
-
-    def __init__(
-        self,
-        title_and_content: Any | tuple[Any, ...] = None,
-        content: tuple[Any, ...] | None = None,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        select: int | str | None = None,
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiButtonSelectorH(
-                title: str,
-                content: tuple[str, ...],
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                select: int | str | None = None
-            )
-            ```
-            ``` python
-            GuiButtonSelectorH(
-                content: tuple[str, ...],
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                select: int | str | None = None
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Buttons' texts
             color: Selector button's text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: text or index of button to select initially
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, select=select)
+        super().__init__(content, color=color, select=select, title=title)
 
 
 class ButtonGroupWidgetVertical(ButtonGroupWidgetHorizontal):
@@ -263,57 +170,19 @@ class GuiButtonSelectorV(GuiWidget):
 
     _qt_widget_class = ButtonGroupWidgetVertical
 
-    @overload
     def __init__(
         self,
-        title: str,
-        content: tuple[str, ...],
+        content: Sequence[str] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        content: tuple[str, ...],
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        select: int | str | None = None,
-    ): ...
-
-    def __init__(
-        self,
-        title_and_content: Any | tuple[Any, ...] = None,
-        content: tuple[Any, ...] | None = None,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        select: int | str | None = None,
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiButtonSelectorV(
-                title: str,
-                content: tuple[str, ...],
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                select: int | str | None = None
-            )
-            ```
-            ``` python
-            GuiButtonSelectorV(
-                content: tuple[str, ...],
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                select: int | str | None = None
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Buttons' texts
             color: Selector button's text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: text or index of button to select initially
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, select=select)
+        super().__init__(content, color=color, select=select, title=title)

@@ -1,4 +1,4 @@
-from typing import overload, Any
+from collections.abc import Sequence
 
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
@@ -22,7 +22,7 @@ class ListSelectorWidget(WrappedQWidgetMixin, QListWidget):
 
         self.currentRowChanged.connect(self.selection_changed_signal)
 
-    def set_content(self, list_items: tuple[str]) -> None:
+    def set_content(self, list_items: Sequence[str]) -> None:
         self.addItems([str(item) for item in list_items])
 
     def set_selection(self, selection: int | str) -> None:
@@ -46,61 +46,23 @@ class ListSelectorWidget(WrappedQWidgetMixin, QListWidget):
 
 
 class GuiListSelector(GuiWidget):
-    """List of text items to select value."""
+    """List of text items to select value"""
 
     _qt_widget_class = ListSelectorWidget
 
-    @overload
     def __init__(
         self,
-        title: str,
-        content: tuple[str, ...],
+        content: Sequence[str] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         select: int | str | None = None,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        content: tuple[str, ...],
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        select: int | str | None = None,
-    ): ...
-
-    def __init__(
-        self,
-        title_and_content: Any | tuple[Any, ...],
-        content: tuple[Any, ...] | None = None,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        select: int | str | None = None,
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiListSelector(
-                title: str,
-                content: tuple[str, ...],
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                select: int | str | None = None
-            )
-            ```
-            ``` python
-            GuiListSelector(
-                content: tuple[str, ...],
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                select: int | str | None = None
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Items' texts
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             select: Text or index of item to select initially
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, select=select)
+        super().__init__(content, color=color, select=select, title=title)

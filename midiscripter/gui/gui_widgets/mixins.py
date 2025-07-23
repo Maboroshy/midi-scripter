@@ -1,4 +1,3 @@
-from typing import Any
 from collections.abc import Sequence
 
 from PySide6.QtCore import *
@@ -47,10 +46,10 @@ class WrappedQWidgetMixin:
         self.setPalette(palette)
 
     # Getters and setters
-    def get_content(self) -> Any | Sequence[Any]:
+    def get_content(self) -> str | Sequence[str]:
         raise NotImplementedError
 
-    def set_content(self, content: Any | Sequence[Any]) -> None:
+    def set_content(self, content: str | Sequence[str]) -> None:
         raise NotImplementedError
 
     def get_value(self) -> str | None:

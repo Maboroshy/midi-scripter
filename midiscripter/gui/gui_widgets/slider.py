@@ -1,5 +1,3 @@
-from typing import overload, Any
-
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
@@ -188,83 +186,41 @@ class HorizontalProgressBarWidget(_WrappedSliderMixin, QWidget):
 class _GuiSliderWidgetBase(GuiWidget):
     _qt_widget_class: QWidget
 
-    @overload
     def __init__(
         self,
-        title: Any,
-        content: Any,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
         range: tuple[int, int] = (0, 100),
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        content: Any,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        value: int = 0,
-        range: tuple[int, int] = (0, 100),
-    ): ...
-
-    def __init__(
-        self,
-        title_and_content: Any,
-        content: Any | None = None,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        value: int = 0,
-        range: tuple[int, int] = (0, 100),
+        title: str | None = None,
     ):
-        super().__init__(title_and_content, content, color=color, value=value, range=range)
+        super().__init__(content, color=color, value=value, range=range, title=title)
 
 
 class GuiKnob(_GuiSliderWidgetBase):
-    """Knob to set value."""
+    """Knob to set value"""
 
     _qt_widget_class = KnobWidget
 
     def __init__(
         self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
         range: tuple[int, int] = (0, 100),
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiKnob(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-            ``` python
-            GuiKnob(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Knob label
             color: Knob color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
             range: Knob value range
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, value=value, range=range)
+        super().__init__(content, color=color, value=value, range=range, title=title)
 
 
 class GuiSliderV(_GuiSliderWidgetBase):
@@ -274,43 +230,22 @@ class GuiSliderV(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
         range: tuple[int, int] = (0, 100),
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiSliderVertical(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-            ``` python
-            GuiSliderVertical(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Slider label
             color: Slider handle color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
             range: Slider value range
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, value=value, range=range)
+        super().__init__(content, color=color, value=value, range=range, title=title)
 
 
 class GuiSliderH(_GuiSliderWidgetBase):
@@ -320,43 +255,22 @@ class GuiSliderH(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
         range: tuple[int, int] = (0, 100),
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiSliderHorizontal(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-            ``` python
-            GuiSliderHorizontal(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Slider label
             color: Slider handle color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
             range: Slider value range
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, value=value, range=range)
+        super().__init__(content, color=color, value=value, range=range, title=title)
 
 
 class GuiProgressBarH(_GuiSliderWidgetBase):
@@ -366,43 +280,22 @@ class GuiProgressBarH(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
         range: tuple[int, int] = (0, 100),
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiProgressBarHorizontal(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-            ``` python
-            GuiProgressBarHorizontal(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Progress bar label
             color: Progress color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
             range: Progress bar value range
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, value=value, range=range)
+        super().__init__(content, color=color, value=value, range=range, title=title)
 
 
 class GuiProgressBarV(_GuiSliderWidgetBase):
@@ -412,40 +305,19 @@ class GuiProgressBarV(_GuiSliderWidgetBase):
 
     def __init__(
         self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: int = 0,
         range: tuple[int, int] = (0, 100),
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiProgressBarVertical(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-            ``` python
-            GuiProgressBarVertical(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                value: int = 0,
-                range: tuple[int, int] = (0, 100)
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Progress bar label
             color: Progress color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
             range: Progress bar value range
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, value=value, range=range)
+        super().__init__(content, color=color, value=value, range=range, title=title)

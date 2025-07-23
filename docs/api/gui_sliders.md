@@ -2,13 +2,11 @@
     options:
       members:
         - content
-        - title
         - color
         - value
         - range
         - is_visible
         - qt_widget
-        - is_enabled
         - calls
         - subscribe
 
@@ -16,13 +14,11 @@
     options:
       members:
         - content
-        - title
         - color
         - value
         - range
         - is_visible
         - qt_widget
-        - is_enabled
         - calls
         - subscribe
 
@@ -30,13 +26,11 @@
     options:
       members:
         - content
-        - title
         - color
         - value
         - range
         - is_visible
         - qt_widget
-        - is_enabled
         - calls
         - subscribe
 
@@ -44,13 +38,11 @@
     options:
       members:
         - content
-        - title
         - color
         - value
         - range
         - is_visible
         - qt_widget
-        - is_enabled
         - calls
         - subscribe
 
@@ -58,12 +50,10 @@
     options:
       members:
         - content
-        - title
         - color
         - value
         - range
         - is_visible
         - qt_widget
-        - is_enabled
         - calls
         - subscribe

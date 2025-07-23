@@ -11,15 +11,20 @@ midi_input_from_daw = MidiIn('From DAW', virtual=True)  # MIDI input from (after
 pressed_notes_midi_data = []  # A global variable
 
 # Setting GUI widgets
-root_selector = GuiButtonSelectorV(('C', 'D', 'E', 'F', 'G', 'A', 'B'), select='C')
-root_alteration_selector = GuiButtonSelectorV(('b', '♮', '#'), select='♮')
-mode_selector = GuiButtonSelectorV(('Major', 'Minor'), select='Major')
-buttons_layout = GuiWidgetLayout('Settings', [root_selector, [root_alteration_selector, 
-                                                              mode_selector]])  # fmt: skip
+root_selector = GuiButtonSelectorV(('C', 'D', 'E', 'F', 'G', 'A', 'B'), select='C', title='Root')
+root_alteration_selector = GuiButtonSelectorV(('b', '♮', '#'), select='♮', title='Alteration')
+mode_selector = GuiButtonSelectorV(('Major', 'Minor'), select='Major', title='Mode')
+
+buttons_layout = GuiWidgetLayout([root_selector, [root_alteration_selector, 
+                                                  mode_selector]], 
+                                 title='Settings')  # fmt: skip
+
 chord_degree_label = GuiText('Degree')
 chord_name_label = GuiText('Chord Name')
-labels_layout = GuiWidgetLayout('Info', chord_degree_label, 
-                                        chord_name_label)  # fmt: skip
+
+labels_layout = GuiWidgetLayout(chord_degree_label, 
+                                chord_name_label, 
+                                title='Info')  # fmt: skip
 
 
 @midi_input_from_daw.subscribe((MidiType.NOTE_ON, MidiType.NOTE_OFF))

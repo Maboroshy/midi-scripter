@@ -1,5 +1,6 @@
 import types
-from typing import TYPE_CHECKING, overload, Any
+from typing import TYPE_CHECKING, overload, Any, Self
+from collections.abc import Sequence
 
 from PySide6.QtWidgets import *
 
@@ -14,15 +15,47 @@ if TYPE_CHECKING:
     from .mixins import WrappedQWidgetMixin
 
 
-class GuiWidget(midiscripter.base.port_base.Input):
-    """GUI windows widget which also acts like an input port"""
+class GuiWindowItem:
+    """GUI windows item (widget, layout) which can also by bound to `GuiWidgetLayout`"""
+
+    _title: str
+    """Title for dock widget and position saving, set by content or type if `None`"""
+
+    _title_to_instance: dict[str, 'GuiWindowItem'] = {}
+    """Title to instances registry filled by `__init__`"""
+
+    _stretch_multiplier = 1
+    """Stretch multiplier for layout. Set by multiplying the object."""
+
+    def __init__(self, content: Any | None = None, title: str | None = None):
+        counter = 1
+        title_id = title or str(content) or self.__class__.__name__
+        title = title_id
+        while title in self._title_to_instance:
+            counter += 1
+            title = f'{title_id} {counter}'
+
+        self._title = title
+        self._title_to_instance[self._title] = self
+
+    def __mul__(self, multiplier: int) -> Self:
+        self._stretch_multiplier = multiplier
+        return self
+
+
+class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
+    """
+    GUI windows widget which can have calls subscribed to it's
+    [`GuiEventMsg`][midiscripter.GuiEventMsg].
+    """
+
+    _gui_color: str = 'green'
+    _log_show_link: bool = False
 
     _qt_widget_class: type[QWidget, 'WrappedQWidgetMixin']
 
-    _content: Any | tuple[Any, ...]
-    """Current content. 
-    Allows to store `Any` object as content, even if it's `str` for a QWidget.
-    """
+    _content: str | Sequence[str]
+    """Current content cache. Used when `self.qt_widget` has not `.get_content` method."""
 
     _color: str | tuple[int, int, int] | None = None
     """Current color"""
@@ -32,43 +65,40 @@ class GuiWidget(midiscripter.base.port_base.Input):
 
     def __init__(
         self,
-        title_and_content: Any | tuple[Any, ...],
-        content: Any | tuple[Any, ...] | None = None,
+        content: str | Sequence[str] | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         value: str | int | bool | None = None,
         select: int | str | None = None,
         toggle_state: bool | None = None,
         range: tuple[int, int] | None = None,
+        title: str | None = None,
     ):
         """
         Args:
-            title (Any): Widget's title
             content: Widget's text or text for its items
             color: Color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             value: Initial value
             select: Preselected item
             toggle_state: Initial toggle state
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        if isinstance(title_and_content, types.GeneratorType):
-            title_and_content = tuple(title_and_content)
-        if isinstance(content, types.GeneratorType):
-            content = tuple(content)
-
-        self.title = str(title_and_content)
-        """Widget's title"""
-
-        super().__init__(self.title)
+        midiscripter.base.port_base.Subscribable.__init__(self)
+        GuiWindowItem.__init__(self, content, title)
 
         self.qt_widget = self._qt_widget_class()  # workaround for mkdocstrings issue #607
 
-        self.qt_widget: QWidget
+        self.qt_widget: QWidget | WrappedQWidgetMixin
         """Wrapped `PySide6` `QWidget` that can be altered for extra customization"""
 
-        self.qt_widget.setObjectName(self.title)
+        self.qt_widget.setObjectName(self._title)
+
         midiscripter.gui.app.add_qwidget(self.qt_widget)
 
-        self.content = content if content is not None else title_and_content
+        if isinstance(content, types.GeneratorType):
+            content = tuple(content)
+
+        self.content = content
 
         if value:
             self.value = value
@@ -82,6 +112,9 @@ class GuiWidget(midiscripter.base.port_base.Input):
             self.range = range
 
         self.__connect_change_signals_to_msgs()
+
+    def __str__(self):
+        return self.qt_widget.objectName()
 
     def __connect_change_signals_to_msgs(self) -> None:
         self.qt_widget.triggered_signal.connect(
@@ -108,10 +141,13 @@ class GuiWidget(midiscripter.base.port_base.Input):
     @property
     def content(self) -> Any | tuple[Any, ...]:
         """Widget's text or text for its items"""
-        return self._content
+        try:
+            return self.qt_widget.get_content
+        except NotImplementedError:
+            return self._content
 
     @content.setter
-    def content(self, content: Any | tuple[Any, ...]) -> None:
+    def content(self, content: str | Sequence[str]) -> None:
         self._content = content
         self.qt_widget.set_content_signal.emit(content)
         self.qt_widget.content_changed_signal.emit()

@@ -1,5 +1,3 @@
-from typing import overload, Any
-
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
@@ -29,65 +27,27 @@ class GuiText(GuiWidget):
     """Text widget. Goes grey on toggle off.
 
     Tip:
-        Use `GuiText('⬤', 'LED 1', 'green')` for a toggleable "LED indicator".
+        Use `GuiText('⬤', color='green')` for a toggleable "LED indicator".
     """
 
     _qt_widget_class = AdaptableLabelWidget
 
-    @overload
     def __init__(
         self,
-        title: Any,
-        content: Any,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool | None = None,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        content: Any,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool | None = None,
-    ): ...
-
-    def __init__(
-        self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool = False,
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiText(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                toggle_state: bool = False
-            )
-            ```
-            ``` python
-            GuiText(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                toggle_state: bool = False
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Widget's text
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             toggle_state: Text "grey out" state
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, toggle_state=toggle_state)
+        super().__init__(content, color=color, toggle_state=toggle_state, title=title)
 
 
 class AdaptableLineEditWidget(AdaptiveTextSizeMixin, WrappedQWidgetMixin, QLineEdit):
@@ -137,60 +97,22 @@ class GuiEditableText(GuiWidget):
     _qt_widget_class = AdaptableLineEditWidget
     qt_widget: AdaptableLineEditWidget
 
-    @overload
     def __init__(
         self,
-        title: Any,
-        content: Any,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool | None = None,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        content: Any,
-        *,
-        color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool | None = None,
-    ): ...
-
-    def __init__(
-        self,
-        title_and_content: Any,
-        content: Any | None = None,
+        content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
         toggle_state: bool = False,
+        title: str | None = None,
     ):
         """
-        **Overloads:**
-            ``` python
-            GuiEditableText(
-                title: Any,
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                toggle_state: bool = False
-            )
-            ```
-            ``` python
-            GuiEditableText(
-                content: Any,
-                *,
-                color: str | tuple[int, int, int] | None = None,
-                toggle_state: bool = False
-            )
-            ```
-
         Args:
-            title (Any): Widget's title
             content: Widget's text
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
             toggle_state: Text "grey out" state
+            title: Title for dock widget and position saving, set by content or type if `None`
         """
-        super().__init__(title_and_content, content, color=color, toggle_state=toggle_state)
+        super().__init__(content, color=color, toggle_state=toggle_state, title=title)
 
     @property
     def content(self) -> str:

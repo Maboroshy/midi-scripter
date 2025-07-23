@@ -152,7 +152,7 @@ class MidiPortItem(PortItemMixin, PortWidgetItem):
         if not self.port_instance.is_enabled:
             self.port_instance._open()
             if isinstance(self.port_instance, Input):
-                self.port_instance._call_on_port_init()
+                self.port_instance._call_on_init()
 
         if self.port_instance.is_enabled:
             self.setCheckState(0, Qt.CheckState.Checked)

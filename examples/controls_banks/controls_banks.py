@@ -15,7 +15,7 @@ to_daw = MidiOut('To DAW', virtual=True)
 from_daw = MidiIn('From DAW', virtual=True)
 
 bank_selector_widget = GuiButtonSelectorH(
-    'Bank Selector', tuple(str(n) for n in range(1, NUMBER_OF_BANKS + 1))
+    tuple(str(n) for n in range(1, NUMBER_OF_BANKS + 1)), title='Bank Selector'
 )
 
 

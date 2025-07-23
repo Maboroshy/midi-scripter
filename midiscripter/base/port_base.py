@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class CallOn(enum.StrEnum):
-    """Special conditions to use as `@input_port.subscribe(argument)`."""
+    """Special conditions to use as `@input_port.subscribe(argument)`"""
 
     NOT_MATCHED_BY_ANY_CALL = 'NOT MATCHED BY ANY CALLS'
     """Call when a message is not matched by any other call"""
@@ -31,7 +31,7 @@ def _all_opened() -> None:
             port._open()
 
             if isinstance(port, Input):
-                port._call_on_port_init()
+                port._call_on_init()
 
     yield
 
@@ -72,6 +72,165 @@ class SubscribedCall:
         return self.__callable.__qualname__
 
 
+class Subscribable:
+    """Base class for object that calls can subscribe to."""
+
+    calls: list[None | tuple[tuple, dict], list[SubscribedCall]]
+    """Message match arguments and callables that will be called with matching incoming messages.
+    `None` conditions matches any message."""
+
+    __init_called: bool = False
+
+    def __init__(self):
+        self.calls: list[tuple[None | tuple[tuple, dict], list[SubscribedCall]]] = []
+
+        # workarounds for mkdocstrings issue #607
+        self.calls: list[tuple[None | tuple[tuple, dict], list[SubscribedCall]]]
+        """Message match arguments and callables that will be called with matching incoming messages.
+           `None` conditions matches any message."""
+
+    def subscribe(
+        self,
+        *msg_matches_args: 'None | Container[Any] | Any',
+        **msg_matches_kwargs: 'str, None | Container[Any] | Any',
+    ) -> 'Callable':
+        """Decorator to subscribe a callable to the input's messages.
+
+        Decorator without arguments subscribes a callable to all the input's messages.
+
+        Decorator with arguments subscribes a callable to the input's messages
+        that match conditions set by arguments.
+        It works the same way as message's [`matches`][midiscripter.base.msg_base.Msg.matches] method:
+
+        1. If condition is `None` or omitted it matches anything.
+
+        2. If condition equals the message's attribute value it matches the attribute.
+
+        3. If condition is a container (list, tuple) and contains the message's attribute value,
+        it matches the attribute.
+
+        ??? Examples
+            1. Calls function for all MIDI port's messages:
+            ``` python
+            @midi_input_instance.subscribe
+            def function(msg: MidiMsg) -> None:
+                pass
+            ```
+            2. Calls function for OSC messages from specific address:
+            ``` python
+            @osc_input_instance.subscribe(address='/live/song/get/track_data')
+            def function(msg: OscMsg) -> None:
+                pass
+            ```
+            3. Call object instance method for MIDI port's "note on" and "note off" messages:
+            ``` python
+            midi_input_instance.subscribe((MidiType.NOTE_ON, MidiType.NOTE_OFF))(object.method)
+            ```
+
+        Returns:
+            Subscribed callable.
+        """
+
+        def wrapped_subscribe(
+            callable_: 'Callable[[Msg], None] | Callable[[], None]',
+        ) -> 'Callable':
+            if msg_matches_args[0] in CallOn:
+                conditions = msg_matches_args[0]
+            elif (
+                msg_matches_args[0] is callable_ or not msg_matches_args and not msg_matches_kwargs
+            ):  # noqa: SIM108
+                conditions = None
+            else:
+                conditions = (msg_matches_args, msg_matches_kwargs)
+
+            call = SubscribedCall(conditions, callable_)
+
+            try:
+                call_list_for_conditions = next(
+                    entry[1] for entry in self.calls if entry[0] == conditions
+                )
+                call_list_for_conditions.append(call)
+            except StopIteration:
+                self.calls.append((conditions, [call]))
+
+            return callable_
+
+        if callable(msg_matches_args[0]):
+            return wrapped_subscribe(msg_matches_args[0])
+
+        return wrapped_subscribe
+
+    def _send_input_msg_to_calls(self, msg: 'Msg') -> None:
+        """Sends the message received by the input port to subscribed calls.
+
+        Notes:
+            Not supposed to be overridden in subclasses.
+            Supposed to be called from the listener thread started
+            by the subclass implementation of `open` method.
+
+        Args:
+            msg: A message received by the input port to send to its registered calls.
+        """
+        log('{subscribable} got message {msg}', subscribable=self, msg=msg)
+
+        matched_calls = []
+        not_matched_by_any_calls = []
+        for conditions, call_list in self.calls:
+            if conditions == CallOn.NOT_MATCHED_BY_ANY_CALL:
+                not_matched_by_any_calls = call_list
+            elif isinstance(conditions, str) and conditions in CallOn:
+                continue
+            elif conditions is None or msg.matches(*conditions[0], **conditions[1]):
+                matched_calls.extend(call_list)
+
+        calls = matched_calls or not_matched_by_any_calls
+
+        msg_copies = [copy.copy(msg) for _ in range(len(calls))]
+        midiscripter.shared.thread_executor.map(self.__call_worker, calls, msg_copies)
+
+    @staticmethod
+    def __call_worker(call: SubscribedCall, msg: 'Msg') -> None:
+        """Function called in thread for each subscribed call and each received message.
+
+        Notes:
+            Not supposed to be overridden in subclasses.
+            Supposed to be called from `_send_input_msg_to_calls` method.
+
+        Args:
+            call: Subscribed callable.
+            msg: Received message to use as callable only argument.
+        """
+        log('Calling {call}', call=call)
+        try:
+            call(msg)
+        except Exception as exc:
+            log.red(''.join(traceback.format_exception(exc)))
+
+    def _call_on_init(self) -> None:
+        """Called after input port is enabled for the first time.
+
+        Notes:
+            Not supposed to be overridden in subclasses.
+        """
+        if self.__init_called:
+            return
+
+        self.__init_called = True
+
+        for conditions, call_list in self.calls:
+            if conditions == CallOn.PORT_INIT:
+                for call in call_list:
+
+                    def __call_runner() -> None:
+                        try:
+                            log('Running {call}', call=call)  # noqa: B023
+                            call()  # noqa: B023
+                        except Exception as exc:
+                            log.red(''.join(traceback.format_exception(exc)))
+
+                    midiscripter.shared.thread_executor.submit(__call_runner)
+
+
 class Port:
     """Port base class.
 
@@ -79,16 +238,16 @@ class Port:
         Port declarations with the same arguments will return the same instance port (singleton).
     """
 
+    is_enabled: bool
+    """`True` if port is listening messages / ready to send messages"""
+
     _force_uid: ClassVar[None | str] = None
     """UID override for classes that have can have only one instance per whole class,
        like keyboard port classes. Object for these classes are declared without arguments.
     """
 
-    is_enabled: bool
-    """`True` if port is listening messages / ready to send messages"""
-
     _inited_with_args: dict
-    """The arguments the port singleton was initialized with. Used by `_PortRegistryMeta`."""
+    """The arguments the port singleton was initialized with. Used by `__new__`."""
 
     __port_instance_type = TypeVar('__port_instance_type', bound='Port')
     """Type for correct IDE recognition and code completion for returned port subclasses"""
@@ -175,178 +334,19 @@ class Port:
         self.is_enabled = False
 
 
-class Input(Port):
+class Input(Subscribable, Port):
     """Input port base class."""
-
-    is_enabled: bool
-    """`True` if port is listening and generating messages"""
-
-    calls: list[None | tuple[tuple, dict], list[SubscribedCall]]
-    """Message match arguments and callables that will be called with matching incoming messages.
-    `None` conditions matches any message."""
 
     _gui_color: str = 'green'
     _log_show_link: bool = True
-    __port_init_called: bool = False
 
     def __init__(self, uid: 'Hashable'):
-        super().__init__(uid)
-        self.calls: list[tuple[None | tuple[tuple, dict], list[SubscribedCall]]] = []
-
-        # workarounds for mkdocstrings issue #607
-        self.calls: list[tuple[None | tuple[tuple, dict], list[SubscribedCall]]]
-        """Message match arguments and callables that will be called with matching incoming messages.
-           `None` conditions matches any message."""
-
-    def subscribe(
-        self,
-        *msg_matches_args: 'None | Container[Any] | Any',
-        **msg_matches_kwargs: 'str, None | Container[Any] | Any',
-    ) -> 'Callable':
-        """Decorator to subscribe a callable to the input's messages.
-
-        Decorator without arguments subscribes a callable to all the input's messages.
-
-        Decorator with arguments subscribes a callable to the input's messages
-        that match conditions set by arguments.
-        It works the same way as message's [`matches`][midiscripter.base.msg_base.Msg.matches] method:
-
-        1. If condition is `None` or omitted it matches anything.
-
-        2. If condition equals the message's attribute value it matches the attribute.
-
-        3. If condition is a container and contains the message's attribute value it matches the attribute.
-
-        ??? Examples
-            1. Calls function for all MIDI port's messages:
-            ``` python
-            @midi_input_instance.subscribe
-            def function(msg: MidiMsg) -> None:
-                pass
-            ```
-            2. Calls function for OSC messages from specific address:
-            ``` python
-            @osc_input_instance.subscribe(address='/live/song/get/track_data')
-            def function(msg: OscMsg) -> None:
-                pass
-            ```
-            3. Call object instance method for MIDI port's "note on" and "note off" messages:
-            ``` python
-            midi_input_instance.subscribe((MidiType.NOTE_ON, MidiType.NOTE_OFF))(object.method)
-            ```
-
-        Returns:
-            Subscribed callable.
-        """
-
-        def wrapped_subscribe(
-            callable_: 'Callable[[Msg], None] | Callable[[], None]',
-        ) -> 'Callable':
-            if msg_matches_args[0] in CallOn:
-                conditions = msg_matches_args[0]
-            elif (
-                msg_matches_args[0] is callable_ or not msg_matches_args and not msg_matches_kwargs
-            ):  # noqa: SIM108
-                conditions = None
-            else:
-                conditions = (msg_matches_args, msg_matches_kwargs)
-
-            call = SubscribedCall(conditions, callable_)
-
-            try:
-                call_list_for_conditions = next(
-                    entry[1] for entry in self.calls if entry[0] == conditions
-                )
-                call_list_for_conditions.append(call)
-            except StopIteration:
-                self.calls.append((conditions, [call]))
-
-            return callable_
-
-        if callable(msg_matches_args[0]):
-            return wrapped_subscribe(msg_matches_args[0])
-
-        return wrapped_subscribe
-
-    def _send_input_msg_to_calls(self, msg: 'Msg') -> None:
-        """Sends the message received by the input port to subscribed calls.
-
-        Notes:
-            Not supposed to be overridden in subclasses.
-            Supposed to be called from the listener thread started
-            by the subclass implementation of `open` method.
-
-        Args:
-            msg: A message received by the input port to send to its registered calls.
-        """
-        log('{input} got message {msg}', input=self, msg=msg)
-
-        if not self.is_enabled:
-            return
-
-        matched_calls = []
-        not_matched_by_any_calls = []
-        for conditions, call_list in self.calls:
-            if conditions == CallOn.NOT_MATCHED_BY_ANY_CALL:
-                not_matched_by_any_calls = call_list
-            elif isinstance(conditions, str) and conditions in CallOn:
-                continue
-            elif conditions is None or msg.matches(*conditions[0], **conditions[1]):
-                matched_calls.extend(call_list)
-
-        calls = matched_calls or not_matched_by_any_calls
-
-        msg_copies = [copy.copy(msg) for _ in range(len(calls))]
-        midiscripter.shared.thread_executor.map(self.__call_worker, calls, msg_copies)
-
-    @staticmethod
-    def __call_worker(call: SubscribedCall, msg: 'Msg') -> None:
-        """Function called in thread for each subscribed call and each received message.
-
-        Notes:
-            Not supposed to be overridden in subclasses.
-            Supposed to be called from `_send_input_msg_to_calls` method.
-
-        Args:
-            call: Subscribed callable.
-            msg: Received message to use as callable only argument.
-        """
-        log('Calling {call}', call=call)
-        try:
-            call(msg)
-        except Exception as exc:
-            log.red(''.join(traceback.format_exception(exc)))
-
-    def _call_on_port_init(self) -> None:
-        """Called after input port is opened for the first time.
-
-        Notes:
-            Not supposed to be overridden in subclasses.
-        """
-        if self.__port_init_called:
-            return
-
-        self.__port_init_called = True
-
-        for conditions, call_list in self.calls:
-            if conditions == CallOn.PORT_INIT:
-                for call in call_list:
-
-                    def __call_runner() -> None:
-                        try:
-                            log('Running {call}', call=call)  # noqa: B023
-                            call()  # noqa: B023
-                        except Exception as exc:
-                            log.red(''.join(traceback.format_exception(exc)))
-
-                    midiscripter.shared.thread_executor.submit(__call_runner)
+        Port.__init__(self, uid)
+        Subscribable.__init__(self)
 
 
 class Output(Port):
     """Output port base class"""
-
-    is_enabled: bool
-    """`True` if port is ready to send messages"""
 
     _gui_color: str = 'magenta'
     _log_show_link: bool = True
