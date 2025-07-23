@@ -6,7 +6,6 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 
-# noinspection PyUnresolvedReferences
 class WrappedQWidgetMixin:
     # Setter methods can't be successfully called from another thread, so signals are used
     set_content_signal = Signal(object)
@@ -38,11 +37,13 @@ class WrappedQWidgetMixin:
         raise NotImplementedError
 
     def set_color(self, color: str | tuple[int, int, int]) -> None:
+        self: QWidget
         qcolor = QColor(color) if isinstance(color, str) else QColor(*color)
-
         palette = self.palette()
         palette.setColor(QPalette.ColorGroup.Active, QPalette.ColorRole.ButtonText, qcolor)
         palette.setColor(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText, qcolor)
+        palette.setColor(QPalette.ColorGroup.Inactive, QPalette.ColorRole.ButtonText, qcolor)
+        palette.setColor(QPalette.ColorGroup.Inactive, QPalette.ColorRole.WindowText, qcolor)
         self.setPalette(palette)
 
     # Getters and setters
