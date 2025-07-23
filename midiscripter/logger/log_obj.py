@@ -66,7 +66,7 @@ class Log:
         self.__buffer = collections.deque(maxlen=self.BUFFER_SIZE)
         self.__last_entry_time = time.time()
 
-    def __call__(self, text: str | Any, *args, **kwargs):
+    def __call__(self, text: str | Any, *args: Any, **kwargs: Any):
         """Print log message.
 
         Args:

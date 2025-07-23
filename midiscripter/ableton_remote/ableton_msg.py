@@ -152,7 +152,8 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
             ``` python
             AbletonMsg(
                 type: AbletonEvent,
-                value: int | bool, *,
+                value: int | bool,
+                *,
                 source: 'None | AbletonIn' = None
             )
             ```

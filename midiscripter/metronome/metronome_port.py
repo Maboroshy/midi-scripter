@@ -30,7 +30,7 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         """
         **Overloads:**
             ``` python
-            MetronomeIn(name: str, bpm: float = 60, msg_to_send: Msg = Msg('Click'))
+            MetronomeIn(name: str, bpm: float = 60, *, msg_to_send: Msg = Msg('Click'))
             ```
             ``` python
             MetronomeIn(bpm: float, *, msg_to_send: Msg = Msg('Click'))

@@ -1,7 +1,7 @@
 from midiscripter import *
 
 
-input_port = MidiIn('Enter port name')
+input_port = MidiIn('Enter MIDI controller port name')
 output_port = MidiOut('To DAW', virtual=True)
 
 

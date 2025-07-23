@@ -114,6 +114,7 @@ plugins:
             inherited_members: true
             members_order: source
             show_symbol_type_heading: true
+            show_overloads: false
             show_symbol_type_toc: true
             show_labels: false
             

@@ -32,13 +32,13 @@ def start_cli_debug() -> NoReturn:
 
 
 def start_silent() -> NoReturn:
-    """Starts the script without logging. The fastest way to run the script."""
+    """Starts the script without logging. The fastest way to run the script"""
     log._accepts_messages = False
     _run_cli_loop()
 
 
 def _run_cli_loop() -> NoReturn:
-    """Opens the ports and loops until broken by user."""
+    """Opens the ports and loops until broken by user"""
     if not midiscripter.shared.script_path_str:
         raise RuntimeError('Starter can only be called from a script')
 

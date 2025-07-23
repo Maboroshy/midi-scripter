@@ -65,7 +65,8 @@ class Msg:
 
         2. If condition equals attribute, it matches the attribute.
 
-        3. If condition is a container and contains the attribute, it matches the attribute.
+        3. If condition is a container (list, tuple) and contains the attribute,
+        it matches the attribute.
 
         Use `Not(condition)` to invert condition matching.
 

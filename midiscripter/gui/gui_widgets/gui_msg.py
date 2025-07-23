@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class GuiEvent(midiscripter.base.msg_base.AttrEnum):
     """GUI event type enumerator
-    to use as [`GuiEventMsg`][midiscripter.GuiEventMsg] `type` attribute."""
+    to use as [`GuiEventMsg`][midiscripter.GuiEventMsg] `type` attribute"""
 
     CONTENT_SET = 'CONTENT_SET'
     COLOR_SET = 'COLOR_SET'
@@ -22,10 +22,10 @@ class GuiEvent(midiscripter.base.msg_base.AttrEnum):
 
 
 class GuiEventMsg(midiscripter.base.msg_base.Msg):
-    """GUI interaction message produced by GUI widget port."""
+    """GUI interaction message produced by GUI widget"""
 
     type: GuiEvent
-    """GUI event type."""
+    """GUI event type"""
 
     data: 'str | int | bool | Sequence | None'
     """New value set by event.
