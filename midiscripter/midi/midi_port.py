@@ -7,6 +7,7 @@ import rtmidi.midiconstants
 import midiscripter.base.port_base
 from midiscripter.logger import log
 from midiscripter.midi.midi_msg import MidiType, MidiMsg
+from midiscripter.midi.teVirtualMIDI import TeVirtualMidiPort
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Container
@@ -53,7 +54,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
         self._is_virtual = virtual
         self._input_callback = input_callback
         self._rtmidi_port: rtmidi.MidiIn | rtmidi.MidiOut | None = None
-        self._pytemidi_port: 'midiscripter.midi.teVirtualMIDI.Device' | None = None  # noqa: UP037
+        self._pytemidi_port: TeVirtualMidiPort | None = None
 
     @classmethod
     def _get_available_names(cls) -> list[str]:
@@ -89,7 +90,10 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
                 if platform.system() == 'Windows':
                     import midiscripter.midi.teVirtualMIDI
 
-                    if self.name in midiscripter.midi.teVirtualMIDI.Device.opened_port_names:
+                    if (
+                        self.name
+                        in midiscripter.midi.teVirtualMIDI.TeVirtualMidiPort.opened_port_names
+                    ):
                         log.red(
                             "Can't create virtual port {port}. "
                             'Virtual MIDI port with the same name already exists.',
@@ -97,7 +101,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
                         )
                         raise AttributeError
 
-                    self._pytemidi_port = midiscripter.midi.teVirtualMIDI.Device(
+                    self._pytemidi_port = TeVirtualMidiPort(
                         self.name, self._input_callback, no_input=not is_input, no_output=is_input
                     )
                     self._pytemidi_port.create()

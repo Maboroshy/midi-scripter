@@ -1,4 +1,4 @@
-# This is modified version of PyTeMidi by Daniel Drizhuk (complynx)
+# This is based on PyTeMidi by Daniel Drizhuk (complynx)
 # https://pypi.org/project/pytemidi/
 # https://github.com/complynx/pytemidi
 #
@@ -24,15 +24,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# ruff: noqa: ANN001, ANN201
-
 import ctypes
 import os
 import struct
-import threading
-import time
-import weakref
-from ctypes import wintypes as wintypes
+from ctypes import wintypes
 from collections.abc import Callable
 
 
@@ -112,7 +107,7 @@ MIDI_DATA_CB = ctypes.WINFUNCTYPE(None, MIDI_PORT, bytep, wintypes.DWORD, wintyp
 # You can specify a name for the device to be created. Each named port can only exist once on a system.
 #
 # When the application terminates, the port will be deleted (or if the public front-end of the port is already in use by
-# a DAW-application, it will become inactive - giving back apropriate errors to the application using this port.
+# a DAW-application, it will become inactive - giving back appropriate errors to the application using this port.
 #
 # In addition to the name, you can supply a callback-interface, which will be called for all MIDI-data received by the
 # virtual-midi port. You can also provide instance-data, which will also be handed back within the callback, to have the
@@ -188,74 +183,17 @@ virtualMIDIShutdown.argtypes = [MIDI_PORT]
 
 
 class DriverError(IOError):
-    def __init__(self, errno, additional=''):
+    def __init__(self, errno: int, additional: str = ''):
         super().__init__(self, f'ERROR({errno}): {additional}')
 
 
-def realaddr(pointer):
+def realaddr(pointer: MIDI_PORT) -> int:
     return ctypes.cast(pointer, ctypes.c_void_p).value
 
 
-def shutdown(_id) -> None:
-    pointer = ctypes.c_void_p(_id)
-    port = ctypes.cast(pointer, MIDI_PORT)
-    virtualMIDIClosePort(port)
-
-
-class GCThread(threading.Thread):
-    GCTimer = 30 * 60
-
-    def __init__(self):
-        super().__init__(daemon=True, name='PyTeMIDI.GC')
-        self.collection = {}
-        self.running = False
-        self.unified_callback_ptr = MIDI_DATA_CB(self.unified_callback)
-
-    def collect(self) -> None:
-        for _id, ref in self.collection.items():
-            if ref() is None:
-                shutdown(_id)
-        self.collection = {k: v for k, v in self.collection.items() if v is not None}
-
-    def add(self, _id, dev) -> None:
-        self.collection[_id] = weakref.ref(dev)
-        if not self.running:
-            self.start()
-
-    def remove(self, _id) -> None:
-        shutdown(_id)
-        del self.collection[_id]
-
-    def close_all(self) -> None:
-        for _id in self.collection:
-            shutdown(_id)
-
-    def unified_callback(self, port, midi_bytes, length, additional) -> None:
-        port_addr = realaddr(port)
-        dev = self.collection[port_addr]() if port_addr in self.collection else None
-        if dev is not None and midi_bytes is not None:
-            try:
-                dev._callback(bytes(midi_bytes[:length]))
-            except Exception:
-                pass
-
-    def run(self) -> None:
-        self.running = True
-
-        import atexit
-
-        atexit.register(self.close_all)
-
-        while True:
-            time.sleep(self.GCTimer)
-            self.collect()
-
-
-GC = GCThread()
-
-
-class Device:
-    opened_port_names = []
+class TeVirtualMidiPort:
+    __port_address_to_instance: dict[int, 'TeVirtualMidiPort'] = {}
+    opened_port_names: list[str] = []
 
     def __init__(
         self,
@@ -265,46 +203,57 @@ class Device:
         no_input: bool = False,
         sysex_size: int = DEFAULT_BUFFER_SIZE,
     ):
-        self._name = name
-        self._no_input = no_input
-        self._no_output = no_output
-        self._sysex_size = sysex_size
-        self._callback = callback
-        self._id = None
-        self._id_addr = 0
+        self.__name = name
+        self.__no_input = no_input
+        self.__no_output = no_output
+        self.__sysex_size = sysex_size
+        self.__callback = callback
+        self.__id: MIDI_PORT = None
+        self.__id_addr: int = 0
+
+        self.__unified_callback_ptr = MIDI_DATA_CB(self._unified_callback)
+
+    @classmethod
+    def _unified_callback(
+        cls, port: MIDIPort, midi_bytes: bytep, length: int, _: wintypes.PDWORD
+    ) -> None:
+        try:
+            port_addr = realaddr(port)
+            port_inst = cls.__port_address_to_instance[port_addr]
+            if midi_bytes is not None:
+                port_inst.__callback(bytes(midi_bytes[:length]))
+        except Exception:
+            pass
 
     def create(self) -> None:
         flags = 0
-        if not self._no_input:
+        if not self.__no_input:
             flags |= FLAGS_INSTANTIATE_RX_ONLY
             flags |= FLAGS_PARSE_RX
-        if not self._no_output:
+        if not self.__no_output:
             flags |= FLAGS_INSTANTIATE_TX_ONLY
             flags |= FLAGS_PARSE_TX
 
-        _id = virtualMIDICreatePortEx2(
-            self._name, GC.unified_callback_ptr, None, self._sysex_size, flags
+        self.__id = virtualMIDICreatePortEx2(
+            self.__name, self.__unified_callback_ptr, None, self.__sysex_size, flags
         )
 
-        if _id is None:
+        if self.__id is None:
             raise DriverError(ctypes.GetLastError(), "Couldn't create the device")
 
-        self._id = _id
-        self._id_addr = realaddr(_id)
+        self.__id_addr = realaddr(self.__id)
 
-        GC.add(self._id_addr, self)
-
-        self.opened_port_names.append(self._name)
+        self.__port_address_to_instance[self.__id_addr] = self
+        self.opened_port_names.append(self.__name)
 
     def close(self) -> None:
-        GC.remove(self._id_addr)
-        self._id = None
-        self._id_addr = 0
-        self.opened_port_names.remove(self._name)
+        virtualMIDIClosePort(self.__id)
+        self.__port_address_to_instance.pop(self.__id_addr)
+        self.opened_port_names.remove(self.__name)
 
     def send(self, raw_midi_data: tuple[hex, ...]) -> None:
         raw_midi_bytes = bytearray(raw_midi_data)
         c_buf = (ctypes.c_ubyte * len(raw_midi_bytes)).from_buffer(raw_midi_bytes)
-        ret = virtualMIDISendData(self._id, c_buf, len(raw_midi_bytes))
+        ret = virtualMIDISendData(self.__id, c_buf, len(raw_midi_bytes))
         if ret == 0:
             raise DriverError(ctypes.GetLastError(), "Couldn't send data")
