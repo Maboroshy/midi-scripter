@@ -100,15 +100,15 @@ class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
 
         self.content = content
 
-        if value:
+        if value is not None:
             self.value = value
-        if select:
+        if select is not None:
             self.select(select)
-        if toggle_state:
+        if toggle_state is not None:
             self.toggle_state = toggle_state
-        if color:
+        if color is not None:
             self.color = color
-        if range:
+        if range is not None:
             self.range = range
 
         self.__connect_change_signals_to_msgs()

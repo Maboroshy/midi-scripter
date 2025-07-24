@@ -65,7 +65,7 @@ class GuiToggleButton(GuiWidget):
         content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool | None = None,
+        toggle_state: bool | None = False,
         title: str | None = None,
     ):
         """

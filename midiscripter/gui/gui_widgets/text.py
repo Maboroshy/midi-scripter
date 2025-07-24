@@ -37,14 +37,14 @@ class GuiText(GuiWidget):
         content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool = False,
+        toggle_state: bool = True,
         title: str | None = None,
     ):
         """
         Args:
             content: Widget's text
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
-            toggle_state: Text "grey out" state
+            toggle_state: False to "grey out" text
             title: Title for dock widget and position saving, set by content or type if `None`
         """
         super().__init__(content, color=color, toggle_state=toggle_state, title=title)
@@ -102,14 +102,14 @@ class GuiEditableText(GuiWidget):
         content: str | None = None,
         *,
         color: str | tuple[int, int, int] | None = None,
-        toggle_state: bool = False,
+        toggle_state: bool = True,
         title: str | None = None,
     ):
         """
         Args:
             content: Widget's text
             color: Text color as [color name](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) or RGB tuple
-            toggle_state: Text "grey out" state
+            toggle_state: False to disable and "grey out" text
             title: Title for dock widget and position saving, set by content or type if `None`
         """
         super().__init__(content, color=color, toggle_state=toggle_state, title=title)
