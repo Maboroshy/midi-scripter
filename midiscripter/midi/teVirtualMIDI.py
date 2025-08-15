@@ -30,6 +30,7 @@ import struct
 from ctypes import wintypes
 from collections.abc import Callable
 
+from midiscripter import log
 
 py_bitness = struct.calcsize('P') * 8
 libName = 'teVirtualMIDI64.dll' if py_bitness == 64 else 'teVirtualMIDI.dll'
@@ -193,7 +194,6 @@ def realaddr(pointer: MIDI_PORT) -> int:
 
 class TeVirtualMidiPort:
     __port_address_to_instance: dict[int, 'TeVirtualMidiPort'] = {}
-    opened_port_names: list[str] = []
 
     def __init__(
         self,
@@ -208,6 +208,7 @@ class TeVirtualMidiPort:
         self.__no_output = no_output
         self.__sysex_size = sysex_size
         self.__callback = callback
+
         self.__id: MIDI_PORT = None
         self.__id_addr: int = 0
 
@@ -215,10 +216,10 @@ class TeVirtualMidiPort:
 
     @classmethod
     def _unified_callback(
-        cls, port: MIDIPort, midi_bytes: bytep, length: int, _: wintypes.PDWORD
+        cls, port_id: MIDIPort, midi_bytes: bytep, length: int, _: wintypes.PDWORD
     ) -> None:
         try:
-            port_addr = realaddr(port)
+            port_addr = realaddr(port_id)
             port_inst = cls.__port_address_to_instance[port_addr]
             if midi_bytes is not None:
                 port_inst.__callback(bytes(midi_bytes[:length]))
@@ -226,6 +227,18 @@ class TeVirtualMidiPort:
             pass
 
     def create(self) -> None:
+        try:
+            # Second creation of this instance
+            if self.__port_address_to_instance[self.__id_addr] == self:
+                return
+            else:  # Creation for second instance pointing to the same port
+                raise AttributeError(
+                    f"Can't create virtual port '{self.__name}'. "
+                    'Virtual MIDI port with the same name already exists.',
+                )
+        except KeyError:
+            pass
+
         flags = 0
         if not self.__no_input:
             flags |= FLAGS_INSTANTIATE_RX_ONLY
@@ -244,12 +257,15 @@ class TeVirtualMidiPort:
         self.__id_addr = realaddr(self.__id)
 
         self.__port_address_to_instance[self.__id_addr] = self
-        self.opened_port_names.append(self.__name)
 
     def close(self) -> None:
+        if self.__id_addr not in self.__port_address_to_instance:  # Already closed
+            return
+
         virtualMIDIClosePort(self.__id)
         self.__port_address_to_instance.pop(self.__id_addr)
-        self.opened_port_names.remove(self.__name)
+        self.__id: MIDI_PORT = None
+        self.__id_addr: int = 0
 
     def send(self, raw_midi_data: tuple[hex, ...]) -> None:
         raw_midi_bytes = bytearray(raw_midi_data)
