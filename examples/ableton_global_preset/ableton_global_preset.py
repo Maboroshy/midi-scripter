@@ -67,8 +67,9 @@ class Preset:
 
     def save_param_data_from_set(self) -> None:
         self.param_data = collections.defaultdict(dict)
-        track_names = ableton_osc.query('/live/song/get/track_names')
-        if not track_names:
+        try:
+            track_names = ableton_osc.query('/live/song/get/track_names')
+        except TimeoutError:
             log.red('Ableton OSC is not running')
             return
 
@@ -93,8 +94,9 @@ class Preset:
         save_presets()
 
     def load_param_data_to_set(self) -> None:
-        track_names = ableton_osc.query('/live/song/get/track_names')
-        if not track_names:
+        try:
+            track_names = ableton_osc.query('/live/song/get/track_names')
+        except TimeoutError:
             log.red('No connection to AbletonOSC')
             return
 
