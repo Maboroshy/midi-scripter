@@ -1,7 +1,7 @@
 from midiscripter import *
 
 
-midi_keyboard = MidiIn('MIDI Keyboard', virtual=True)  # GUI will provide you with port names
+midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you with port names
 proxy_output = MidiOut('DAW', virtual=True)  # using virtual port for output
 
 # GUI controls in a single line
