@@ -3,8 +3,8 @@ from typing import overload
 
 import midiscripter.base.port_base
 import midiscripter.shared
-from midiscripter.base.msg_base import Msg
 from midiscripter.logger import log
+from midiscripter.base.msg_base import Msg
 
 
 class MetronomeIn(midiscripter.base.port_base.Input):
@@ -13,6 +13,8 @@ class MetronomeIn(midiscripter.base.port_base.Input):
     Notes:
         `Metronome` sets extra `bpm` and `number` attributes to any message it sends
     """
+
+    _log_description: str = 'metronome'
 
     @overload
     def __init__(self, name: str, bpm: float = 60, *, msg_to_send: Msg = Msg('Click')): ...  # noqa: B008
@@ -59,13 +61,13 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         self.__interval_sec = 60 / bpm
 
     def _open(self) -> None:
-        self.is_enabled = True
+        self.is_opened = True
         midiscripter.shared.thread_executor.submit(self.__send_clicks_worker)
-        log('Started {input} at {bpm}', input=self, bpm=self.bpm)
+        log._port_open(self, True, custom_text='Started {input} at {bpm}', input=self, bpm=self.bpm)
 
     def __send_clicks_worker(self) -> None:
         msg_counter = 1
-        while self.is_enabled:
+        while self.is_opened:
             time.sleep(self.__interval_sec)
 
             self.msg_to_send.source = self
@@ -77,7 +79,7 @@ class MetronomeIn(midiscripter.base.port_base.Input):
 
             msg_counter += 1
 
-        log('Stopped {input}', input=self)
+        log._port_close(self, True, custom_text='Stopped {input}', input=self)
 
     def _close(self) -> None:
-        self.is_enabled = False
+        self.is_opened = False

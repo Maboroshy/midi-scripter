@@ -42,8 +42,8 @@ class GuiWidgetLayout(GuiWindowItem):
             GuiWidgetLayout('1 x 2', [row1_col1, row1_col2])
             ```
             ``` python
-            # 1 row x 2 columns with the second one stretched
-            GuiWidgetLayout('1 x 2', [row1_col1, row1_col2 * 2])
+            # 1 row x 3 columns with the spacer as the second and one third one widget stretched
+            GuiWidgetLayout('1 x 2', [row1_col1, None, row1_col3 * 2])
             ```
             ``` python
             # 2 rows x 2 columns
@@ -85,7 +85,7 @@ class GuiWidgetLayout(GuiWindowItem):
         layout.setSpacing(self.__spacing)
 
         for item in items:
-            if item is None or item is Ellipsis:
+            if item is None:
                 layout.addStretch(1)
             elif not isinstance(item, Sequence):
                 layout.addWidget(item.qt_widget, item._stretch_multiplier)

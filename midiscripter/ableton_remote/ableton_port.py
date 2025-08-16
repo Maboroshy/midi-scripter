@@ -1,6 +1,6 @@
 from typing import overload, TYPE_CHECKING
 
-from midiscripter.midi import MidiIn, MidiOut, ChannelMsg
+from midiscripter.midi import MidiIn, MidiOut, MidiIO, ChannelMsg
 from midiscripter.base.port_base import Input
 from midiscripter.logger import log
 from midiscripter.ableton_remote.ableton_msg import AbletonEvent, AbletonMsg
@@ -12,7 +12,6 @@ from midiscripter.ableton_remote.remote_script_midi_mapping import (
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
-    from midiscripter.base.msg_base import Msg
 
 
 # noinspection PyMethodOverriding
@@ -29,8 +28,8 @@ class AbletonIn(MidiIn):
         """
         super().__init__(proxy_midi_port_name, virtual=virtual)
 
-    def _convert_to_msg(self, rt_midi_data: tuple[hex, ...]) -> 'AbletonMsg':
-        msg_atts = self._raw_channel_midi_to_attrs(rt_midi_data)
+    def _convert_to_msg(self, raw_midi_data: tuple[hex, ...]) -> 'AbletonMsg':
+        msg_atts = self._raw_channel_midi_to_attrs(raw_midi_data)
         lead_msg_atts = msg_atts[:3]
         value = msg_atts[3]
 
@@ -73,6 +72,8 @@ class AbletonOut(MidiOut):
     as MIDI message to Ableton Live remote script.
     """
 
+    _disable_logging_in_send = True
+
     def __init__(self, proxy_midi_port_name: str, *, virtual: bool = False):
         """
         Args:
@@ -89,7 +90,7 @@ class AbletonOut(MidiOut):
         """
         if isinstance(msg, ChannelMsg):
             super().send(msg)
-            super()._log_msg_sent(msg)
+            log._msg_sent(self, msg)
             return
 
         try:
@@ -106,13 +107,43 @@ class AbletonOut(MidiOut):
                 value = msg.value
 
             super().send(ChannelMsg(*midi_lead_attrs, value))
-            super()._log_msg_sent(msg)
+            log._msg_sent(self, msg)
 
         except (IndexError, KeyError):
-            log.red("Invalid {msg}. Can't convert to MIDI message.", msg=msg)
+            log.red("Invalid message {msg}. Can't convert to MIDI message.", msg=msg)
 
-    def _log_msg_sent(self, msg: 'Msg') -> None:
-        """Overriding MidiOut method.
-        Otherwise sent message will be logged as MidiMsg rather that AbletonMsg.
+
+# noinspection PyMethodOverriding
+class AbletonIO(MidiIO):
+    _input_port_class: 'type[MidiIn | AbletonIn]' = AbletonIn
+    _output_port_class: 'type[MidiOut | AbletonOut]' = AbletonOut
+
+    def __init__(self, proxy_midi_port_name: str, *, virtual: bool = False):
+        super().__init__(proxy_midi_port_name, virtual=virtual)
+
+    @overload
+    def subscribe(self, call: 'Callable[[AbletonMsg], None]') -> 'Callable': ...
+
+    @overload
+    def subscribe(
+        self,
+        type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
+        index: 'None | Container | int | tuple[int, int]' = None,
+        value: 'None | Container[int] | int | bool' = None,
+    ) -> 'Callable': ...
+
+    def subscribe(
+        self,
+        type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
+        index: 'None | Container[int, tuple[int, int]] | int | tuple[int, int]' = None,
+        value: 'None | Container[int] | int | bool' = None,
+    ) -> 'Callable':
+        return self._input_ports[0].subscribe(type, index, value)
+
+    def send(self, msg: AbletonMsg | ChannelMsg) -> None:
+        """Send message to Ableton remote script.
+
+        Args:
+            msg: object to send
         """
-        pass
+        self._output_ports[0].send(msg)

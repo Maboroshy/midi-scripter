@@ -49,7 +49,7 @@ class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
     [`GuiEventMsg`][midiscripter.GuiEventMsg].
     """
 
-    _gui_color: str = 'green'
+    _log_color: str = 'green'
     _log_show_link: bool = False
 
     _qt_widget_class: type[QWidget, 'WrappedQWidgetMixin']
@@ -142,7 +142,7 @@ class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
     def content(self) -> Any | tuple[Any, ...]:
         """Widget's text or text for its items"""
         try:
-            return self.qt_widget.get_content
+            return self.qt_widget.get_content()
         except NotImplementedError:
             return self._content
 

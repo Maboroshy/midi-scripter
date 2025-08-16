@@ -51,6 +51,8 @@ class MainWindow(QMainWindow):
         self.menu_bar = midiscripter.gui.menu_bar.MenuBar(self)
         self.setMenuBar(self.menu_bar)
 
+        self.ports_widget.repopulate()
+
         self.tray = TrayIcon(self.windowIcon(), self)
         self.tray.show()
 

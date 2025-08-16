@@ -47,6 +47,7 @@ class WrappedQWidgetMixin:
 
     # Getters and setters
     def get_content(self) -> str | Sequence[str]:
+        """Reimplement only for dynamic content. `GuiWidget` may use its own cache instead."""
         raise NotImplementedError
 
     def set_content(self, content: str | Sequence[str]) -> None:
@@ -82,6 +83,7 @@ class AdaptiveTextSizeMixin:
     def __init__(self: QWidget):
         self.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored))
         self.setContentsMargins(10, 5, 10, 5)
+        self._make_text_size_fit_widget_size()
         self.__longest_text_rect_size = QFontMetrics(self.font()).boundingRect(self.text()).size()
 
     def setText(self, text: str) -> None:
@@ -106,7 +108,7 @@ class AdaptiveTextSizeMixin:
         font = self.font()
         content_rect = self.contentsRect()
 
-        font_size = 1
+        font_size = 3
         increment = 1
         text_rect = QSize()
         while (

@@ -14,7 +14,6 @@ import midiscripter.base.port_base
 import midiscripter.shared
 import midiscripter.file_event
 import midiscripter.gui.main_window
-import midiscripter.midi.midi_ports_update
 from .saved_state_controls import SavedCheckedAction
 
 
@@ -28,8 +27,8 @@ class ScripterGUI(QApplication):
     def __init__(self):
         super().__init__()
         self.setOrganizationName('MIDI Scripter')
-        if midiscripter.shared.script_path_str:
-            self.setApplicationName(pathlib.Path(midiscripter.shared.script_path_str).name)
+        if midiscripter.shared.SCRIPT_PATH_STR:
+            self.setApplicationName(pathlib.Path(midiscripter.shared.SCRIPT_PATH_STR).name)
 
         self.setApplicationDisplayName(f'{self.applicationName()} - {self.organizationName()}')
 
@@ -79,7 +78,7 @@ class ScripterGUI(QApplication):
         self.request_restart.emit()
 
     def restart(self) -> None:
-        if pathlib.Path(midiscripter.shared.script_path_str).is_file():
+        if pathlib.Path(midiscripter.shared.SCRIPT_PATH_STR).is_file():
             # These settings saved only for restart
             self.processEvents()  # update win status to get correct status
             QSettings().setValue('restart win minimized', self.main_window.isMinimized())
@@ -123,13 +122,15 @@ def remove_qwidget(qwidget: QWidget) -> None:
 
 def start_gui() -> NoReturn:
     """Starts the script and runs GUI. Logging goes to GUI Log widget."""
-    if not midiscripter.shared.script_path_str:
+    if not midiscripter.shared.SCRIPT_PATH_STR:
         raise RuntimeError('Starter can only be called from a script')
 
-    midiscripter.shared._raise_current_process_cpu_priority()
+    midiscripter.shared.raise_current_process_cpu_priority()
 
-    sigint_exit_code = {'Windows': -1073741510, 'Linux': 130, 'Darwin': 2}[platform.system()]
+    sigint_exit_code = {'Windows': -1073741510, 'Linux': 130, 'Darwin': 130}[platform.system()]
     signal.signal(signal.SIGINT, lambda *_: app_instance.exit(sigint_exit_code))
+    sigterm_exit_code = {'Windows': 3, 'Linux': 143, 'Darwin': 143}[platform.system()]
+    signal.signal(signal.SIGTERM, lambda *_: app_instance.exit(sigterm_exit_code))
 
     signal_checker_dummy_timer = QTimer()  # runs python code from Qt to allow the signal to trigger
     signal_checker_dummy_timer.start(1000)
@@ -144,4 +145,4 @@ def start_gui() -> NoReturn:
     if exit_status == 1467:  # restart request, can't do sys.exit() while Qt app works
         midiscripter.shared.restart_script()
     else:
-        exit(exit_status)
+        sys.exit(exit_status)

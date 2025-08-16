@@ -6,6 +6,8 @@ import midiscripter.shared
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from midiscripter.base.port_base import Port, Output, Subscribable, SubscribedCall
+    from midiscripter.base.msg_base import Msg
 
 
 class LogObjRef:
@@ -16,11 +18,15 @@ class LogObjRef:
 
     def __init__(self, obj: Any):
         self.text = str(obj)
+
         try:
-            self.color = obj._gui_color
-            self.link = repr(obj) if obj._log_show_link else None
+            self.color = obj._log_color
         except AttributeError:
             self.color = None
+
+        try:
+            self.link = repr(obj) if obj._log_show_link else None
+        except AttributeError:
             self.link = None
 
 
@@ -81,10 +87,7 @@ class Log:
         if not self._accepts_messages:
             return
 
-        try:
-            entry_color = kwargs.pop('_color')
-        except KeyError:
-            entry_color = None
+        entry_color = kwargs.pop('_color', None)
 
         format_args = tuple(LogObjRef(obj) for obj in args)
         format_kwargs = {arg: LogObjRef(obj) for arg, obj in kwargs.items()}
@@ -135,7 +138,7 @@ class Log:
     @staticmethod
     def _get_precise_timestamp(precise_epoch_time: None | float = None) -> str:
         """Returns current timestamp with microsecond precision as a string
-        The argument is to don't get current time two times during log call"""
+        The argument is present to don't get current time two times during log call"""
         precise_time = precise_epoch_time or midiscripter.shared.precise_epoch_time()
         time_string = time.strftime('%H:%M:%S', time.localtime(precise_time))
 
@@ -145,26 +148,96 @@ class Log:
         microsec_part = after_dot[3:]
         return f'{time_string}.{milisec_part},{microsec_part}'
 
+    def _port_open(
+        self,
+        port_instance: 'Port',
+        success: bool,
+        *,
+        custom_text: str = '',
+        **log_call_kwargs,
+    ) -> None:
+        """Print port open message"""
+        if custom_text:
+            self(custom_text, **log_call_kwargs)
+        elif success:
+            if port_instance._is_virtual:
+                self(
+                    'Created and opened {port} virtual {desc}',
+                    port=port_instance,
+                    desc=port_instance._log_description,
+                )
+            else:
+                self(
+                    'Opened {port} {desc}', port=port_instance, desc=port_instance._log_description
+                )
+        else:
+            self.red(
+                'Failed to open {port} {desc}',
+                port=port_instance,
+                desc=port_instance._log_description,
+            )
+
+    def _port_close(
+        self,
+        port_instance: 'Port',
+        success: bool,
+        *,
+        custom_text: str = '',
+        **log_call_kwargs,
+    ) -> None:
+        """Print port close message"""
+        if custom_text:
+            self(custom_text, **log_call_kwargs)
+        elif success:
+            self('Closed {port} {desc}', port=port_instance, desc=port_instance._log_description)
+        else:
+            self.red(
+                'Failed to close {port} {desc}',
+                port=port_instance,
+                desc=port_instance._log_description,
+            )
+
+    def _msg_received(self, subscribable_instance: 'Subscribable', msg: 'Msg') -> None:
+        """Print message received message"""
+        self('{subscribable} got message {msg}', subscribable=subscribable_instance, msg=msg)
+
+    def _msg_sent(self, output: 'Output', msg: 'Msg') -> None:
+        """Print message sent message"""
+        if msg.source:
+            self(
+                '{output} sent message {msg} received {age_ms} ms ago',
+                output=output,
+                msg=msg,
+                age_ms=msg._age_ms,
+            )
+        else:
+            self('{output} sent message {msg}', output=output, msg=msg)
+
+    def _call_made(self, call: 'SubscribedCall') -> None:
+        """Print subscribed callable called message"""
+        if '._' not in str(call):
+            self('Calling {call}', call=call)
+
     def red(self, text: str | Any, *args, **kwargs) -> None:
-        """Print red log message."""
+        """Print red log message"""
         self(text, *args, _color='red', **kwargs)
 
     def blue(self, text: str | Any, *args, **kwargs) -> None:
-        """Print blue log message."""
+        """Print blue log message"""
         self(text, *args, _color='blue', **kwargs)
 
     def cyan(self, text: str | Any, *args, **kwargs) -> None:
-        """Print cyan log message."""
+        """Print cyan log message"""
         self(text, *args, _color='cyan', **kwargs)
 
     def magenta(self, text: str | Any, *args, **kwargs) -> None:
-        """Print magenta log message."""
+        """Print magenta log message"""
         self(text, *args, _color='magenta', **kwargs)
 
     def green(self, text: str | Any, *args, **kwargs) -> None:
-        """Print green log message."""
+        """Print green log message"""
         self(text, *args, _color='green', **kwargs)
 
     def yellow(self, text: str | Any, *args, **kwargs) -> None:
-        """Print yellow log message."""
+        """Print yellow log message"""
         self(text, *args, _color='yellow', **kwargs)

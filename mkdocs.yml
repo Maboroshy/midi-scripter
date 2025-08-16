@@ -38,20 +38,21 @@ nav:
             - GUI Event Message: api/gui_msg.md
 
         - Starters: api/starters.md
-        
+                
         - Logging: api/logging.md
         
-        - Extra ports:
+        - Extra Ports:
             - File System Events:
                 - Port: api/fs_port.md
                 - Message: api/fs_event_msg.md
             - Metronome: api/metronome_port.md
-            - Midi Ports Changes: api/midi_ports_changed.md
+            - Midi Ports Watcher: api/midi_ports_changed.md
+        
+        - Extra Call Conditions: api/base_call.md
         
         - Base Classes:
             - Ports: api/base_ports.md
             - GUI Widget: api/base_gui_widget.md
-            - Call: api/base_call.md
             - Message: api/base_msg.md
 theme:
     name: material

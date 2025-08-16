@@ -7,5 +7,4 @@
         - selected_item_index
         - is_visible
         - qt_widget
-        - calls
         - subscribe

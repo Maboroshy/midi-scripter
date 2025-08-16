@@ -18,6 +18,9 @@ def start_cli_debug() -> NoReturn:
     log._flushing_is_enabled = True
 
     log('')
+    log('Available MIDI i/o ports:')
+    [log.yellow(port_name) for port_name in midiscripter.midi.MidiIO._get_available_names()]
+    log('')
     log('Available MIDI inputs:')
     [log.green(port_name) for port_name in midiscripter.midi.MidiIn._get_available_names()]
     log('')
@@ -26,9 +29,6 @@ def start_cli_debug() -> NoReturn:
     log('')
 
     _run_cli_loop()
-
-    log._flush()
-    log._flushing_is_enabled = False
 
 
 def start_silent() -> NoReturn:
@@ -39,13 +39,15 @@ def start_silent() -> NoReturn:
 
 def _run_cli_loop() -> NoReturn:
     """Opens the ports and loops until broken by user"""
-    if not midiscripter.shared.script_path_str:
+    if not midiscripter.shared.SCRIPT_PATH_STR:
         raise RuntimeError('Starter can only be called from a script')
 
-    midiscripter.shared._raise_current_process_cpu_priority()
+    midiscripter.shared.raise_current_process_cpu_priority()
     with midiscripter.base.port_base._all_opened():
         while True:
             try:
                 time.sleep(1)
             except (KeyboardInterrupt, SystemExit):
                 break
+
+    log._flush()

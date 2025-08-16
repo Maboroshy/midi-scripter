@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 name = 'midiscripter'
-version = '0.7'
+version = '0.8'
 description = 'Framework for scripting MIDI, Open Sound Control, keyboard and mouse input and output'
 readme = 'README.md'
 requires-python = '>=3.11'
@@ -38,6 +38,9 @@ doc = ['mkdocs-material', 'mkdocstrings', 'griffe-inherited-docstrings', 'black'
 
 [tool.hatch.build.targets.sdist]
 only-include = ['midiscripter']
+
+[project.gui-scripts]
+midiscripter = 'midiscripter:start_gui'
 
 [project.urls]
 Documentation = 'https://maboroshy.github.io/midi-scripter'

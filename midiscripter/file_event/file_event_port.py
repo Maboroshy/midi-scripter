@@ -6,7 +6,7 @@ import watchdog.observers
 
 import midiscripter.base.port_base
 import midiscripter.file_event
-import midiscripter.logger
+from midiscripter.logger import log
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
@@ -21,6 +21,8 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
     """File system events input port. Watches file/directory modifications.
     Produces [`FileEventMsg`][midiscripter.FileEventMsg] objects.
     """
+
+    _log_description: str = 'file event listener'
 
     def __init__(self, path: str | pathlib.Path, recursive: bool = False):
         """
@@ -46,11 +48,8 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
         self.__recursive = recursive
         self.__watch = None
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}('{str(self._uid)}')"
-
     def __str__(self):
-        return f"File system path '{self.__path.relative_to(self.__path.parent.parent)}' watcher"
+        return f"'{self.__path.relative_to(self.__path.parent.parent)}' watcher"
 
     def _open(self) -> None:
         self.__watch = shared_observer.schedule(
@@ -58,14 +57,14 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
         )
         if not shared_observer.is_alive():
             shared_observer.start()
-        self.is_enabled = True
-        midiscripter.logger.log('Started {input}', input=self)
+        self.is_opened = True
+        log._port_open(self, True)
 
     def _close(self) -> None:
         if self.__watch:
             shared_observer.unschedule(self.__watch)
-        self.is_enabled = False
-        midiscripter.logger.log('Stopped {input}', input=self)
+        self.is_opened = False
+        log._port_close(self, True)
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent) -> None:
         # Override for `watchdog.events.FileSystemEventHandler` method.

@@ -6,14 +6,14 @@ import music21.roman
 from midiscripter import *
 
 
-midi_input_from_daw = MidiIn('From DAW', virtual=True)  # MIDI input from (after) DAW
+midi_input_from_daw = MidiIn('DAW', virtual=True)  # MIDI input from (after) DAW
 
 pressed_notes_midi_data = []  # A global variable
 
-# Setting GUI widgets
-root_selector = GuiButtonSelectorV(('C', 'D', 'E', 'F', 'G', 'A', 'B'), select='C', title='Root')
-root_alteration_selector = GuiButtonSelectorV(('b', '♮', '#'), select='♮', title='Alteration')
-mode_selector = GuiButtonSelectorV(('Major', 'Minor'), select='Major', title='Mode')
+# GUI widgets
+root_selector = GuiButtonSelectorV(('C', 'D', 'E', 'F', 'G', 'A', 'B'), select='C')
+root_alteration_selector = GuiButtonSelectorV(('b', '♮', '#'), select='♮')
+mode_selector = GuiButtonSelectorV(('Major', 'Minor'), select='Major')
 
 buttons_layout = GuiWidgetLayout([root_selector, [root_alteration_selector, 
                                                   mode_selector]], 

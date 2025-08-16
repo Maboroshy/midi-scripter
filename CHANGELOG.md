@@ -1,19 +1,36 @@
 # Changelog
 
-## **v0.7** - 29.06.2025
+## **v0.8** - 16.08.2025 
+
+### Added
+- `MultiPort` port wrapper class and IO port classes based on it
+- `GuiEditableText` widget and a complex Global device presets 
+for Ableton Live example that uses it
+- `GuiWidgetLayout` items stretching and spacers
+- Ableton Live remote script installer by GUI menubar action
 
 ### Fixed
-- OscQueryMaker stability
-- GUI logging issues
-- `Show Unused Ports` button state loading
-- Errors introduced by using newer pyside6 and Qt versions
-- Leaving open sockets after script close
-- Script restart stability issues
+- Ableton remote script mixer buttons mode
+- Widgets loose color on GUI opening from tray
+- Virtual MIDI port memory issues
+
+### Changed
+- [BREAKING] Port and widget classes API
+
+## **v0.7** - 29.06.2025
 
 ### Added
 - MIDI ports changes detection and handling in GUI
 - Virtual MIDI port creation on Windows
 - `log` can now print representation of an object passed as an argument
+ 
+### Fixed
+- OscQueryMaker stability
+- GUI logging issues
+- `Show Unused Ports` button state loading
+- Errors introduced by using newer PySide6 and Qt versions
+- Leaving open sockets after script close
+- Script restart stability issues
 
 ### Changed
 - [BREAKING] Reimplemented Ableton port with a User Remote Script 
@@ -26,6 +43,12 @@
 
 ## **v0.6** - 19.08.2024
 
+### Added
+- Message Sender widget 
+- Knob, slider and progress bar widgets
+- "Single instance only" option
+- `GuiWidgetLayout` now has `spacing` keyword attribute 
+- 
 ### Fixed
 - Log filter spaces handling
 - Log history and separators handling while using log filters
@@ -37,12 +60,6 @@
 - Port instance registry handling
 - Window state handling
 
-### Added
-- Message Sender widget 
-- Knob, slider and progress bar widgets
-- "Single instance only" option
-- `GuiWidgetLayout` now has `spacing` keyword attribute 
-
 ### Changed
 - Virtual MIDI ports now require dedicated `virtual=True` init argument
 - Any type object can be used as GUI widget content, `str(content)` will be 
@@ -51,10 +68,6 @@
 
 ## **v0.5** - 30.06.2024
 
-### Fixed
-- Increased log performance
-- Maximized window sizing issues
-
 ### Added
 - Ableton Live control ports and messages with custom remote script
 - `CallOn` flags to use as port subscription conditions
@@ -62,6 +75,10 @@
 - `Control + Click` on object reference in GUI now copies its arguments
 - `Show Unused Ports` button for Port widget 
 - `Hold` button for Log widget
+
+### Fixed
+- Increased log performance
+- Maximized window sizing issues
 
 ### Changed
 - GUI colors
@@ -85,6 +102,9 @@
 - Reworked GUI log widget. It can exclude entries based on filter now.
 - Midi ports now has `name` attribute
 
+### Fixed
+- Fixed and improved `GuiWidgetLayout`
+
 ### Changed
 - [BREAKING] Changed signatures for `MetronomeIn` and `GuiWidged` classes so 
   name/title comes first, for unification
@@ -93,8 +113,6 @@
   and readability 
 - [BREAKING] Subsequent ports init requires all init attrs match
 
-### Fixed
-- Fixed and improved `GuiWidgetLayout`
 
 ## **v0.3** - 07.05.2024
 

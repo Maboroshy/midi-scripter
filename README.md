@@ -1,28 +1,29 @@
-# <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="23"/> MIDI Scripter
 
-MIDI Scripter is a framework for filtering, modifying, routing and any other
-scripting of MIDI, Open Sound Control (OSC), keyboard and mouse input and
-output with Python.
+# <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="23"/> MIDI Scripter ‣ [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/midiscripter?style=flat-square&logo=python&logoColor=yellow)](https://pypi.org/project/midiscripter/) ![GitHub License](https://img.shields.io/github/license/maboroshy/midi-scripter?style=flat-square&color=darkgreen) ![For](https://img.shields.io/badge/for-Windows%20|%20macOS%20|%20Linux-darkmagenta?style=flat-square)
 
-MIDI Scripter monitors input ports and processes incoming messages 
-by sending them to subscribed callables such as functions or methods. 
-These callables, along with any other Python code, can send out modified 
-or newly created messages through output ports. Essentially, MIDI Scripter 
-serves as a proxy that can filter, transform, and convert incoming data.
+MIDI Scripter is a Python framework for filtering, modifying, routing and any other
+handling of MIDI, Open Sound Control (OSC), keyboard and mouse input and output.
+
+It works on Windows and Linux and should work on macOS.
+
+MIDI Scripter listens input ports and send incoming messages to subscribed callables such as functions or methods. 
+These callables, along with any other Python code, can send out modified or newly created messages through output ports. 
+MIDI Scripter can serve as a proxy that filters, transforms, and converts incoming messages.
 
 In addition, MIDI Scripter features a customizable graphical user interface (GUI) 
-that provides message logging, coding assistance, 
-and various controls and indicators to use in the script.
+that provides logging, coding assistance, various controls and indicators to use in the script.
+
+All that with no boilerplate and only a few lines of code.
 
 An octave transposer with GUI controls in 10 lines of code:
 
 ``` python
 from midiscripter import *
 
-midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you with port names
+midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you the port names
 proxy_output = MidiOut('To DAW', virtual=True)  # virtual proxy port for output
 
-# GUI control in a single line
+# GUI widget in a single line
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')
 
 @midi_keyboard.subscribe  # decorated function will receive port's messages
@@ -31,57 +32,47 @@ def transpose(msg: MidiMsg) -> None:
 		msg.data1 += 12 * int(octave_selector.selected_item_text)  # modify
 	proxy_output.send(msg)  # route
 
-if __name__ == '__main__':  # combine multiple scripts by importing them
+if __name__ == '__main__':
 	start_gui()  # opens helpful customizable GUI
 ```
 
-![Screenshot after some widget arrangement](https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot.png?raw=true)
+Screenshot with only `octave_selector` widget enabled:
 
-The average measured roundtrip latency for the script above is less than 0.25 
-milliseconds.
+![Screenshot with only octave_selector widget enabled](
+https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot_widget.png?raw=true)
 
-Currently MIDI Scripter is at "beta" development stage. It's fully
-functional but needs more user feedback. It works on Windows and Linux and
-should work on macOS.
+Screenshot with service Ports and Log and Message Sender widgets:
 
-## Documentation and Examples
+![Screenshot with all the widget visible](
+https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot_full.png?raw=true)
 
-[Overview and full API documentation is available here.](https://maboroshy.github.io/midi-scripter)
+The average latency for the script above is less than 0.25 milliseconds.
 
-[You can find more examples here.](https://github.com/Maboroshy/midi-scripter/tree/master/examples)
+Currently MIDI Scripter is at "beta" development stage. 
+It's fully functional but needs more user feedback. 
 
+## Use cases
 
-## Features
+- Programming MIDI input/output handling scripts 
+  that may also use OSC, keyboard and mouse input/output.
+- Mapping your MIDI controller in your own custom way, 
+  from simple MIDI message filtering or conversion to mostly anything you can imagine.
+- Controlling Ableton Live with Python, without diving into 
+  it's complex MIDI remote scripting or Max for Live.
 
-#### Basic Functionality:
+## Examples 
+- [Add extra banks for the MIDI controllers.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/controls_banks)
+- [Launch an app or run any Python code with a MIDI message.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/start_daw_by_midi)
+- [Show pressed chord description.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/chord_info)
+- Control Ableton Live with [remote script](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_select_armed_track_with_remote_script) or [AbletonOSC.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_select_armed_track_with_osc)
+- [Make custom mapping overlay on top of Ableton Live built-in MIDI controller integration.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/launchpad_overlay)
+- [Run Python code with Ableton Live clips.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_clips_launch_code)
+- [Save and load global presets for Ableton Live devices.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_global_preset)
 
-- Create proxy MIDI ports.
-- Receive input messages from MIDI, OSC, keyboard and mouse.
-- Filter, modify and manipulate messages using Python.
-- Send modified or generated MIDI, OSC, keyboard, and mouse messages.
+## Documentation
 
-#### For Music Performance MIDI Setups:
-
-- Create additional banks and layers to enhance MIDI controllers.
-- Organize mappings into sets or scenes using with GUI dashboard.
-- Add overlay mappings on top of your MIDI controller’s DAW integration 
-  using proxy ports.
-- Combine multiple MIDI controllers into a single unit with any logic.
-- Control Ableton Live through a [special remote script or AbletonOSC](https://github.com/Maboroshy/midi-scripter/tree/master/extra/Ableton%20Remote%20Script).
-
-#### For Software Control and Automation:
-
-- Map or convert messages on specific conditions and logic.
-- Use MIDI controllers or keyboard shortcuts to run any Python code.
-- Implement keyboard and mouse macros.
-
-#### For Writing MIDI-Related Python Code:
-
-- Prepare MIDI, OSC, keyboard, and mouse inputs and outputs with a single line of code, without boilerplate.
-- Use decorators to feed input messages to functions or other callables.
-- Work with message objects rather than raw data, which varies by port type.
-- Create GUI widgets with just one line of code and arrange them with mouse.
-- Fully type-annotated API for better code clarity.
+MIDI Scripter has fully documented and type hinted API.  
+[Overview and API documentation is available here.](https://maboroshy.github.io/midi-scripter)
 
 ## Installation
 
@@ -91,18 +82,22 @@ should work on macOS.
 Extra steps for Windows:
 
 1. Enable `Add python .exe to PATH` option in Python installer.
-2. Install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) 
-   for virtual ports support.
+2. Install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) for virtual MIDI port support.
 
 ## Quick Start Guide
 
-1. Paste the [script template](examples/script_template.py) into your Python IDE or a plain text editor. Using an IDE is recommended.
-2. Run the template script directly from the IDE or by `python your_script.py`. This will open the GUI (as shown in the screenshot below), providing information about available ports and incoming input.
-3. Ensure that the “Show Unused Ports” button located under the port list is activated. Enable the checkboxes for any available ports to activate them, monitor the log for incoming messages.
-4. Click on the port names and messages in the log to copy their declarations 
- to the clipboard. You can paste the declarations into your script.
-5. Adjust the template function to achieve desired functionality. Use `log('messages')` for debugging purposes.
+1. Paste the [script template](examples/script_template.py) into your Python IDE or a plain text editor. Using IDE is recommended.
+2. Run the template script directly from the IDE or by `python your_script.py`. 
+   This will open the GUI, providing information about available ports and incoming input.
+3. Ensure that the “Show Unused Ports” button located under the port list is activated. 
+   Enable the checkboxes for any available ports to open them. Monitor the log for incoming messages.
+4. Click on the port names and messages in the log or port list to copy their declarations to the clipboard. 
+   You can paste the declarations into your script.
+5. Rewrite the template function to achieve desired functionality. Use `log('messages')` for debugging purposes.
 6. Restart the script from the GUI to see how it performs.
-7. Develop more complex scripts by utilizing additional inputs, outputs and functions (callables). Subscribe callables to input messages using the `@input_port.subscribe` decorator.
+7. Develop more complex scripts by utilizing additional inputs, outputs and functions (callables). 
+   Subscribe new callables to input messages using the `@input_port.subscribe` decorator.
 
-![Screenshot](https://github.com/Maboroshy/midi-scripter/blob/master/docs/screenshot.png?raw=true)
+## License 
+MIDI Scripter assets and code is under LGPL 3.0 license.  
+That code that use it can have any license.

@@ -68,7 +68,7 @@ class AbletonEvent(midiscripter.base.msg_base.AttrEnum):
     TAP_TEMPO = 'TAP_TEMPO'
     """Tap tempo"""
     TEMPO_CONTROL = 'TEMPO_CONTROL'
-    """Tempo control CC assignment"""
+    """Tempo control"""
 
     TRACK_ARM = 'TRACK_ARM'
     """Track record arm by index"""
@@ -107,7 +107,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
     type: AbletonEvent
     """Ableton Live remote script event"""
 
-    index: None | int | tuple[int, int] = None
+    index: None | int = None
     """Track/clip/send index"""
 
     value: int | bool
@@ -143,7 +143,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
             ``` python
             AbletonMsg(
                 type: AbletonEvent,
-                index: int | tuple[int, int],
+                index: int,
                 value: int | bool,
                 *,
                 source: 'None | AbletonIn' = None
@@ -160,7 +160,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
 
         Args:
             type: Ableton Live remote script event
-            index (int): Track/clip/send index
+            index (int): Track/encoder/device bank index
             value (int | bool): Control event value (0-127 or True / False)
             source: The [`AbletonIn`][midiscripter.AbletonIn] instance that generated the message
         """
@@ -178,7 +178,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
     def matches(
         self,
         type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
-        index: 'None | Container[int, tuple[int, int]] | int | tuple[int, int]' = None,
+        index: 'None | Container[int] | int' = None,
         value: 'None | Container[int] | int | bool' = None,
     ) -> bool:
         return super().matches(type, index, value)

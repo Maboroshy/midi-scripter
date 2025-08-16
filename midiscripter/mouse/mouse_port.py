@@ -33,11 +33,12 @@ class MouseIn(midiscripter.base.port_base.Input):
         Use `MouseOut` only for one-time movements.
     """
 
-    _force_uid: ClassVar[str] = 'Mouse In'
+    _forced_uid: ClassVar[str] = 'Mouse In'
+    _log_description: str = 'mouse input listener'
 
     def __init__(self):
         """"""
-        super().__init__(self._force_uid)
+        super().__init__()
         self.__pynput_listener = None
 
     def __on_move(self, x: int, y: int) -> None:
@@ -68,14 +69,14 @@ class MouseIn(midiscripter.base.port_base.Input):
         )
         self.__pynput_listener.start()
         self.__pynput_listener.wait()
-        self.is_enabled = True
-        log('Started mouse input listener')
+        self.is_opened = True
+        log._port_open(self, True)
 
     def _close(self) -> None:
         self.__pynput_listener.stop()
         self.__pynput_listener = None
-        self.is_enabled = False
-        log('Stopped mouse input listener')
+        self.is_opened = False
+        log._port_close(self, True)
 
     @overload
     def subscribe(self, call: 'Callable[[MouseMsg], None]') -> 'Callable': ...
@@ -101,16 +102,16 @@ class MouseOut(midiscripter.base.port_base.Output):
     """Mouse output port. Sends [`MouseMsg`][midiscripter.MouseMsg] objects.
 
     Warning:
-        Transparent `MouseIn` -> `MouseOut` proxy won't work since it will react to its own output.
+        Transparent `MouseIn` -> `MouseOut` proxy won't work, since it will react to its own output.
 
-        Use `MouseOut` only for one-time movements.
+        Use `MouseOut` only for single movements.
     """
 
-    _force_uid: ClassVar[str] = 'Mouse Output'
+    _forced_uid: ClassVar[str] = 'Mouse Out'
+    _log_description: str = 'mouse output'
 
     def __init__(self):
-        """"""
-        super().__init__(self._force_uid)
+        super().__init__()
         self.__pynput_controller = pynput.mouse.Controller()
 
     def send(self, msg: MouseMsg) -> None:
@@ -124,7 +125,7 @@ class MouseOut(midiscripter.base.port_base.Output):
 
         # Log messages sent before actual sending, so receive messages for sent keys
         # won't be displayed before the message
-        self._log_msg_sent(msg)
+        log._msg_sent(self, msg)
 
         self.__pynput_controller.position = (msg.x, msg.y)
 
@@ -150,3 +151,44 @@ class MouseOut(midiscripter.base.port_base.Output):
 
         except AttributeError:
             log.red(f'Invalid MouseMsg type: {msg.type}')
+
+
+class MouseIO(midiscripter.base.port_base.MultiPort):
+    """Mouse input/output port that combines [`MouseIn`][midiscripter.MouseIn] and
+    [`MouseOut`][midiscripter.MouseOut] ports.
+    Produces and sends [`MouseMsg`][midiscripter.MouseMsg] objects.
+    """
+
+    _forced_uid: ClassVar[str] = 'Mouse'
+    _log_description: str = 'mouse i/o'
+
+    def __init__(self):
+        """"""
+        super().__init__('Mouse', MouseIn(), MouseOut())
+
+    @overload
+    def subscribe(self, call: 'Callable[[MouseMsg], None]') -> 'Callable': ...
+
+    @overload
+    def subscribe(
+        self,
+        type: 'None | Container[MouseEvent] | MouseEvent' = None,
+        x: 'None | Container[int] | int' = None,
+        y: 'None | Container[int] | int' = None,
+    ) -> 'Callable': ...
+
+    def subscribe(
+        self,
+        type: 'None | Container[MouseEvent] | MouseEvent' = None,
+        x: 'None | Container[int] | int' = None,
+        y: 'None | Container[int] | int' = None,
+    ) -> 'Callable':
+        return self._input_ports[0].subscribe(type, x, y)
+
+    def send(self, msg: MouseMsg) -> None:
+        """Send the mouse input.
+
+        Args:
+            msg: object to send
+        """
+        self._output_ports[0].send(msg)

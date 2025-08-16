@@ -34,7 +34,7 @@ class Msg:
 
     __match_args__: tuple[str] = ('type',)
 
-    _gui_color: str = 'blue'
+    _log_color: str = 'blue'
     _log_show_link: bool = True
 
     def __init__(self, type: str, source: 'Input | None' = None):

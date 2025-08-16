@@ -1,7 +1,8 @@
 from midiscripter import *
 
-midi_keyboard = MidiIn('MIDI Keyboard')  # GUI will provide you with port names
-proxy_output = MidiOut('To DAW', virtual=True)  # using virtual port for output
+
+midi_keyboard = MidiIn('MIDI Keyboard', virtual=True)  # GUI will provide you with port names
+proxy_output = MidiOut('DAW', virtual=True)  # using virtual port for output
 
 # GUI controls in a single line
 octave_selector = GuiButtonSelectorH(('-2', '-1', '0', '+1', '+2'), select='0')

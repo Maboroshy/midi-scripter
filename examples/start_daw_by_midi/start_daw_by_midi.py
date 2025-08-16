@@ -10,7 +10,7 @@ DAW_START_MIDI_MSG_CONDITIONS = (MidiType('CONTROL_CHANGE'), 1, 1, 0)
 
 
 midi_controller = MidiIn('MIDI Controller')
-proxy_output = MidiOut('To DAW', virtual=True)
+proxy_output = MidiOut('DAW', virtual=True)
 
 midi_controller.passthrough_out(proxy_output)
 

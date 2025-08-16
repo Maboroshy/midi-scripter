@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from PySide6.QtGui import QResizeEvent
+from PySide6.QtGui import QResizeEvent, QShowEvent
 from PySide6.QtWidgets import *
 
 from .gui_widget_base import GuiWidget
@@ -129,7 +129,13 @@ class ButtonGroupWidgetHorizontal(WrappedQWidgetMixin, QWidget):
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
+        self._sync_font_sizes()
 
+    def showEvent(self, event: QShowEvent) -> None:
+        super().showEvent(event)
+        self._sync_font_sizes()
+
+    def _sync_font_sizes(self) -> None:
         font_sizes_and_fonts = {
             button.font().pixelSize(): button.font()
             for button in self.wrapped_qt_buttons_map.values()

@@ -6,6 +6,9 @@ from midiscripter.logger.log_obj import LogEntry
 
 
 def _to_colored_text(text: str, color: str, global_color: None | str = None) -> str:
+    if not color:
+        return text
+
     if global_color:
         closing_tag = getattr(colorama.Fore, color.upper())
     else:

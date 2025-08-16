@@ -5,7 +5,6 @@
         - color
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiToggleButton
@@ -16,7 +15,6 @@
         - toggle_state
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiButtonSelectorH
@@ -28,7 +26,6 @@
         - selected_item_index
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiButtonSelectorV
@@ -40,5 +37,4 @@
         - color
         - is_visible
         - qt_widget
-        - calls
         - subscribe

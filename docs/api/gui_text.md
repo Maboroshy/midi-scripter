@@ -6,7 +6,6 @@
         - toggle_state
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiEditableText
@@ -17,5 +16,4 @@
         - toggle_state
         - is_visible
         - qt_widget
-        - calls
         - subscribe

@@ -1,4 +1,4 @@
-MIDI Scripter scripts use 5 main elements:
+MIDI Scripter scripts has 5 main elements:
 
 ```python
 from midiscripter import *
@@ -26,25 +26,28 @@ if __name__ == '__main__':
 
 ## 1. Ports
 
-There are two port types: input ports and output ports.
+There are three port types: input, output and input/output (i/o) ports.
 
-Port are typically declared as `port_class(name_or_adress)` or `port_class
-()` for those that don't need a name. For detailed information 
-on how to declare specific ports, refer to the API documentation.
+The i/o port is implemented as a wrapper that combines 
+input and output ports together and acts like both. 
+
+Port are typically declared as `port_class(name_or_address)` or `port_class()` 
+(for those that don't need a name or address). For detailed information 
+on specific ports, refer to the API documentation.
 
 Virtual MIDI ports can be created with `MidiIn('Virtual port name', 
 virtual=True)` (installed 
 [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) 
-required for Windows). Virtual MIDI ports can be used to write proxy scripts, like the one above.
+required for Windows). 
+Virtual MIDI ports can be used to write proxy scripts like the one above.
 
-Port declaration is all you need to use the port, the starter
-function does the rest.
-
-The starter function opens all declared ports, input ports start to feed 
+Port declaration is all you need to use the port.
+The starter function opens all declared ports, input ports start feeding 
 incoming messages to subscribed callables.
 
-Callables or any other Python code can use `output_port.send(msg)` to send 
-messages.
+Input and i/o ports can [subscribe callables with the decorator](#3-calls). 
+
+Output and i/o ports can send messages with `output_port.send(msg)`.
 
 Available ports:
 
@@ -53,37 +56,38 @@ Available ports:
 - [Keyboard](api/key_port.md)
 - [Mouse](api/mouse_port.md)
 - [Ableton Live Remote](api/ableton_port.md)
-- [Metronome](api/metronome_port.md)
 - [File System Events](api/fs_port.md)
-- [Midi Ports Changes](api/midi_ports_changed.md)
+- [Metronome](api/metronome_port.md)
 
 ## 2. GUI widgets
 
 Declared GUI widgets appear in GUI window opened by 
 [`start_gui`][midiscripter.start_gui] starter function.
 
-Widgets are declared as `widget_class(title, content)` or `widget_class
-(content)` (used in example above) where:
-
-- title - widget title;
-- content - widget's text or tuple of its items' text.
+Widgets are declared as `widget_class(content)`.
 
 Widget's initial state can be set by keyword arguments specific for widget
 class (`color`, `select`, `toggle_state`, etc.) like in the example above.
 
+Widget's title for GUI widget list can be set by the `title` keyword argument. 
+Otherwise, widget's content or type is used as a title.
+The title is used for widget's position saving. It should be unique for 
+all the widgets not bound to the special layout wrapper.
+
 Widget's state can be read or set by reading or changing its properties.
 
-For detailed information on how to declare widgets, 
+For detailed information on how to declare and use specific widgets, 
 refer to the API documentation.
 
-GUI widgets can be rearranged by dragging their titles. 
-At first run widget layout can be messy, but it's easy to
-arrange it as you want. The GUI will save the widget layout for each script.
+GUI widgets can be rearranged in the window by dragging their titles. 
+At first run widget layout can be random, but it's easy to
+arrange it as you want. The GUI will save the layout for each script.
 
-GUI widgets act like input ports. They can subscribe callables that will
+GUI widgets can subscribe callables that will
 receive [`GuiEventMsg`][midiscripter.GuiEventMsg] messages.
 
-Custom PySide6 widgets can be added to the GUI by `add_qwidget(qwidget)`.
+Custom PySide6 widgets can be added to the GUI by `add_qwidget(qwidget)` 
+before the starter function run.
 
 Available widgets:
 
@@ -102,13 +106,13 @@ Available widgets:
 
 ## 3. Calls
 
-Input ports subscribe functions, object methods or anything callable 
-to call with incoming message object. Callables can have any name, 
+Input ports and GUI widgets subscribe functions, object methods or anything 
+callable to call with incoming message object. Callables can have any name, 
 must accept a message as their only argument or have no arguments at all,
 and are not expected to return anything.
 
-To subscribe a callable to the messages from an input port, use the 
-`@input_port.subscribe` decorator. A single callable can be subscribed 
+To subscribe a callable to the messages from an input port or and GUI widget,
+use the `@input_port.subscribe` decorator. A single callable can be subscribed 
 to multiple ports by stacking multiple decorators:
 
 ``` python
@@ -118,17 +122,17 @@ def do_something(msg: MidiMsg) -> None:
     log.green('This function receives messages from both ports')
 ```
 
-Callable subscription can have conditions provided as 
+Callable subscription can have conditions provided as decorator arguments:
 `@input_port.subscribe(conditions)`. Conditions can be 
 [message `.matches` arguments](#message-matching) 
 or a [`CallOn` enum value][midiscripter.CallOn].
 
-MIDI Scripter includes  its own [logger](api/logging.md) for debugging or feedback. 
+MIDI Scripter includes its own [logger](api/logging.md) for debugging or feedback. 
 Print log messages with `log('message')` or `log.red('colored message')`. 
 The color methods are `red`, `yellow`, `green`, `cyan`, `blue` and `magenta`.
 
 Each call runs in its own thread, but all calls run in the same process.
-So if a call performs some heavy computing it can increase latency and 
+So if a call performs some heavy computing, it can increase latency and 
 jitter for the whole script. It's recommended to move heavy computing out 
 of the main process with Python's
 [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html) module.
@@ -136,7 +140,7 @@ of the main process with Python's
 Each callable receives its own copy of the input message it can modify 
 without affecting other calls' work.
 
-Getting exception in a call won't affect other calls or the script's work.
+Getting an exception in a call won't affect other calls' or the script's work.
 Exception details are printed to log.
 
 You can check call execution time statistics in the Ports GUI widget by
@@ -144,11 +148,11 @@ hovering mouse over a call item.
 
 ## 4. Messages
 
-Messages are data objects generated by input ports or created in the
+Messages are data objects produced by input ports or created in the
 script's code. Messages can be sent with an output port of the corresponding 
 type.
 
-Each message stores the source port instance as `source` attribute and its
+Each message stores the source port/widgets instance as `source` attribute and its
 creation time in epoch format as `ctime` attribute.
 
 The time since message creation (in milliseconds) can be checked by
@@ -193,16 +197,16 @@ Available message types:
 - [`MidiMsg`][midiscripter.MidiMsg] ([`ChannelMsg`][midiscripter.ChannelMsg],
 [`SysexMsg`][midiscripter.SysexMsg])
 - [`OscMsg`][midiscripter.OscMsg]
+- [`AbletonMsg`][midiscripter.AbletonMsg]
 - [`KeyMsg`][midiscripter.KeyMsg]
 - [`MouseMsg`][midiscripter.MouseMsg]
-- [`AbletonMsg`][midiscripter.AbletonMsg]
 - [`GuiEventMsg`][midiscripter.GuiEventMsg]
 - [`FileEventMsg`][midiscripter.FileEventMsg]
 
 ## 5. Starter
 
 Starter is a function that should be called after ports, widgets and
-calls are set up. Starter opens all the ports, keeps input message
+calls are set up. Starter opens all ports, keeps input message
 listening loops running and handles logging.
 
 There are 3 starter functions:
@@ -210,27 +214,27 @@ There are 3 starter functions:
 - [`start_gui`][midiscripter.start_gui] - starts the script with GUI and routes
   log messages to its Log widget. The preferred starter.
 - [`start_silent`][midiscripter.start_silent] - starts the script with no
-  logging or GUI. The fastest.
+  logging or GUI. The most efficient.
 - [`start_cli_debug`][midiscripter.start_cli_debug] - starts the script with
   logging to console. That increases latency and jitter. Use only while
   debugging the script with no access to GUI.
 
 ## Message matching
 
-Message objects can be filtered in callables by their attribute values as in 
+Message objects can be filtered within callables by their attribute values as in 
 the example above, but they also have more powerful 
-[`matches`][midiscripter.Msg.matches] method.
+[`.matches`][midiscripter.Msg.matches] method.
 
 This method takes conditions for each message object attribute in the 
 order of message object's `__init__`.
 
-This matching uses the simplified 
+The matching uses the simplified 
 [schema](https://github.com/keleshev/schema)-like approach:
 
-1. If condition is `None` or omitted, it matches anything.
-2. If condition equals attribute, it matches the attribute.
-3. If condition is a container and contains the attribute, it matches the 
-attribute.
+1. If the condition is `None` or omitted, it matches anything.
+2. If the condition equals the attribute, it matches the attribute.
+3. If the condition is a container (list, tuple) and contains the attribute, 
+it matches the attribute.
 
 Use `Not(condition)` to invert condition matching.
 
@@ -251,8 +255,8 @@ True
 False
 ```
 
-The same matching patter can be used as the arguments for 
-`@input_port_subscribe` decorator. Only matching messages will go to the calls:
+The matching pattern can be used as arguments for 
+`@input_port_subscribe` decorator. Only matching messages will go to calls:
 
 ``` python
 @input_port.subscribe(MidiType.SYSEX)
@@ -270,26 +274,21 @@ MidiIn('MIDI Controller').subscribe(MidiType.SYSEX)(MidiOut('To DAW').send)
 
 ## Combining multiple scripts
 
-A single combined script is much easier to manage than running multiple
+A single combined script is easier to manage than running multiple
 scripts in parallel.
 
-To combine multiple atomic scripts to run as a single one you can simply 
+To combine multiple atomic scripts to run as a single one you can
 import them.
 
-To manage that easier port declaration with the same arguments returns 
+It is possible because port declaration with the same arguments returns 
 the same port object instance (singleton):
 
 ``` python
 >>> MidiIn('Port name') is MidiIn('Port name')
 True
-
->>> GuiButton('Ok') is GuiButton('Ok')
-True
 ```
 
-It's advised to put starter into `if __name__ == '__main__':` clause, like in
-the example scripts. This allows to safely combine standalone scripts later by
-importing them:
+Imported scripts should have their starters in `if __name__ == '__main__':` clause:
 
 ```python
 from midiscripter import *

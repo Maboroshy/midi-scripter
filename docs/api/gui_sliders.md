@@ -7,7 +7,6 @@
         - range
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiSliderV
@@ -19,7 +18,6 @@
         - range
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiSliderH
@@ -31,7 +29,6 @@
         - range
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiProgressBarV
@@ -43,7 +40,6 @@
         - range
         - is_visible
         - qt_widget
-        - calls
         - subscribe
 
 ## :::midiscripter.GuiProgressBarH
@@ -55,5 +51,4 @@
         - range
         - is_visible
         - qt_widget
-        - calls
         - subscribe

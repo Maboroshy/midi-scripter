@@ -1,4 +1,4 @@
-from .shared import restart_script
+from .shared import restart_script, SCRIPT_PATH_STR
 from .base import *
 from .logger import *
 from .cli import *

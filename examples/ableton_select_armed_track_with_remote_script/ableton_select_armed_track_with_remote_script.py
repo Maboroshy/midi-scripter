@@ -1,14 +1,12 @@
 from midiscripter import *
-from ableton_remote import *
 
 
-ableton_in = AbletonIn('From Ableton Script', virtual=True)
-ableton_out = AbletonOut('To Ableton Script', virtual=True)
+ableton = AbletonIO('Ableton Live', virtual=True)
 
 
-@ableton_in.subscribe(AbletonEvent.TRACK_ARM, value=True)
+@ableton.subscribe(AbletonEvent.TRACK_ARM, value=True)
 def select_armed_track(msg: AbletonMsg) -> None:
-    ableton_out.send(AbletonMsg(AbletonEvent.TRACK_SELECT, msg.index, True))
+    ableton.send(AbletonMsg(AbletonEvent.TRACK_SELECT, msg.index, True))
 
 
 if __name__ == '__main__':
