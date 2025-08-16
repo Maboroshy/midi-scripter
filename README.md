@@ -100,4 +100,4 @@ Extra steps for Windows:
 
 ## License 
 MIDI Scripter assets and code is under LGPL 3.0 license.  
-That code that use it can have any license.
+The code that use it can have any license.
