@@ -1,5 +1,6 @@
 
-# <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="23"/> MIDI Scripter ‣ [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/midiscripter?style=flat-square&logo=python&logoColor=yellow)](https://pypi.org/project/midiscripter/) ![GitHub License](https://img.shields.io/github/license/maboroshy/midi-scripter?style=flat-square&color=darkgreen) ![For](https://img.shields.io/badge/for-Windows%20|%20macOS%20|%20Linux-darkmagenta?style=flat-square)
+# <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="23"/> MIDI Scripter
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/midiscripter?style=flat-square&logo=python&logoColor=yellow)](https://pypi.org/project/midiscripter/) ![GitHub License](https://img.shields.io/github/license/maboroshy/midi-scripter?style=flat-square&color=darkgreen) ![For](https://img.shields.io/badge/for-Windows%20|%20macOS%20|%20Linux-darkmagenta?style=flat-square)
 
 MIDI Scripter is a Python framework for filtering, modifying, routing and any other
 handling of MIDI, Open Sound Control (OSC), keyboard and mouse input and output.
