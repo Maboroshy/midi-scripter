@@ -6,6 +6,6 @@ Ableton Live. The script uses MIDI channel 15.
 ## Prerequisites
 
 - Install Ableton Live Remote Script by MIDI Scripter GUI's menubar `Help` section action.
-- Assign virtual ports to Remote Script:
+- Assign proxy ports to Remote Script:
 
 ![Ableton Live settings](/examples/ableton_select_armed_track_with_remote_script/ableton_settings.png)
