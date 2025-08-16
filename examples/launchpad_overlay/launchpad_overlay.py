@@ -4,7 +4,6 @@ from midiscripter import *
 # Settings
 SCENES_CC = (89, 79, 69, 59)
 LPX_CHANNEL = 1
-OVERLAY_CHANNEL = 2
 SELECTED_SCENE_PAD_COLOR = 21
 
 
