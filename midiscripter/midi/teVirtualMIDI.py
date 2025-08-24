@@ -68,7 +68,7 @@ FLAGS_SUPPORTED = (
 
 
 class MIDIPort(ctypes.Structure):
-    """Wrapper for the VM_MIDI_PORT C struct."""
+    """Wrapper for the VM_MIDI_PORT C struct"""
 
     pass
 

@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class MidiType(midiscripter.base.msg_base.AttrEnum):
-    """MIDI message type enumerator to use as [`MidiMsg`][midiscripter.MidiMsg] `type` attribute."""
+    """MIDI message type enumerator to use as [`MidiMsg`][midiscripter.MidiMsg] `type` attribute"""
 
     NOTE_ON = 'NOTE_ON'
     NOTE_OFF = 'NOTE_OFF'
@@ -24,11 +24,11 @@ class MidiType(midiscripter.base.msg_base.AttrEnum):
 
 
 class MidiMsg(midiscripter.base.msg_base.Msg):
-    """The base class for MIDI messages that will produce [`ChannelMsg`][midiscripter.ChannelMsg]
+    """The base class for MIDI messages that produces [`ChannelMsg`][midiscripter.ChannelMsg]
     or [`SysexMsg`][midiscripter.SysexMsg] objects depending on init arguments.
 
     It is advised to use [`ChannelMsg`][midiscripter.ChannelMsg]
-    or [`SysexMsg`][midiscripter.SysexMsg] classes to create own MIDI messages for clarity.
+    or [`SysexMsg`][midiscripter.SysexMsg] classes to create MIDI messages for clarity.
     """
 
     __match_args__: tuple[str] = ('type', 'channel', 'data1', 'data2')
@@ -64,17 +64,17 @@ class ChannelMsg(MidiMsg):
     """Channel voice/mode MIDI message. The most common MIDI message."""
 
     type: MidiType
-    """MIDI message type."""
+    """MIDI message type"""
 
     channel: int
-    """MIDI message channel (1-16)."""
+    """MIDI message channel (1-16)"""
 
     data1: int
     """First data byte: note, control, program or aftertouch value 
-    depending on MIDI message type (0-127)."""
+    depending on MIDI message type (0-127)"""
 
     data2: int
-    """Second data byte: velocity, value depending on MIDI message type (0-127)."""
+    """Second data byte: velocity or value depending on MIDI message type (0-127)"""
 
     def __new__(cls, *args, **kwargs):
         """Resets base class custom __new__"""
@@ -121,7 +121,7 @@ class ChannelMsg(MidiMsg):
     @property
     def combined_data(self) -> int | tuple[int, ...]:
         """Both data bytes combined to 14-bit number -
-        pitch value for pitch bend MIDI message (0-16383)."""
+        pitch value for pitch bend MIDI message (0-16383)"""
         return self.data1 | (self.data2 << 7)
 
     @combined_data.setter
@@ -145,16 +145,16 @@ class SysexMsg(MidiMsg):
     """System exclusive MIDI message"""
 
     type = MidiType.SYSEX
-    """MIDI message type."""
+    """MIDI message type"""
 
     channel: tuple[int, ...]
-    """Manufacturer ID (protocol)."""
+    """Manufacturer ID (protocol)"""
 
     data1: tuple[int, ...]
-    """Sub ID (model, device, command, etc.)."""
+    """Sub ID (model, device, command, etc.)"""
 
     data2: tuple[int, ...]
-    """Message data."""
+    """Message data"""
 
     def __new__(cls, *args, **kwargs):
         """Resets base class custom __new__"""
@@ -180,7 +180,7 @@ class SysexMsg(MidiMsg):
 
     @property
     def combined_data(self) -> tuple[int, ...]:
-        """Whole sysex message including opening `240` and closing `247` bytes."""
+        """Whole sysex message including opening `240` and closing `247` bytes"""
         return (
             rtmidi.midiconstants.SYSTEM_EXCLUSIVE,
             *self.channel,

@@ -9,18 +9,18 @@ if TYPE_CHECKING:
 
 class MouseEvent(midiscripter.base.msg_base.AttrEnum):
     """Mouse event message type enumerator
-    to use as [`MouseMsg`][midiscripter.MouseMsg] `type` attribute."""
+    to use as [`MouseMsg`][midiscripter.MouseMsg] `type` attribute"""
 
     MOVE = 'MOVE'
 
     LEFT_CLICK = 'LEFT_CLICK'
-    """Left button press and release. Isn't assigned by [`MouseIn`][midiscripter.MouseIn] 
+    """Left button press and release. Not used by [`MouseIn`][midiscripter.MouseIn] 
        but can be sent with [`MouseOut`][midiscripter.MouseOut]."""
     MIDDLE_CLICK = 'MIDDLE_CLICK'
-    """Middle button press and release. Isn't assigned by [`MouseIn`][midiscripter.MouseIn] 
+    """Middle button press and release. Not used by [`MouseIn`][midiscripter.MouseIn] 
        but can be sent with [`MouseOut`][midiscripter.MouseOut]."""
     RIGHT_CLICK = 'RIGHT_CLICK'
-    """Right button press and release. Isn't assigned by [`MouseIn`][midiscripter.MouseIn] 
+    """Right button press and release. Not used by [`MouseIn`][midiscripter.MouseIn] 
        but can be sent with [`MouseOut`][midiscripter.MouseOut]."""
 
     LEFT_PRESS = 'LEFT_PRESS'

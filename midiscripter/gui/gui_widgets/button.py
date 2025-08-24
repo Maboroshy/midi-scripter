@@ -172,7 +172,7 @@ class ButtonGroupWidgetVertical(ButtonGroupWidgetHorizontal):
 
 
 class GuiButtonSelectorV(GuiWidget):
-    """Button group to select value, vertical layout."""
+    """Button group to select value, vertical layout"""
 
     _qt_widget_class = ButtonGroupWidgetVertical
 

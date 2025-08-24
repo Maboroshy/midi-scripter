@@ -71,8 +71,7 @@ class (`color`, `select`, `toggle_state`, etc.) like in the example above.
 
 Widget's title for GUI widget list can be set by the `title` keyword argument. 
 Otherwise, widget's content or type is used as a title.
-The title is used for widget's position saving. It should be unique for 
-all the widgets not bound to the special layout wrapper.
+The title is also used for widget's position saving.
 
 Widget's state can be read or set by reading or changing its properties.
 
@@ -92,6 +91,7 @@ before the starter function run.
 Available widgets:
 
 - [`GuiText`][midiscripter.GuiText]
+- [`GuiEditableText`][midiscripter.GuiEditableText]
 - [`GuiButton`][midiscripter.GuiButton]
 - [`GuiToggleButton`][midiscripter.GuiToggleButton]
 - [`GuiButtonSelectorH`][midiscripter.GuiButtonSelectorH]
@@ -126,6 +126,7 @@ Callable subscription can have conditions provided as decorator arguments:
 `@input_port.subscribe(conditions)`. Conditions can be 
 [message `.matches` arguments](#message-matching) 
 or a [`CallOn` enum value][midiscripter.CallOn].
+Object methods can be subscribed by `input_port.subscribe(conditions)(object.method)`.
 
 MIDI Scripter includes its own [logger](api/logging.md) for debugging or feedback. 
 Print log messages with `log('message')` or `log.red('colored message')`. 
@@ -250,7 +251,7 @@ True
 
 >>> msg.matches(
     MidiType.NOTE_ON,  # only "note on"
-    data2=Not(range(60, 128))  # velocity less than 60 won't match
+    data2=Not(range(60, 128))  # velocity not in 60 - 128 range
 )  
 False
 ```

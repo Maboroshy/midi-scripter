@@ -40,9 +40,7 @@ _NOTE_INT_TO_NOTE_NAME_MAP_FLATS = ('C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', '
 
 
 class NoteData:
-    """Optional wrapper for readable representation of MIDI note data.
-    When using it as `int` - it's note's MIDI data, when using as `str` - it's note's name.
-    """
+    """Optional wrapper for readable representation of MIDI note data"""
 
     middle_c_octave_n = 3
     """Octave number for middle C to use as reference for note naming"""
@@ -65,11 +63,11 @@ class NoteData:
             raise TypeError
 
     def as_str(self) -> str:
-        """Note name. Same as `str(note_data_obj)`."""
+        """Note name. Same as `str(note_data_obj)`"""
         return self.__str
 
     def as_int(self) -> int:
-        """Note MIDI data. Same as `int(note_data_obj)`."""
+        """Note MIDI data. Same as `int(note_data_obj)`"""
         return self.__int
 
     def __str__(self):

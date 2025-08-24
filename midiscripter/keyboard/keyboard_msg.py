@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING
 from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 import pynput.keyboard
 
@@ -32,13 +32,13 @@ MODIFIER_KEYS_VARIATIONS = {
 
 class KeyEvent(midiscripter.base.msg_base.AttrEnum):
     """Keyboard event message type enumerator
-    to use as [`KeyMsg`][midiscripter.KeyMsg] `type` attribute."""
+    to use as [`KeyMsg`][midiscripter.KeyMsg] `type` attribute"""
 
     PRESS = 'PRESS'
     RELEASE = 'RELEASE'
     TAP = 'TAP'
     """Key press and release. Isn't assigned by [`KeyIn`][midiscripter.KeyIn]
-       but can be sent with [`KeyOut`][midiscripter.KeyOut]."""
+       but can be sent with [`KeyOut`][midiscripter.KeyOut]"""
 
 
 class KeyMsg(midiscripter.base.msg_base.Msg):
@@ -50,7 +50,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
     """Keyboard event type"""
 
     keycodes: list[pynput.keyboard.Key]
-    """Keycodes in the order they were pressed. Use when press order matters."""
+    """Keycodes in the order they were pressed. Use when pressing order matters."""
 
     source: 'None | KeyIn'
 
@@ -68,7 +68,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
             source: The [`KeyIn`][midiscripter.KeyIn] instance that generated the message
 
         Tip:
-            Run GUI and enable keyboard input. Use log to get messages with shortcuts you need.
+            Use log to get the shortcuts you need
         """
         super().__init__(type, source)
         self.__shortcut_cache = ''
@@ -84,7 +84,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
     @property
     def shortcut(self) -> str:
         """Keyboard shortcut description like `'ctrl+shift+t'`.
-        Stays the same for any key press order."""
+        Stays the same for any key pressing order."""
         if self.__cached_keycodes != self.keycodes:
             modifiers = []
             non_mod_keys = []
