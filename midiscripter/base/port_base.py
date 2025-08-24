@@ -48,7 +48,7 @@ def _all_opened() -> None:
 
 
 class SubscribedCall:
-    """Wrapper object created for subscribed callable."""
+    """Wrapper object created for subscribed callable"""
 
     conditions: None | tuple[tuple, dict]
     """Message match conditions for call"""
@@ -90,7 +90,7 @@ class SubscribedCall:
 
 
 class Subscribable:
-    """Base class for object that calls can subscribe to."""
+    """Base class for object that calls can subscribe to"""
 
     _calls: list[None | CallOn | tuple[tuple, dict], list[SubscribedCall]]
     """Message match arguments and callables that will be called with matching incoming messages.
@@ -344,7 +344,7 @@ class Port:
 
     @property
     def _is_available(self) -> bool:
-        """Port is available and can be opened."""
+        """Port is available and can be opened"""
         return True
 
     def _open(self) -> None:
@@ -369,7 +369,7 @@ class Port:
 
 
 class Input(Subscribable, Port):
-    """Input port base class."""
+    """Input port base class"""
 
     _log_description: str = 'input'
     _log_color: str = 'green'

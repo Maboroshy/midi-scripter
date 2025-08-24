@@ -121,7 +121,7 @@ def remove_qwidget(qwidget: QWidget) -> None:
 
 
 def start_gui() -> NoReturn:
-    """Starts the script and runs GUI. Logging goes to GUI Log widget."""
+    """Starts the script and runs GUI. Logging goes to GUI Log widget"""
     if not midiscripter.shared.SCRIPT_PATH_STR:
         raise RuntimeError('Starter can only be called from a script')
 

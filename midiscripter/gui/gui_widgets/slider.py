@@ -224,7 +224,7 @@ class GuiKnob(_GuiSliderWidgetBase):
 
 
 class GuiSliderV(_GuiSliderWidgetBase):
-    """Vertical slider to set value."""
+    """Vertical slider to set value"""
 
     _qt_widget_class = VerticalSliderWidget
 
@@ -249,7 +249,7 @@ class GuiSliderV(_GuiSliderWidgetBase):
 
 
 class GuiSliderH(_GuiSliderWidgetBase):
-    """Horizontal slider to set value."""
+    """Horizontal slider to set value"""
 
     _qt_widget_class = HorizontalSliderWidget
 
@@ -274,7 +274,7 @@ class GuiSliderH(_GuiSliderWidgetBase):
 
 
 class GuiProgressBarH(_GuiSliderWidgetBase):
-    """Horizontal slider to set value."""
+    """Horizontal slider to set value"""
 
     _qt_widget_class = HorizontalProgressBarWidget
 
@@ -299,7 +299,7 @@ class GuiProgressBarH(_GuiSliderWidgetBase):
 
 
 class GuiProgressBarV(_GuiSliderWidgetBase):
-    """Horizontal slider to set value."""
+    """Horizontal slider to set value"""
 
     _qt_widget_class = VerticalProgressBarWidget
 

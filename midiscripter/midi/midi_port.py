@@ -345,7 +345,7 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
 
     @property
     def _is_available(self) -> bool:
-        """Port is available and can be opened."""
+        """Port is available and can be opened"""
         return self._uid in self._get_available_names()
 
     def passthrough_out(self, midi_output: 'MidiOut') -> None:

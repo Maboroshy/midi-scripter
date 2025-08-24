@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class FileEvent(midiscripter.base.msg_base.AttrEnum):
     """File event message type enumerator
-    to use as [`FileEventMsg`][midiscripter.FileEventMsg] `type` attribute."""
+    to use as [`FileEventMsg`][midiscripter.FileEventMsg] `type` attribute"""
 
     # Names are hardcoded, equal watchdog's event types
     MOVED = 'MOVED'

@@ -41,6 +41,7 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
     """
 
     source: 'None | GuiWidget'
+    """`GuiWidget` instance that generated the message"""
 
     __match_args__: tuple[str] = ('type', 'data')
 
