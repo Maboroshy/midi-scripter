@@ -187,7 +187,7 @@ message's `type`:
 # So when you change its `type` the message is still valid to send
 >>> msg.type = MidiType.CONTROL_CHANGE 
 >>> msg
-ChannelMsg(MidiType.CONTROL_CHANGE, 1, 10, 128)  
+ChannelMsg(MidiType.CONTROL_CHANGE, 1, 10, 64)  
 ```
 
 Other message types are simpler. Check the API documentation for their 

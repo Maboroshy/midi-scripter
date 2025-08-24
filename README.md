@@ -62,13 +62,13 @@ It's fully functional but needs more user feedback.
   it's complex MIDI remote scripting or Max for Live.
 
 ## Examples 
-- [Add extra banks for the MIDI controllers.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/controls_banks)
 - [Launch an app or run any Python code with a MIDI message.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/start_daw_by_midi)
 - [Show pressed chord description.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/chord_info)
 - Control Ableton Live with [remote script](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_select_armed_track_with_remote_script) or [AbletonOSC.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_select_armed_track_with_osc)
 - [Make custom mapping overlay on top of Ableton Live built-in MIDI controller integration.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/launchpad_overlay)
 - [Run Python code with Ableton Live clips.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_clips_launch_code)
 - [Save and load global presets for Ableton Live devices.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_global_preset)
+- [Add extra banks for the MIDI controllers.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/controls_banks)
 
 ## Documentation
 
