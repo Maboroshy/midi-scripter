@@ -5,10 +5,8 @@
 MIDI Scripter is a Python framework for filtering, modifying, routing and any other
 handling of MIDI, Open Sound Control (OSC), keyboard and mouse input and output.
 
-It works on Windows and Linux and should work on macOS.
-
-MIDI Scripter listens input ports and send incoming messages to subscribed callables such as functions or methods. 
-These callables, along with any other Python code, can send out modified or newly created messages through output ports. 
+MIDI Scripter listens to input ports and sends incoming messages to subscribed callables such as functions or methods. 
+These callables, along with other Python code, can send modified or new messages through output ports. 
 MIDI Scripter can serve as a proxy that filters, transforms, and converts incoming messages.
 
 In addition, MIDI Scripter features a customizable graphical user interface (GUI) 
@@ -44,13 +42,13 @@ https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transpose
 
 Screenshot with service Ports and Log and Message Sender widgets:
 
-![Screenshot with all the widget visible](
+![Screenshot with all the widgets visible](
 https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot_full.png?raw=true)
 
 The average latency for the script above is less than 0.25 milliseconds.
 
-Currently MIDI Scripter is at "beta" development stage. 
-It's fully functional but needs more user feedback. 
+Currently, MIDI Scripter is at "beta" development stage. 
+It is fully functional but needs more user feedback. 
 
 ## Use cases
 
