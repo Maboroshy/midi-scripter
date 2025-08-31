@@ -7,7 +7,7 @@ handling of MIDI, Open Sound Control (OSC), keyboard and mouse input and output.
 
 MIDI Scripter listens to input ports and sends incoming messages to subscribed callables such as functions or methods. 
 These callables, along with other Python code, can send modified or new messages through output ports. 
-MIDI Scripter can serve as a proxy that filters, transforms, and converts incoming messages.
+MIDI Scripter can serve as a proxy that filters, transforms and converts incoming messages.
 
 In addition, MIDI Scripter features a customizable graphical user interface (GUI) 
 that provides logging, coding assistance, various controls and indicators to use in the script.
