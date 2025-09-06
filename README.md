@@ -66,7 +66,7 @@ It is fully functional but needs more user feedback.
 - [Make custom mapping overlay on top of Ableton Live built-in MIDI controller integration.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/launchpad_overlay)
 - [Run Python code with Ableton Live clips.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_clips_launch_code)
 - [Save and load global presets for Ableton Live devices.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/ableton_global_preset)
-- [Add extra banks for the MIDI controllers.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/controls_banks)
+- [Add extra banks to MIDI controller.](https://github.com/Maboroshy/midi-scripter/tree/master/examples/controls_banks)
 
 ## Documentation
 

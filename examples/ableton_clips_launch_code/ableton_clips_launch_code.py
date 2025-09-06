@@ -5,11 +5,11 @@ from midiscripter import *
 
 ableton_osc = OscIO(11001, 11000)
 
-reset_clip_lister_button = GuiButton('Reset clip listener')
+reset_clip_listener_button = GuiButton('Reset clip listener')
 
 
 @ableton_osc.subscribe(CallOn.PORT_INIT)
-@reset_clip_lister_button.subscribe(GuiEvent.TRIGGERED)
+@reset_clip_listener_button.subscribe(GuiEvent.TRIGGERED)
 @ableton_osc.subscribe(address='/live/startup')
 def set_clip_fire_listener() -> None:
     """Sets playing clip listener on script start or Ableton Live start"""
