@@ -6,7 +6,7 @@ from midiscripter import *
 # Settings
 DAW_PATH_STR = r'C:\ProgramData\Ableton\Live 11 Suite\Program\Ableton Live 11 Suite.exe'
 DAW_PROJECT_PATH_STR = r'C:\Users\user\Music\Ableton Project\song.als'
-DAW_START_MIDI_MSG_CONDITIONS = (MidiType('CONTROL_CHANGE'), 1, 1, 0)
+DAW_START_MIDI_MSG_CONDITIONS = (MidiType.CONTROL_CHANGE, 1, 1, 0)
 
 
 midi_controller = MidiIn('MIDI Controller')
