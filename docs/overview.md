@@ -31,17 +31,15 @@ There are three port types: input, output and input/output (i/o) ports.
 The i/o port is implemented as a wrapper that combines 
 input and output ports together and acts like both. 
 
-Port are typically declared as `port_class(name_or_address)` or `port_class()` 
+Ports are typically declared as `port_class(name_or_address)` or `port_class()` 
 (for those that don't need a name or address). For detailed information 
-on specific ports, refer to the API documentation.
+on specific port types, refer to the API documentation.
 
-Virtual MIDI ports can be created with `MidiIn('Virtual port name', 
-virtual=True)` (installed 
-[loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) 
-required for Windows). 
+Virtual MIDI ports can be created with `MidiIn('Virtual port name', virtual=True)` 
+(installed [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) required for Windows). 
 Virtual MIDI ports can be used to write proxy scripts like the one above.
 
-Port declaration is all you need to use the port.
+Port instance declaration is all you need to use the port.
 The starter function opens all declared ports, input ports start feeding 
 incoming messages to subscribed callables.
 
@@ -69,7 +67,7 @@ Widgets are declared as `widget_class(content)`.
 Widget's initial state can be set by keyword arguments specific for widget
 class (`color`, `select`, `toggle_state`, etc.) like in the example above.
 
-Widget's title for GUI widget list can be set by the `title` keyword argument. 
+Widget's title to show in GUI can be optionally set by the `title` keyword argument. 
 Otherwise, widget's content or type is used as a title.
 The title is also used for widget's position saving.
 
@@ -111,7 +109,7 @@ callable to call with incoming message object. Callables can have any name,
 must accept a message as their only argument or have no arguments at all,
 and are not expected to return anything.
 
-To subscribe a callable to the messages from an input port or and GUI widget,
+To subscribe a callable to the messages from an input port or a GUI widget,
 use the `@input_port.subscribe` decorator. A single callable can be subscribed 
 to multiple ports by stacking multiple decorators:
 
@@ -153,7 +151,7 @@ Messages are data objects produced by input ports or created in the
 script's code. Messages can be sent with an output port of the corresponding 
 type.
 
-Each message stores the source port/widgets instance as `source` attribute and its
+Each message stores the source port/widget instance as `source` attribute and its
 creation time in epoch format as `ctime` attribute.
 
 The time since message creation (in milliseconds) can be checked by
