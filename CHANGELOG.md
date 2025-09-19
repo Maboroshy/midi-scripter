@@ -1,5 +1,10 @@
 # Changelog
 
+## **v0.8.1** - 19.09.2025 
+
+### Fixed
+- GUI theming support (light and dark themes)
+
 ## **v0.8** - 16.08.2025 
 
 ### Added
