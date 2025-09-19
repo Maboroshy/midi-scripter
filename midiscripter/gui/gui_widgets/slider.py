@@ -48,7 +48,6 @@ class KnobWidget(_WrappedSliderMixin, QDial):
 
         self.slider = self
         self.setNotchesVisible(True)
-        self.setStyleSheet('QDial {background-color: white}')
 
         self.label = _SliderLabel(self)
         self.label.show()

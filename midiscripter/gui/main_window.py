@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self.setDockNestingEnabled(True)
 
         self.setStyleSheet("""
-            QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
+            QMainWindow::separator:hover, QMainWindow::separator:pressed {background: grey}
         """)
 
         self.__prepare_dock_widgets(widgets_to_add)
@@ -64,16 +64,6 @@ class MainWindow(QMainWindow):
         for dock in self.dock_widgets:
             dock_title_widget = QWidget() if are_hidden else None
             dock.setTitleBarWidget(dock_title_widget)
-
-        if are_hidden:
-            self.setStyleSheet("""
-                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
-            """)
-        else:
-            self.setStyleSheet("""
-                QMainWindow::separator { background: lightgrey }
-                QMainWindow::separator:hover, QMainWindow::separator:pressed {background: cyan}
-            """)
 
     def set_always_on_top(self, state: bool) -> None:
         if state:

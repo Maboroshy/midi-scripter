@@ -56,7 +56,7 @@ class SubscribedCall:
     statistics: collections.deque
     """Last 20 call execution durations in milliseconds"""
 
-    _log_color: str = 'cyan'
+    _log_color: str | None = 'cyan'
     _log_show_link: bool = False
 
     def __init__(
@@ -279,7 +279,7 @@ class Port:
     """Subclasses instances filled by `__new__`"""
 
     _log_description: str = 'port'
-    _log_color: str = 'black'
+    _log_color: str | None = None
     _log_show_link: bool = True
 
     def __init_subclass__(cls, **kwargs):
@@ -372,7 +372,7 @@ class Input(Subscribable, Port):
     """Input port base class"""
 
     _log_description: str = 'input'
-    _log_color: str = 'green'
+    _log_color: str | None = 'green'
 
     def __init__(self, uid: 'Hashable | None' = None):
         Port.__init__(self, uid)
@@ -383,7 +383,7 @@ class Output(Port):
     """Output port base class"""
 
     _log_description: str = 'output'
-    _log_color: str = 'magenta'
+    _log_color: str | None = 'magenta'
 
     def send(self, msg: Msg) -> None:
         """Send message using the output port.

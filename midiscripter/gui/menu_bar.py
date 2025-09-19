@@ -38,13 +38,13 @@ class MenuBar(QMenuBar):
 
         options_menu.insertAction(QAction(), QApplication.instance().single_instance_only)
 
+        options_menu.addSeparator()
+
         self.always_on_top = SavedCheckedAction(
             'Window always on top',
             main_window.set_always_on_top,
             key_shortcut=QKeySequence('Ctrl+Space'),
         )
-        options_menu.addSeparator()
-
         options_menu.insertAction(QAction(), self.always_on_top)
 
         options_menu.addSeparator()

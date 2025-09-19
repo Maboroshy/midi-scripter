@@ -11,6 +11,7 @@ from midiscripter.keyboard import KeyIn, KeyOut, KeyIO
 from midiscripter.mouse import MouseIn, MouseOut, MouseIO
 from midiscripter.file_event import FileEventIn
 from midiscripter.metronome import MetronomeIn
+from midiscripter.gui.color_theme import theme_color
 from .saved_state_controls import SavedToggleButton
 
 
@@ -40,8 +41,9 @@ class PortItem(PortWidgetItem):
             self.setDisabled(True)
             self.setCheckState(0, Qt.CheckState.Unchecked)
         else:
-            item_color = f'dark{self.port_instance._log_color}'
-            self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
+            if self.port_instance._log_color:
+                item_color = theme_color(self.port_instance._log_color)
+                self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(item_color))
             self.update_ports_state()
 
     def update_ports_state(self) -> None:
@@ -127,7 +129,7 @@ class CallItem(PortWidgetItem):
         self.origin_call_list = origin_call_list
         self.call = call
 
-        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(f'dark{call._log_color}'))
+        self.setData(0, Qt.ItemDataRole.ForegroundRole, QBrush(theme_color(call._log_color)))
         self.setCheckState(0, Qt.CheckState.Checked)
 
     def request_state_change(self, state: bool) -> None:
@@ -174,12 +176,15 @@ class PortsView(QTreeWidget):
         self.setHeaderHidden(True)
         self.setFrameStyle(QFrame.Shape.NoFrame)
 
+        self.setStyleSheet('QTreeWidget::item::hover {background-color: rgba(0, 183, 255, 10)}')
+
         self.__port_instances_closed_by_user = []
         self.__ports_declared_in_script = tuple(Port._subclass_instances)
 
         self.setMouseTracking(True)
         self.itemEntered.connect(self.__update_item_tooltip)
 
+        self.currentItemChanged.connect(self.selectionModel().clear)
         self.itemSelectionChanged.connect(self.__item_selected)
         # with the blocks set itemChanged is emitted only on check state change
         self.itemChanged.connect(self.__item_state_changed)
@@ -237,6 +242,9 @@ class PortsView(QTreeWidget):
 
         self.blockSignals(False)
 
+        # Overrides auto setting the first item as current
+        self.setCurrentItem(self.invisibleRootItem())
+
     def __add_top_level_item(self, item_text: str) -> QTreeWidgetItem:
         bold_font = self.font()
         bold_font.setBold(True)
@@ -282,7 +290,11 @@ class PortsView(QTreeWidget):
                     port_instance._call_on_init()
 
             # Close the ports that became absent
-            if not port_instance._is_available and port_instance.__class__ is not MidiIO and port_instance.is_opened:
+            if (
+                not port_instance._is_available
+                and port_instance.__class__ is not MidiIO
+                and port_instance.is_opened
+            ):
                 port_instance._close()
 
             if not port_instance._wrapped_in:
@@ -328,7 +340,7 @@ class PortsView(QTreeWidget):
         except AttributeError:
             pass
 
-        selected_item.setSelected(False)
+        self.selectionModel().clear()
 
     def __item_state_changed(self, item: PortWidgetItem, _: int) -> None:
         """Enabled or disables the MIDI port / passthrough out / call according to the checked

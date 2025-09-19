@@ -49,7 +49,7 @@ class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
     [`GuiEventMsg`][midiscripter.GuiEventMsg].
     """
 
-    _log_color: str = 'green'
+    _log_color: str | None = 'green'
     _log_show_link: bool = False
 
     _qt_widget_class: type[QWidget, 'WrappedQWidgetMixin']

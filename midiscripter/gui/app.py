@@ -11,9 +11,9 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 import midiscripter.base.port_base
-import midiscripter.shared
 import midiscripter.file_event
 import midiscripter.gui.main_window
+from .color_theme import enable_dark_mode
 from .saved_state_controls import SavedCheckedAction
 
 
@@ -35,9 +35,7 @@ class ScripterGUI(QApplication):
         icon_path = pathlib.Path(midiscripter.__file__).parent / 'resources' / 'icon.ico'
         self.setWindowIcon(QIcon(str(icon_path)))
 
-        palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, QColor('white'))
-        self.setPalette(palette)
+        self.set_theme()
 
         self.__time_until_restart_sec = self.RESTART_DELAY
         self.request_restart.connect(self.restart)
@@ -47,6 +45,20 @@ class ScripterGUI(QApplication):
         self.single_instance_only = SavedCheckedAction('Single instance only', shared=True)
         if self.single_instance_only:
             self.__terminate_if_second_instance()
+
+    def set_theme(self) -> None:
+        # self.styleHints().setColorScheme(Qt.ColorScheme.Dark)
+
+        self.setStyle('Fusion')
+        dark_mode_enabled = self.styleHints().colorScheme() == Qt.ColorScheme.Dark
+        enable_dark_mode(dark_mode_enabled)
+
+        if dark_mode_enabled:
+            self.setStyleSheet('QPushButton:checked { border: 1px solid grey; }')
+
+        palette = self.palette()
+        palette.setColor(QPalette.ColorRole.Window, palette.color(QPalette.ColorRole.Base))
+        self.setPalette(palette)
 
     def prepare_main_window(self, minimized_to_tray: bool = False) -> None:
         self.main_window = midiscripter.gui.main_window.MainWindow(self.widgets_to_add)

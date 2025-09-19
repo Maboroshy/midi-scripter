@@ -8,6 +8,7 @@ from PySide6.QtWidgets import *
 
 import midiscripter.logger.html
 from midiscripter.logger import log
+from midiscripter.gui.color_theme import theme_color
 
 
 class LogWidget(QWidget):
@@ -27,7 +28,7 @@ class LogWidget(QWidget):
         self.exclude_line.textChanged.connect(self.log_view.set_exclude)
         self.exclude_line.textChanged.connect(
             lambda text: self.exclude_line.setStyleSheet(
-                f'background-color: {"lightgreen" if bool(text) else "white"}'
+                f'background-color: {theme_color("green", True) if bool(text) else "none"}'
             )
         )
         self.exclude_line.setText(QSettings().value('log exclude', ''))
@@ -40,7 +41,7 @@ class LogWidget(QWidget):
         self.filter_line.textChanged.connect(self.log_view.set_filter)
         self.filter_line.textChanged.connect(
             lambda text: self.filter_line.setStyleSheet(
-                f'background-color: {"lightgreen" if bool(text) else "white"}'
+                f'background-color: {theme_color("green", True) if bool(text) else "none"}'
             )
         )
         self.filter_line.setText(QSettings().value('log filter', ''))
@@ -155,7 +156,7 @@ class LogView(QPlainTextEdit):
         cursor: QTextCursor = self.textCursor()
 
         text_format = QTextCharFormat()
-        text_format.setBackground(QBrush(QColor('yellow')))
+        text_format.setBackground(QBrush(QColor(theme_color('yellow', True))))
 
         if not last_n_blocks:
             start_from = 0

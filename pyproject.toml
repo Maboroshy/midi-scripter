@@ -28,7 +28,7 @@ dependencies = [
   'python-osc ~=1.7',  # Unlicense
   'pynput ~=1.7',  # LGPL
   'watchdog ~=4.0',  # Apache
-  'PySide6_Essentials >6.4',  # LGPL
+  'PySide6_Essentials >6.5',  # LGPL
   'pywin32; platform_system == "Windows"',  # BSD
 ]
 

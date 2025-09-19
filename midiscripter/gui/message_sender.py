@@ -7,6 +7,7 @@ from PySide6.QtWidgets import *
 
 from midiscripter.base.port_base import Output
 from midiscripter.base.msg_base import AttrEnum, Msg
+from midiscripter.gui.color_theme import theme_color
 
 # Imports used by `eval`
 from midiscripter.midi import MidiMsg, ChannelMsg, SysexMsg, MidiType
@@ -130,7 +131,11 @@ class MessageSender(QWidget):
         self.__validate()
 
     def __validate(self) -> None:
-        input_line_bg_color = 'white' if self.msg or not self.input_line.text() else 'pink'
+        if self.msg or not self.input_line.text():
+            input_line_bg_color = 'none'
+        else:
+            input_line_bg_color = theme_color('red', True)
+
         self.input_line.setStyleSheet(f'background-color: {input_line_bg_color}')
 
         if not self.output or not self.msg:
