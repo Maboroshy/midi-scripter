@@ -47,17 +47,17 @@ class NoteData:
 
     __note_name_re = re.compile(r'([A-G][#|b]?)(-?[0-9])')
 
-    def __init__(self, int_or_name: int | str, use_flats: bool = False):
+    def __init__(self, midi_note_or_name: int | str, use_flats: bool = False):
         """
         Args:
-            int_or_name: note MIDI data (0-127) or note name (like 'C#3' or 'Db3')
+            midi_note_or_name: MIDI note data (0-127) or note name (like 'C#3' or 'Db3')
             use_flats: `True` to use flats in note name (Db3), `False` to use sharps (C#3)
         """
-        if isinstance(int_or_name, int):
-            self.__int = int_or_name
+        if isinstance(midi_note_or_name, int):
+            self.__int = midi_note_or_name
             self.__str = self.__covert_to_str(self.__int, use_flats)
-        elif isinstance(int_or_name, str):
-            self.__str = int_or_name
+        elif isinstance(midi_note_or_name, str):
+            self.__str = midi_note_or_name
             self.__int = self.__covert_to_int(self.__str)
         else:
             raise TypeError
