@@ -43,6 +43,7 @@ class ScripterGUI(QApplication):
 
         # Action to use before main window creation
         self.single_instance_only = SavedCheckedAction('Single instance only', shared=True)
+        self.__single_instance_socket = socket.socket()
         if self.single_instance_only:
             self.__terminate_if_second_instance()
 
@@ -99,7 +100,6 @@ class ScripterGUI(QApplication):
 
     def __terminate_if_second_instance(self) -> None:
         try:
-            self.__single_instance_socket = socket.socket()
             self.__single_instance_socket.bind(('127.0.0.1', 1337))
         except OSError:
             print(
@@ -111,6 +111,7 @@ class ScripterGUI(QApplication):
     def __cleanup(self) -> None:
         self.main_window.close()
         self.main_window.tray.hide()
+
         self.__single_instance_socket.close()
 
 
