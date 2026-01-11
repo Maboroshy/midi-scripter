@@ -59,7 +59,7 @@ class PortItem(PortWidgetItem):
             self.setCheckState(0, Qt.CheckState.Unchecked)
 
     def add_children(self) -> None:
-        if isinstance(self.port_instance, MultiPort):
+        if isinstance(self.port_instance, MultiPort) and not isinstance(self, PassthroughOutputMidiPortItem):
             for port_instance in self.port_instance._input_ports:
                 PortItem(self, port_instance, 'In:')
 
