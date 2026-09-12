@@ -1,3 +1,5 @@
+import sys
+
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
@@ -58,6 +60,19 @@ class MainWindow(QMainWindow):
 
         self.__load_state()
 
+        self.__show()
+
+    def __show(self) -> None:
+        if '--tray' in sys.argv or QSettings().value('restart closed to tray', False, type=bool):
+            QSettings().setValue('restart closed to tray', False)
+            self.close()
+        elif QSettings().value('restart win minimized', False, type=bool):
+            self.showMinimized()
+            # 'win minimized' set by restart request, cleared for the next normal start
+            QSettings().setValue('restart win minimized', False)
+        else:
+            self.show_from_tray()
+
     def set_dock_titles_visibility(self, are_hidden: bool) -> None:
         # Can't make full lock with setFixedSize due to AdaptiveTextSizeWidgets
         # that has "Ignore" size policy and always restore at maximum size after that
@@ -106,9 +121,8 @@ class MainWindow(QMainWindow):
         self, widget: QWidget, *, fix_width: bool = False, hidden_by_default: bool = False
     ) -> None:
         dock = QDockWidget(self)
-        dock.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetMovable
-            | QDockWidget.DockWidgetFeature.DockWidgetClosable
+        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable |
+                         QDockWidget.DockWidgetFeature.DockWidgetClosable
         )
         dock.setObjectName(widget.objectName())
         dock.setWindowTitle(widget.objectName())
@@ -128,10 +142,5 @@ class MainWindow(QMainWindow):
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
         self.restoreState(QSettings().value('win state'))
         self.resize(QSettings().value('win size', QSize(800, 500)))
-        self.move(QSettings().value('win position', self.__get_screen_center()))
-
-    def __get_screen_center(self) -> QPoint:
-        return (
-            self.screen().geometry().center()
-            - QRect(QPoint(), self.frameGeometry().size()).center()
-        )
+        screen_center = self.screen().geometry().center() - QRect(QPoint(), self.frameGeometry().size()).center()
+        self.move(QSettings().value('win position', screen_center))

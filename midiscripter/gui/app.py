@@ -11,31 +11,27 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 import midiscripter.base.port_base
+import midiscripter.base.msg_base
 import midiscripter.file_event
 import midiscripter.gui.main_window
+from .gui_widgets.window import GuiWindow
 from .color_theme import enable_dark_mode
 from .saved_state_controls import SavedCheckedAction
 
 
 class ScripterGUI(QApplication):
-    main_window: 'midiscripter.gui.main_window.MainWindow'
     request_restart = Signal()
+    set_icon = Signal(QIcon)
 
     RESTART_DELAY = 2
-    widgets_to_add = []
 
-    def __init__(self):
-        super().__init__()
+    # noinspection PyAttributeOutsideInit
+    def prepare(self) -> None:
         self.setOrganizationName('MIDI Scripter')
         if midiscripter.shared.SCRIPT_PATH_STR:
             self.setApplicationName(pathlib.Path(midiscripter.shared.SCRIPT_PATH_STR).name)
 
         self.setApplicationDisplayName(f'{self.applicationName()} - {self.organizationName()}')
-
-        icon_path = pathlib.Path(midiscripter.__file__).parent / 'resources' / 'icon.ico'
-        self.setWindowIcon(QIcon(str(icon_path)))
-
-        self.set_theme()
 
         self.__time_until_restart_sec = self.RESTART_DELAY
         self.request_restart.connect(self.restart)
@@ -47,9 +43,14 @@ class ScripterGUI(QApplication):
         if self.single_instance_only:
             self.__terminate_if_second_instance()
 
-    def set_theme(self) -> None:
-        # self.styleHints().setColorScheme(Qt.ColorScheme.Dark)
+        self.__set_theme()
+        self.main_window = midiscripter.gui.main_window.MainWindow(GuiWindow._widgets_to_add)
 
+        self.set_icon.connect(self.setWindowIcon)
+        self.set_icon.connect(self.main_window.tray.setIcon)
+        self.set_icon.emit(GuiWindow._get_icon())
+
+    def __set_theme(self) -> None:
         self.setStyle('Fusion')
         dark_mode_enabled = self.styleHints().colorScheme() == Qt.ColorScheme.Dark
         enable_dark_mode(dark_mode_enabled)
@@ -60,19 +61,6 @@ class ScripterGUI(QApplication):
         palette = self.palette()
         palette.setColor(QPalette.ColorRole.Window, palette.color(QPalette.ColorRole.Base))
         self.setPalette(palette)
-
-    def prepare_main_window(self, minimized_to_tray: bool = False) -> None:
-        self.main_window = midiscripter.gui.main_window.MainWindow(self.widgets_to_add)
-
-        if minimized_to_tray or QSettings().value('restart closed to tray', False, type=bool):
-            QSettings().setValue('restart closed to tray', False)
-            self.main_window.close()
-        elif QSettings().value('restart win minimized', False, type=bool):
-            self.main_window.showMinimized()
-            # 'win minimized' set by restart request, cleared for the next normal start
-            QSettings().setValue('restart win minimized', False)
-        else:
-            self.main_window.show_from_tray()
 
     def restart_at_file_change(self, msg: midiscripter.file_event.FileEventMsg) -> None:
         if msg.type not in (
@@ -119,20 +107,6 @@ class ScripterGUI(QApplication):
 app_instance = ScripterGUI()
 
 
-def add_qwidget(qwidget: QWidget) -> None:
-    """Add custom pyside6 QWidget to the GUI"""
-    if qwidget not in midiscripter.gui.app.ScripterGUI.widgets_to_add:
-        midiscripter.gui.app.ScripterGUI.widgets_to_add.append(qwidget)
-
-
-def remove_qwidget(qwidget: QWidget) -> None:
-    """Remove custom pyside6 QWidget to the GUI"""
-    try:
-        midiscripter.gui.app.ScripterGUI.widgets_to_add.remove(qwidget)
-    except ValueError:
-        pass
-
-
 def start_gui() -> NoReturn:
     """Starts the script and runs GUI. Logging goes to GUI Log widget"""
     if not midiscripter.shared.SCRIPT_PATH_STR:
@@ -149,10 +123,8 @@ def start_gui() -> NoReturn:
     signal_checker_dummy_timer.start(1000)
     signal_checker_dummy_timer.timeout.connect(lambda: None)  # dummy python code to run
 
-    start_minimized_to_tray = '--tray' in sys.argv
-
     with midiscripter.base.port_base._all_opened():
-        app_instance.prepare_main_window(start_minimized_to_tray)
+        app_instance.prepare()
         exit_status = app_instance.exec()
 
     if exit_status == 1467:  # restart request, can't do sys.exit() while Qt app works

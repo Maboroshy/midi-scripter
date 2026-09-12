@@ -35,6 +35,7 @@ nav:
             - Knob, Sliders and Bars: api/gui_sliders.md
             - List Selector: api/gui_list.md
             - Layout: api/gui_layout.md
+            - Window: api/gui_window.md
             - GUI Event Message: api/gui_msg.md
 
         - Starters: api/starters.md

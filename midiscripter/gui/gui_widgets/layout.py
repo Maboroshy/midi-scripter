@@ -3,8 +3,9 @@ from collections.abc import Sequence
 
 from PySide6.QtWidgets import *
 
-import midiscripter.gui.app
 from .gui_widget_base import GuiWindowItem
+from .window import GuiWindow
+
 
 if TYPE_CHECKING:
     from gui_widget_base import GuiWidget
@@ -76,7 +77,7 @@ class GuiWidgetLayout(GuiWindowItem):
 
         self.__populate_layout(qt_widget_layout, rows)
 
-        midiscripter.gui.app.add_qwidget(self.qt_widget)
+        GuiWindow.add_qwidget(self.qt_widget)
 
     def __populate_layout(
         self, layout: QBoxLayout, items: 'Sequence[GuiWidget, GuiWidgetLayout, Sequence, None]'
@@ -89,7 +90,7 @@ class GuiWidgetLayout(GuiWindowItem):
                 layout.addStretch(1)
             elif not isinstance(item, Sequence):
                 layout.addWidget(item.qt_widget, item._stretch_multiplier)
-                midiscripter.gui.app.remove_qwidget(item.qt_widget)
+                GuiWindow._remove_qwidget(item.qt_widget)
             else:
                 # Flip layout type
                 child_layout = QVBoxLayout() if isinstance(layout, QHBoxLayout) else QHBoxLayout()
