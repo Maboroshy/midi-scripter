@@ -52,20 +52,24 @@ class OscIn(midiscripter.base.port_base.Input):
     def __osc_server_msg_handler(self, address: str, *data) -> None:
         if len(data) == 1:
             data = data[0]
-        input_msg = OscMsg(address, data, source=self)
+        input_msg = OscMsg(address, data)
         self._send_input_msg_to_calls(input_msg)
 
     def _open(self) -> None:
-        self._osc_server = pythonosc.osc_server.BlockingOSCUDPServer(
-            (self.listener_ip_address, self.listener_port), self.__dispatcher
-        )
-        midiscripter.shared.thread_executor.submit(self._osc_server.serve_forever)
-        self.is_opened = True
-        log._port_open(self, True)
+        try:
+            self._osc_server = pythonosc.osc_server.BlockingOSCUDPServer(
+                (self.listener_ip_address, self.listener_port), self.__dispatcher
+            )
+            midiscripter.shared.thread_executor.submit(self._osc_server.serve_forever)
+            self._is_opened = True
+            log._port_open(self, True)
+        except OSError:
+            log._port_open(self, False)
 
     def _close(self) -> None:
+        self._osc_server.shutdown()
         self._osc_server.server_close()
-        self.is_opened = False
+        self._is_opened = False
         log._port_close(self, True)
 
     @overload
