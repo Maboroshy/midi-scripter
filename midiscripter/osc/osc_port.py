@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from collections.abc import Container, Callable
 
 
-def _parse_ip_port(ip_port: str | int) -> (str, int):
+def _parse_ip_port(ip_port: str | int) -> tuple[str, int]:
     """Parses 'ip:port' or local port to get ip and port
 
     Args:

@@ -90,7 +90,7 @@ class ScripterGUI(QApplication):
             self.__single_instance_socket.bind(('127.0.0.1', 1337))
         except OSError:
             print(f'"{self.single_instance_only.text()}" option is enabled.\nSecond instance won\'t be started.')
-            raise RuntimeError
+            raise RuntimeError from None
 
     def __cleanup(self) -> None:
         self.main_window.close()
