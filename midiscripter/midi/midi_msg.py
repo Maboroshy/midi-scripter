@@ -35,7 +35,6 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
     data1: int | tuple[int, int]
     data2: int | tuple[int, ...]
     combined_data: int | tuple[int, ...]
-    source: 'None | MidiIn'
 
     def __new__(cls, *args, **kwargs):
         if (args and isinstance(args[0], tuple)) or (

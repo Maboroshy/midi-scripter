@@ -121,9 +121,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
     ): ...
 
     @overload
-    def __init__(
-        self, type: AbletonEvent, value: int | bool = True, *, source: 'None | AbletonIn' = None
-    ): ...
+    def __init__(self, type: AbletonEvent, value: int | bool = True): ...
 
     @overload
     def __init__(self, type: AbletonEvent, index: int, value: int | bool): ...
@@ -150,7 +148,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
             index (int): Track/encoder/device bank index
             value (int | bool): Control event value (0-127 or True / False)
         """
-        super().__init__(type, source)
+        super().__init__(type)
         if value is None:
             self.value = index_or_value
         else:
