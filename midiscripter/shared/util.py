@@ -1,8 +1,6 @@
-import concurrent.futures
 import os
 import platform
 import sys
-import time
 
 import midiscripter.shared
 
@@ -12,14 +10,6 @@ if platform.system() == 'Windows':
     import win32process
 
 
-thread_executor = concurrent.futures.ThreadPoolExecutor(100)
-
-_precise_time_delta = time.time() - time.perf_counter()
-
-
-def precise_epoch_time() -> float:
-    """current time in epoch format with nanosecond precision"""
-    return _precise_time_delta + time.perf_counter()
 
 
 def restart_script() -> None:

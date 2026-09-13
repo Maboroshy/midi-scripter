@@ -2,21 +2,29 @@ import enum
 from typing import TYPE_CHECKING, Any
 from collections.abc import Container
 
-import midiscripter.shared
-
-
 if TYPE_CHECKING:
     from midiscripter.base.port_base import Input
 
 
 class Not:
+    """Inverts wrapped condition"""
     def __init__(self, value: Container | Any):
-        self.value = value
+        self._value = value
+
+    def __eq__(self, other: Any):
+        return other != self._value
+
+    def __contains__(self, item: Any):
+        return item not in self._value
 
 
 class AttrEnum(enum.StrEnum):
+    __repr = None
+
     def __repr__(self):
-        return f'{self.__class__.__name__}.{self.value}'
+        if self.__repr is None:
+            self.__repr = f'{self.__class__.__name__}.{self.name}'
+        return self.__repr
 
 
 class Msg:
@@ -39,60 +47,65 @@ class Msg:
         self.type = type
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({", ".join(repr(value) for value in self._as_tuple())})'
+        return f'{self.__class__.__name__}({", ".join(map(repr, self._as_tuple()))})'
 
     def __str__(self):
-        return ' | '.join(str(value) for value in self._as_tuple() if value is not None)
+        return ' | '.join([str(value) for value in self._as_tuple() if value is not None])
 
     def __eq__(self, other_msg: 'Msg'):
         return type(self) is type(other_msg) and self._as_tuple() == other_msg._as_tuple()
 
-    def matches(self, *conditions_args, **conditions_kwargs) -> bool:
+    def __copy__(self):
+        return type(self)(*self._as_tuple())
+
+    def matches(self, *conditions_args, **conditions_kwargs) -> bool:  # noqa: C901 Hot path optimizations
         """Checks if message's attributes match all provided attribute conditions:
 
         1. If condition is `None` or omitted, it matches anything.
 
         2. If condition equals attribute, it matches the attribute.
 
-        3. If condition is a container (list, tuple) and contains the attribute,
-        it matches the attribute.
+        3. If condition is a container (list, tuple) and contains the attribute, it matches the attribute.
 
         Use `Not(condition)` to invert condition matching.
 
         Returns:
             `True` if all attributes match, `False` if any does not match
         """
-        attr_conditions = dict(zip(self.__match_args__, conditions_args, strict=False))
-        attr_conditions.update(conditions_kwargs)
+        attr_values = self._as_tuple()
 
-        for parameter_name, condition in attr_conditions.items():
+        for index, condition in enumerate(conditions_args):
             if condition is None:
                 continue
 
-            try:
-                attr = getattr(self, parameter_name)
-            except AttributeError:
-                if isinstance(condition, Not):
-                    continue
-                else:
-                    return False
+            value = attr_values[index]
 
-            if attr == condition:
-                if isinstance(condition, Not):
-                    return False
-                else:
-                    continue
-
+            if condition == value:
+                continue
             try:
-                if attr in condition and not isinstance(condition, str):
-                    if isinstance(condition, Not):
-                        return False
-                    else:
-                        continue
-            except TypeError:  # condition is not a container
+                if value in condition:
+                    continue
+            except TypeError:
                 pass
-
             return False
+
+        if conditions_kwargs:
+            for parameter_name, condition in conditions_kwargs.items():
+                if condition is None:
+                    continue
+                try:
+                    value = getattr(self, parameter_name)
+                except AttributeError:
+                    return False
+                if condition == value:
+                    continue
+                try:
+                    if value in condition:
+                        continue
+                except TypeError:
+                    pass
+                return False
+
         return True
 
     @property

@@ -58,7 +58,7 @@ class PortItem(PortWidgetItem):
         else:
             self.setCheckState(0, Qt.CheckState.Unchecked)
 
-    def add_children(self) -> None:
+    def add_children(self) -> None:  # noqa: C901
         if isinstance(self.port_instance, MultiPort) and not isinstance(self, PassthroughOutputMidiPortItem):
             for port_instance in self.port_instance._input_ports:
                 PortItem(self, port_instance, 'In:')
@@ -71,14 +71,15 @@ class PortItem(PortWidgetItem):
                 PassthroughOutputMidiPortItem(self, passthrough_out_port)
 
         if isinstance(self.port_instance, Input):
-            for _, call_list in self.port_instance._calls:
+            for call_list in self.port_instance._event_calls.values():
                 for call in call_list:
                     if '._' not in str(call):  # private object method
                         CallItem(self, self.port_instance, call_list, call)
+            for call in self.port_instance._msg_calls:
+                if '._' not in str(call):  # private object method
+                    CallItem(self, self.port_instance, call_list, call)
 
-    def request_state_change(
-        self: 'GeneralPortItem | MidiPortItem | AlwaysPresentInputPortItem', state: bool
-    ) -> None:
+    def request_state_change(self: 'GeneralPortItem | MidiPortItem | AlwaysPresentInputPortItem', state: bool) -> None:
         if state:
             self.port_instance._open()
 
@@ -366,17 +367,24 @@ class PortsView(QTreeWidget):
         if not isinstance(item, CallItem):
             return
 
-        call_statistics = list(item.call.statistics)
+        pre_call_statistics = list(item.call.pre_call_statistics)
+        in_call_statistics = list(item.call.in_call_statistics)
 
-        if not call_statistics:
+        if not pre_call_statistics:
             tooltip_text = 'No calls made yet'
         else:
-            call_statistics.sort()
+            pre_call_statistics.sort()
+            in_call_statistics.sort()
             tooltip_text = (
-                f'Execution time for last {len(call_statistics)} calls:\n'
-                f'Min: {call_statistics[0]} ms; '
-                f'Med: {call_statistics[int(len(call_statistics) / 2)]} ms; '
-                f'Max: {call_statistics[-1]} ms'
+                f'Execution time for last {len(pre_call_statistics)} calls:\n'
+                f'Pre-call overhead:\n'
+                f'Min: {pre_call_statistics[0] * 1000:.3f} ms; '
+                f'Med: {pre_call_statistics[int(len(pre_call_statistics) / 2)] * 1000:.3f} ms; '
+                f'Max: {pre_call_statistics[-1] * 1000:.3f} ms\n'
+                f'In call:\n'
+                f'Min: {in_call_statistics[0] * 1000:.3f} ms; '
+                f'Med: {in_call_statistics[int(len(in_call_statistics) / 2)] * 1000:.3f} ms; '
+                f'Max: {in_call_statistics[-1] * 1000:.3f} ms'
             )
 
         if item.call.conditions:

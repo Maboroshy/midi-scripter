@@ -159,10 +159,16 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
         present_attrs = (repr(attr) for attr in self._as_tuple() if attr is not None)
         return f'{self.__class__.__name__}({", ".join(present_attrs)})'
 
+    def __copy__(self):
+        return AbletonMsg(self.type, self.index, self.value)
+
     def matches(
         self,
         type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
         index: 'None | Container[int] | int' = None,
         value: 'None | Container[int] | int | bool' = None,
     ) -> bool:
-        return super().matches(type, index, value)
+        return midiscripter.base.msg_base.Msg.matches(self, type, index, value)
+
+    def _as_tuple(self) -> tuple:
+        return self.type, self.index, self.value

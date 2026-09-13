@@ -70,7 +70,7 @@ class LogWidget(QWidget):
 
 class LogView(QPlainTextEdit):
     append_html_entry = Signal(list)
-    entry_ctime_part_len = len(f'{log._get_precise_timestamp()}: ')
+    entry_timestamp_len = 18
 
     def __init__(self):
         super().__init__()
@@ -124,7 +124,7 @@ class LogView(QPlainTextEdit):
         filtered_entries = []
         for entry in log_entries:
             entry_plain_text = re.sub(r'<.*?>', '', entry)
-            log_msg_text = entry_plain_text[self.entry_ctime_part_len :]
+            log_msg_text = entry_plain_text[self.entry_timestamp_len:]
 
             if log_msg_text and (  # noqa: SIM114
                 self.__text_line_is_excluded(log_msg_text)
@@ -172,7 +172,7 @@ class LogView(QPlainTextEdit):
                 match = match_iter.next()
 
                 text_block: QTextBlock = document.findBlock(match.capturedStart())
-                if match.capturedStart() < text_block.position() + self.entry_ctime_part_len:
+                if match.capturedStart() < text_block.position() + self.entry_timestamp_len:
                     continue
 
                 cursor.setPosition(match.capturedStart())

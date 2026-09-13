@@ -4,6 +4,7 @@ import copy
 import enum
 import inspect
 import itertools
+import time
 import traceback
 from typing import TYPE_CHECKING, TypeVar, ClassVar, Any
 from collections.abc import Sequence
@@ -44,7 +45,6 @@ def _all_opened() -> None:
 
     log._flush()
     log._flushing_is_enabled = False
-    midiscripter.shared.thread_executor.shutdown(wait=False, cancel_futures=True)
 
 
 class SubscribedCall:
@@ -54,7 +54,7 @@ class SubscribedCall:
     """Message match conditions for call"""
 
     statistics: collections.deque
-    """Last 20 call execution durations in milliseconds"""
+    """Last 20 call execution durations in seconds"""
 
     _log_color: str | None = 'cyan'
     _log_show_link: bool = False
@@ -63,18 +63,24 @@ class SubscribedCall:
         self, conditions: 'None | tuple[tuple, dict]', callable_: 'Callable', owner: 'Subscribable'
     ):
         self.conditions = conditions
-        self.statistics = collections.deque(maxlen=20)
+        self.pre_call_statistics = collections.deque(maxlen=20)
+        self.in_call_statistics = collections.deque(maxlen=20)
         self.owner = owner
         self.__callable = callable_
         self.__required_parameter_count = len(inspect.signature(callable_).parameters)
 
-    def __call__(self, msg: 'Msg' = None) -> None:
-        msg = msg or Msg('')
-        if self.__required_parameter_count == 0:
-            self.__callable()
-        else:
-            self.__callable(msg)
-        self.statistics.append(msg._age_ms)
+    def __call__(self, msg_received_time_delta: float, msg: 'Msg' = None) -> None:
+        call_start_time_delta = time.perf_counter()
+        try:
+            log._call_made(self)
+            if self.__required_parameter_count == 0:
+                self.__callable()
+            else:
+                self.__callable(msg)
+            self.pre_call_statistics.append(call_start_time_delta - msg_received_time_delta)
+            self.in_call_statistics.append(time.perf_counter() - call_start_time_delta)
+        except Exception as exc:
+            self._print_exception_to_log(exc)
 
     def __str__(self):
         return self.__callable.__qualname__
@@ -92,25 +98,22 @@ class SubscribedCall:
 class Subscribable:
     """Base class for object that calls can subscribe to"""
 
-    _calls: list[None | CallOn | tuple[tuple, dict], list[SubscribedCall]]
-    """Message match arguments and callables that will be called with matching incoming messages.
-    `None` conditions matches any message."""
+    _msg_calls: list[SubscribedCall]
+    """SubscribedCalls that will be called with matching incoming messages. `None` conditions matches any message."""
+
+    _event_calls: dict[CallOn, list[SubscribedCall]]
+    """SubscribedCalls that will be called on CallOn events. `None` conditions matches any message."""
 
     __init_called: bool = False
 
     def __init__(self):
-        self._calls: list[tuple[None | CallOn | tuple[tuple, dict], list[SubscribedCall]]] = []
+        self._msg_calls = []
+        self._event_calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED_BY_ANY_CALL: []}
 
-        # workarounds for mkdocstrings issue #607
-        self._calls: list[tuple[None | CallOn | tuple[tuple, dict], list[SubscribedCall]]]
-        """Message match arguments and callables that will be called with matching incoming messages.
-           `None` conditions matches any message."""
-
-    def subscribe(
-        self,
-        *msg_matches_args: 'None | Container[Any] | Any',
-        **msg_matches_kwargs: 'str, None | Container[Any] | Any',
-    ) -> 'Callable':
+    def subscribe(self,
+                  *msg_matches_args: 'None | Container[Any] | Any',
+                  **msg_matches_kwargs: 'dict[str, None | Container[Any] | Any]'
+                  ) -> 'Callable':
         """Decorator to subscribe a callable to the input's messages.
 
         Decorator without arguments subscribes a callable to all the input's messages.
@@ -147,29 +150,16 @@ class Subscribable:
         Returns:
             Subscribed callable.
         """
-
-        def wrapped_subscribe(
-            callable_: 'Callable[[Msg], None] | Callable[[], None]',
-        ) -> 'Callable':
+        def wrapped_subscribe(callable_: 'Callable[[Msg], None] | Callable[[], None]') -> 'Callable':
             if msg_matches_args[0] in CallOn:
-                conditions = msg_matches_args[0]
-            elif (
-                msg_matches_args[0] is callable_ or not msg_matches_args and not msg_matches_kwargs
-            ):  # noqa: SIM108
-                conditions = None
+                self._event_calls[msg_matches_args[0]].append(SubscribedCall(msg_matches_args[0], callable_, self))
+            elif msg_matches_args[0] is callable_ or not msg_matches_args and not msg_matches_kwargs:
+                self._msg_calls.append(SubscribedCall(None, callable_, self))
             else:
-                conditions = (msg_matches_args, msg_matches_kwargs)
-
-            call = SubscribedCall(conditions, callable_, self)
-
-            try:
-                call_list_for_conditions = next(
-                    entry[1] for entry in self._calls if entry[0] == conditions
-                )
-                call_list_for_conditions.append(call)
-            except StopIteration:
-                self._calls.append((conditions, [call]))
-
+                args = list(msg_matches_args)
+                while args[-1] is None:
+                    args.pop()
+                self._msg_calls.append(SubscribedCall((tuple(args), msg_matches_kwargs), callable_, self))
             return callable_
 
         if callable(msg_matches_args[0]):
@@ -182,46 +172,31 @@ class Subscribable:
 
         Notes:
             Not supposed to be overridden in subclasses.
-            Supposed to be called from the listener thread started
+            Supposed to be called from the listener callback or thread started
             by the subclass implementation of `open` method.
 
         Args:
             msg: A message received by the input port to send to its registered calls.
         """
+        msg_received_time_delta = time.perf_counter()
         log._msg_received(self, msg)
 
-        matched_calls = []
-        not_matched_by_any_calls = []
-        for conditions, call_list in self._calls:
-            if conditions == CallOn.NOT_MATCHED_BY_ANY_CALL:
-                not_matched_by_any_calls = call_list
-            elif isinstance(conditions, str) and conditions in CallOn:
-                continue
-            elif conditions is None or msg.matches(*conditions[0], **conditions[1]):
-                matched_calls.extend(call_list)
+        thread_executor = midiscripter.shared.thread_executor
+        has_matched_calls = False
+        for call in self._msg_calls:
+            if call.conditions is None or msg.matches(*call.conditions[0], **call.conditions[1]):
+                thread_executor.submit(call, msg_received_time_delta, msg.__copy__())
+                has_matched_calls = True
 
-        calls = matched_calls or not_matched_by_any_calls
+        if not has_matched_calls:
+            for call in self._event_calls[CallOn.NOT_MATCHED_BY_ANY_CALL]:
+                thread_executor.submit(call, msg_received_time_delta, msg.__copy__())
 
-        msg_copies = [copy.copy(msg) for _ in range(len(calls))]
-        midiscripter.shared.thread_executor.map(self.__call_worker, calls, msg_copies)
-
-    @staticmethod
-    def __call_worker(call: SubscribedCall, msg: 'Msg') -> None:
-        """Function called in thread for each subscribed call and each received message.
-
-        Notes:
-            Not supposed to be overridden in subclasses.
-            Supposed to be called from `_send_input_msg_to_calls` method.
-
-        Args:
-            call: Subscribed callable.
-            msg: Received message to use as callable only argument.
-        """
-        log._call_made(call)
-        try:
-            call(msg)
-        except Exception as exc:
-            call._print_exception_to_log(exc)
+    def _send_call_on_msg_to_calls(self, event: CallOn, msg: 'Msg') -> None:
+        msg_received_time_delta = time.perf_counter()
+        thread_executor = midiscripter.shared.thread_executor
+        for call in self._event_calls[event]:
+            thread_executor.submit(call, msg_received_time_delta, msg.__copy__())
 
     def _call_on_init(self) -> None:
         """Called after input port is opened for the first time.
@@ -232,11 +207,8 @@ class Subscribable:
         if self.__init_called:
             return
         self.__init_called = True
+        self._send_call_on_msg_to_calls(CallOn.PORT_INIT, Msg('Init'))
 
-        for conditions, call_list in self._calls:
-            if conditions == CallOn.PORT_INIT:
-                for call in call_list:
-                    midiscripter.shared.thread_executor.submit(self.__call_worker, call, Msg(''))
 
 
 class Port:
@@ -450,10 +422,18 @@ class MultiPort(Port):
                 port._close()
 
     @property
-    def _calls(self) -> list[tuple[None | CallOn | tuple[tuple, dict], list[SubscribedCall]]]:
+    def _msg_calls(self) -> list[SubscribedCall]:
         calls = []
         for input_port in self._input_ports:
-            calls.extend(input_port._calls)
+            calls.extend(input_port._msg_calls)
+        return calls
+
+    @property
+    def _event_calls(self) -> dict[CallOn, list[SubscribedCall]]:
+        calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED_BY_ANY_CALL: []}
+        for input_port in self._input_ports:
+            for event, call_list in input_port._event_calls.items():
+                calls[event].extend(call_list)
         return calls
 
     @property
@@ -463,7 +443,7 @@ class MultiPort(Port):
     def subscribe(
         self,
         *msg_matches_args: 'None | Container[Any] | Any',
-        **msg_matches_kwargs: 'str, None | Container[Any] | Any',
+        **msg_matches_kwargs: 'dict[str, None | Container[Any] | Any]',
     ) -> 'Callable':
         """Decorator to subscribe a callable to all the wrapped inputs' messages.
 

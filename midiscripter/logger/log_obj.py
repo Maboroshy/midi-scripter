@@ -1,6 +1,7 @@
 import collections
+import datetime
 import time
-from typing import TYPE_CHECKING, NamedTuple, Any
+from typing import TYPE_CHECKING, Any
 
 import midiscripter.shared
 
@@ -8,6 +9,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from midiscripter.base.port_base import Port, Output, Subscribable, SubscribedCall
     from midiscripter.base.msg_base import Msg
+
+
+_time_start = time.time() - time.perf_counter()
 
 
 class LogObjRef:
@@ -30,12 +34,27 @@ class LogObjRef:
             self.link = None
 
 
-class LogEntry(NamedTuple):
-    text: str
-    format_args: tuple[LogObjRef, ...]
-    format_kwargs: dict[str, LogObjRef]
+class LogEntry:
+    __slots__ = ('timestamp', 'text', 'format_args', 'format_kwargs', 'color')
     timestamp: str
+    text: str
+    format_args: list[LogObjRef]
+    format_kwargs: dict[str, LogObjRef]
     color: None | str
+
+    def __init__(self, time_delta: float | None, text: str, args: Any, kwargs: Any) -> None:
+        self.timestamp = self.__prepare_timestamp(time_delta) if time_delta is not None else ''
+        self.text = str(text)
+        self.color = kwargs.pop('_color', None)
+        self.format_args = [LogObjRef(obj) for obj in args]
+        self.format_kwargs = {arg: LogObjRef(obj) for arg, obj in kwargs.items()}
+
+    @staticmethod
+    def __prepare_timestamp(time_delta: float) -> str:
+        precise_time = _time_start + time_delta
+        struct = datetime.datetime.fromtimestamp(precise_time)
+        mcs = struct.microsecond
+        return f'{struct.hour:02d}:{struct.minute:02d}:{struct.second:02d}.{mcs // 1000:03d},{mcs % 1000:03d}'
 
 
 class Log:
@@ -51,15 +70,15 @@ class Log:
         for log entry with highlighted object representations.
     """
 
-    FLUSH_DELAY = 0.05
+    FLUSH_DELAY = 0.10
 
     ADD_SPACER_THRESHOLD_SEC = 2
     """Time in seconds after which an empty line is added to log to separate logged actions"""
 
-    BUFFER_SIZE = 200
+    BUFFER_SIZE = 500
     """Max size of message buffer to flush to log widget when it becomes visible"""
 
-    _formatter: 'Callable[list[[LogEntry | None]], str]'
+    _formatter: 'Callable[list[LogEntry | None], str]'
     _sink: 'Callable[[str], None]'
     _accepts_messages: bool
     _flushing_is_enabled: bool
@@ -67,10 +86,8 @@ class Log:
     def __init__(self):
         self._accepts_messages = True
         self.__flushing_is_enabled = False
-
-        self.__buffer: collections.deque[LogEntry]
         self.__buffer = collections.deque(maxlen=self.BUFFER_SIZE)
-        self.__last_entry_time = time.time()
+        self.__last_entry_time = 0
 
     def __call__(self, text: str | Any, *args: Any, **kwargs: Any):
         """Print log message.
@@ -84,25 +101,8 @@ class Log:
         [outputs][midiscripter.base.port_base.Output],
         [messages][midiscripter.base.msg_base.Msg] and callable arguments are highlighted.
         """
-        if not self._accepts_messages:
-            return
-
-        entry_color = kwargs.pop('_color', None)
-
-        format_args = tuple(LogObjRef(obj) for obj in args)
-        format_kwargs = {arg: LogObjRef(obj) for arg, obj in kwargs.items()}
-
-        now_time = midiscripter.shared.precise_epoch_time()
-        timestamp = self._get_precise_timestamp(now_time)
-
-        text = str(text)
-        log_entry = LogEntry(text, format_args, format_kwargs, timestamp, entry_color)
-
-        if now_time - self.__last_entry_time > self.ADD_SPACER_THRESHOLD_SEC:
-            self.__buffer.append(LogEntry('', (), {}, timestamp, entry_color))
-        self.__last_entry_time = now_time
-
-        self.__buffer.append(log_entry)
+        if self._accepts_messages:
+            self.__buffer.append((time.perf_counter(), text, args, kwargs))
 
     @property
     def _flushing_is_enabled(self) -> bool:
@@ -115,6 +115,7 @@ class Log:
 
         self.__flushing_is_enabled = state
         if state:
+            time.sleep(self.FLUSH_DELAY * 2)  # time for previous thread to stop, for tight calls
             midiscripter.shared.thread_executor.submit(self._buffer_flush_worker)
 
     def _buffer_flush_worker(self) -> None:
@@ -126,76 +127,47 @@ class Log:
 
     def _flush(self) -> None:
         """Sends buffered messages to sink"""
-        output_entries = []
+        log_entries = []
         while self.__buffer:
-            output_entries.append(self.__buffer.popleft())  # for thread safety
+            time_delta, text, args, kwargs = self.__buffer.popleft()  # for thread safety
+
+            if time_delta - self.__last_entry_time > self.ADD_SPACER_THRESHOLD_SEC:
+                log_entries.append(LogEntry(None, '', (), {}))
+            self.__last_entry_time = time_delta
+
+            log_entries.append(LogEntry(time_delta, text, args, kwargs))
 
         try:
-            self._sink(self._formatter(output_entries))
-        except RuntimeError:  # ignore Qt error on widget destruction at app exit
+            self._sink(self._formatter(log_entries))
+        except (RuntimeError, AttributeError):  # ignore Qt error on widget destruction at app exit
             pass
 
-    @staticmethod
-    def _get_precise_timestamp(precise_epoch_time: None | float = None) -> str:
-        """Returns current timestamp with microsecond precision as a string
-        The argument is present to don't get current time two times during log call"""
-        precise_time = precise_epoch_time or midiscripter.shared.precise_epoch_time()
-        time_string = time.strftime('%H:%M:%S', time.localtime(precise_time))
+    def _port_not_found(self, port_instance: 'Port') -> None:
+        self("Can't find {port} {desc}. Check the port name.", port=port_instance, desc=port_instance._log_description)
 
-        # >1.5 times faster than datetime
-        after_dot = repr(precise_time).split('.')[1][:6].ljust(6, '0')
-        milisec_part = after_dot[:3]
-        microsec_part = after_dot[3:]
-        return f'{time_string}.{milisec_part},{microsec_part}'
-
-    def _port_open(
-        self,
-        port_instance: 'Port',
-        success: bool,
-        *,
-        custom_text: str = '',
-        **log_call_kwargs,
-    ) -> None:
+    def _port_open(self, port_instance: 'Port', success: bool, *, custom_text: str = '', **log_call_kwargs) -> None:
         """Print port open message"""
         if custom_text:
             self(custom_text, **log_call_kwargs)
         elif success:
             if port_instance._is_virtual:
-                self(
-                    'Created and opened {port} virtual {desc}',
+                self('Created and opened {port} virtual {desc}',
                     port=port_instance,
                     desc=port_instance._log_description,
                 )
             else:
-                self(
-                    'Opened {port} {desc}', port=port_instance, desc=port_instance._log_description
-                )
+                self('Opened {port} {desc}', port=port_instance, desc=port_instance._log_description)
         else:
-            self.red(
-                'Failed to open {port} {desc}',
-                port=port_instance,
-                desc=port_instance._log_description,
-            )
+            self.red('Failed to open {port} {desc}', port=port_instance, desc=port_instance._log_description)
 
-    def _port_close(
-        self,
-        port_instance: 'Port',
-        success: bool,
-        *,
-        custom_text: str = '',
-        **log_call_kwargs,
-    ) -> None:
+    def _port_close(self, port_instance: 'Port', success: bool, *, custom_text: str = '', **log_call_kwargs) -> None:
         """Print port close message"""
         if custom_text:
             self(custom_text, **log_call_kwargs)
         elif success:
             self('Closed {port} {desc}', port=port_instance, desc=port_instance._log_description)
         else:
-            self.red(
-                'Failed to close {port} {desc}',
-                port=port_instance,
-                desc=port_instance._log_description,
-            )
+            self.red('Failed to close {port} {desc}', port=port_instance, desc=port_instance._log_description)
 
     def _msg_received(self, subscribable_instance: 'Subscribable', msg: 'Msg') -> None:
         """Print message received message"""

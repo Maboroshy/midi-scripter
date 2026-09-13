@@ -43,4 +43,7 @@ class FileEventMsg(midiscripter.base.msg_base.Msg):
         type: 'None | Container[FileEvent] | FileEvent | str' = None,
         path: 'None | Container[pathlib.Path] | pathlib.Path' = None,
     ) -> bool:
-        return super().matches(type, path)
+        return midiscripter.base.msg_base.Msg.matches(self, type, path)
+
+    def _as_tuple(self) -> tuple:
+        return self.type, self.path

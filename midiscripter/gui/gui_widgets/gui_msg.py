@@ -45,9 +45,15 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
         super().__init__(type)
         self.data = data
 
+    def __copy__(self):
+        return GuiEventMsg(self.type, self.data)
+
     def matches(
         self,
         type: 'None | Container[GuiEvent] | GuiEvent' = None,
         data: 'None | Container | str | int | bool | Sequence' = None,
     ) -> bool:
-        return super().matches(type, data)
+        return midiscripter.base.msg_base.Msg.matches(self, type, data)
+
+    def _as_tuple(self) -> tuple:
+        return self.type, self.data

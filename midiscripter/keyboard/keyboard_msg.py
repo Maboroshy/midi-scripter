@@ -69,7 +69,10 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
         elif isinstance(shortcut_or_keycodes, Iterable):
             self.keycodes = list(shortcut_or_keycodes)
         else:
-            raise TypeError
+            raise AttributeError
+
+    def __copy__(self):
+        return KeyMsg(self.type, self.keycodes)
 
     @property
     def shortcut(self) -> str:
@@ -112,4 +115,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
         type: 'None | Container[KeyEvent] | KeyEvent' = None,
         shortcut: 'None | Container[str] | str' = None,
     ) -> bool:
-        return super().matches(type, shortcut)
+        return midiscripter.base.msg_base.Msg.matches(self, type, shortcut)
+
+    def _as_tuple(self) -> tuple:
+        return self.type, self.shortcut

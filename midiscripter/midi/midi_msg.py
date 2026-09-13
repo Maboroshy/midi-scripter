@@ -44,6 +44,9 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
         else:
             return ChannelMsg.__new__(ChannelMsg, *args, **kwargs)
 
+    def __copy__(self):
+        return MidiMsg(self.type, self.channel, self.data1, self.data2)
+
     def matches(
         self,
         type: 'None | Container | MidiType' = None,
@@ -53,7 +56,10 @@ class MidiMsg(midiscripter.base.msg_base.Msg):
         *,
         combined_data: 'None | Container[int] | int' = None,
     ) -> bool:
-        return super().matches(type, channel, data1, data2, combined_data=combined_data)
+        return midiscripter.base.msg_base.Msg.matches(self, type, channel, data1, data2, combined_data=combined_data)
+
+    def _as_tuple(self) -> tuple:
+        return self.type, self.channel, self.data1, self.data2
 
 
 class ChannelMsg(MidiMsg):
@@ -112,6 +118,9 @@ class ChannelMsg(MidiMsg):
         else:
             return super().__repr__()
 
+    def __copy__(self):
+        return ChannelMsg(self.type, self.channel, self.data1, self.data2)
+
     @property
     def combined_data(self) -> int | tuple[int, ...]:
         """Both data bytes combined to 14-bit number -
@@ -132,7 +141,7 @@ class ChannelMsg(MidiMsg):
         *,
         combined_data: 'None | Container[int] | int' = None,
     ) -> bool:
-        return super().matches(type, channel, data1, data2, combined_data=combined_data)
+        return midiscripter.base.msg_base.Msg.matches(self, type, channel, data1, data2, combined_data=combined_data)
 
 
 class SysexMsg(MidiMsg):
@@ -170,6 +179,9 @@ class SysexMsg(MidiMsg):
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.combined_data!s})'
+
+    def __copy__(self):
+        return SysexMsg(self.combined_data)
 
     @property
     def combined_data(self) -> tuple[int, ...]:
@@ -212,4 +224,4 @@ class SysexMsg(MidiMsg):
         *,
         combined_data: 'None | Container[tuple[int, ...]] | tuple[int, ...]' = None,
     ) -> bool:
-        return super().matches(type, channel, data1, data2, combined_data=combined_data)
+        return midiscripter.base.msg_base.Msg.matches(self, type, channel, data1, data2, combined_data=combined_data)

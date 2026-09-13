@@ -109,13 +109,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
             self._is_opened = True
 
         except ValueError:
-            log._port_open(
-                self,
-                False,
-                custom_text="Can't find {port} {desc}. Check the port name.",
-                port=self,
-                desc=self._log_description,
-            )
+            log._port_not_found(self)
         except Exception:
             log._port_open(self, False)
 

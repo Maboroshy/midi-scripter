@@ -65,10 +65,16 @@ class MouseMsg(midiscripter.base.msg_base.Msg):
         self.x = x
         self.y = y
 
+    def __copy__(self):
+        return MouseMsg(self.type, self.x, self.y)
+
     def matches(
         self,
         type: 'None | Container[MouseEvent] | MouseEvent' = None,
         x: 'None | Container[int] | int' = None,
         y: 'None | Container[int] | int' = None,
     ) -> bool:
-        return super().matches(type, x, y)
+        return midiscripter.base.msg_base.Msg.matches(self, type, x, y)
+
+    def _as_tuple(self) -> tuple:
+        return self.type, self.x, self.y
