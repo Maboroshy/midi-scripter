@@ -328,8 +328,8 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
     @classmethod
     def _get_available_names(cls) -> list[str]:
         """Get available MIDI IO port names"""
-        input_rtmidi_port = rtmidi.MidiIn()
-        output_rtmidi_port = rtmidi.MidiOut()
+        input_rtmidi_port = supriya_midi.MidiIn()
+        output_rtmidi_port = supriya_midi.MidiOut()
         input_port_names = get_persistent_midi_port_names(input_rtmidi_port.get_ports())
         output_port_names = get_persistent_midi_port_names(output_rtmidi_port.get_ports())
         input_rtmidi_port.delete()
