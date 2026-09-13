@@ -16,6 +16,19 @@ class SupressInitAutorun(type):
         return cls.__new__(cls, *args, **kwargs)
 
 
+is_running: bool = False
+
+
+def prerun_checks() -> None:
+    global is_running
+    if is_running:
+        raise RuntimeError('Script is already running. Starter can only be called once.')
+    is_running = True
+
+    if not midiscripter.shared.SCRIPT_PATH_STR:
+        raise RuntimeError('Starter can only be called from a script')
+
+
 def restart_script() -> None:
     """Restart the current script"""
     os.spawnl(os.P_DETACH, sys.executable, 'python', midiscripter.shared.SCRIPT_PATH_STR)
