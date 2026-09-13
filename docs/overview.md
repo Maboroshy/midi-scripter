@@ -151,9 +151,6 @@ Messages are data objects produced by input ports or created in the
 script's code. Messages can be sent with an output port of the corresponding 
 type.
 
-The time since message creation (in milliseconds) can be checked by
-its `age_ms` attribute.
-
 [MIDI message][midiscripter.MidiMsg] objects attributes meanings depending
 on [MIDI message type][midiscripter.MidiType]:
 
