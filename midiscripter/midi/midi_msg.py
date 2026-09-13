@@ -191,7 +191,7 @@ class SysexMsg(MidiMsg):
     @combined_data.setter
     def combined_data(self, combined_data: Sequence[int]) -> None:
         if combined_data[0] != 0xF0 or combined_data[-1] != 0xF7:
-            raise AttributeError('Sysex message should start with 240 (0xF0) and end with 247 (0xF7)')
+            raise ValueError('Sysex message should start with 240 (0xF0) and end with 247 (0xF7)')
 
         payload_data = combined_data[1:-1]  # without opening and closing bytes
 
@@ -206,7 +206,7 @@ class SysexMsg(MidiMsg):
 
         minimal_valid_msg_len = 1 + channel_len + sub_id_len + 1
         if len(combined_data) < minimal_valid_msg_len:
-            raise AttributeError(
+            raise ValueError(
                 f'This sysex message should be at least {minimal_valid_msg_len} ints '
                 f'starting with 240 and ending with 247, it has only {len(combined_data)}'
             )

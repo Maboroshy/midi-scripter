@@ -41,9 +41,11 @@ def _all_opened() -> None:
         if port._is_opened:
             port._close()
 
-    log._flush()
-    log._flushing_is_enabled = False
-
+    try:
+        log._flush()
+        log._flushing_is_enabled = False
+    except AttributeError:  # for exit before log fully set up
+        pass
 
 class SubscribedCall:
     """Wrapper object created for subscribed callable"""

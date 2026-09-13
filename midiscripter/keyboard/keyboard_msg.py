@@ -69,7 +69,7 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
         elif isinstance(shortcut_or_keycodes, Iterable):
             self.keycodes = list(shortcut_or_keycodes)
         else:
-            raise AttributeError
+            raise ValueError
 
     def __copy__(self):
         return KeyMsg(self.type, self.keycodes)

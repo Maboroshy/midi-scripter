@@ -60,7 +60,7 @@ class NoteData:
             self.__str = midi_note_or_name
             self.__int = self.__covert_to_int(self.__str)
         else:
-            raise TypeError
+            raise ValueError
 
     def as_str(self) -> str:
         """Note name. Same as `str(note_data_obj)`"""
@@ -78,7 +78,7 @@ class NoteData:
 
     def __covert_to_str(self, note_int: int, use_flats: bool = False) -> str:
         if not 0 <= note_int < 121:
-            raise AttributeError
+            raise ValueError
 
         octave_n = (note_int / 12) - 5 + self.middle_c_octave_n
         if use_flats:
@@ -92,7 +92,7 @@ class NoteData:
         match = self.__note_name_re.fullmatch(note_str)
 
         if not match:
-            raise AttributeError
+            raise ValueError
 
         note_name, octave_str = match.groups()
         note_index = _NOTE_NAMES[note_name]

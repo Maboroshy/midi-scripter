@@ -29,7 +29,7 @@ def _parse_ip_port(ip_port: str | int) -> (str, int):
         ip_address, port = ip_port.split(':')
         port = int(port)
     else:
-        raise AttributeError(f'Invalid OSC port address: {ip_port}')
+        raise ValueError(f'Invalid OSC port address: {ip_port}')
 
     return ip_address, port
 

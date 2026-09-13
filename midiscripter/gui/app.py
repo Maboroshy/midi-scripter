@@ -33,15 +33,14 @@ class ScripterGUI(QApplication):
 
         self.setApplicationDisplayName(f'{self.applicationName()} - {self.organizationName()}')
 
-        self.__time_until_restart_sec = self.RESTART_DELAY
-        self.request_restart.connect(self.restart)
-        self.aboutToQuit.connect(self.__cleanup)
-
-        # Action to use before main window creation
         self.single_instance_only = SavedCheckedAction('Single instance only', shared=True)
         self.__single_instance_socket = socket.socket()
         if self.single_instance_only:
             self.__terminate_if_second_instance()
+
+        self.__time_until_restart_sec = self.RESTART_DELAY
+        self.request_restart.connect(self.restart)
+        self.aboutToQuit.connect(self.__cleanup)
 
         self.__set_theme()
         self.main_window = midiscripter.gui.main_window.MainWindow(GuiWindow._widgets_to_add)
@@ -90,11 +89,8 @@ class ScripterGUI(QApplication):
         try:
             self.__single_instance_socket.bind(('127.0.0.1', 1337))
         except OSError:
-            print(
-                f'"{self.single_instance_only.text()}" option is enabled.\n'
-                "Second instance won't be started."
-            )
-            sys.exit(1)
+            print(f'"{self.single_instance_only.text()}" option is enabled.\nSecond instance won\'t be started.')
+            raise RuntimeError
 
     def __cleanup(self) -> None:
         self.main_window.close()
@@ -124,8 +120,11 @@ def start_gui() -> NoReturn:
     signal_checker_dummy_timer.timeout.connect(lambda: None)  # dummy python code to run
 
     with midiscripter.base.port_base._all_opened():
-        app_instance.prepare()
-        exit_status = app_instance.exec()
+        try:
+            app_instance.prepare()
+            exit_status = app_instance.exec()
+        except RuntimeError:
+            exit_status = 1
 
     if exit_status == 1467:  # restart request, can't do sys.exit() while Qt app works
         midiscripter.shared.restart_script()

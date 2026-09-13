@@ -232,7 +232,7 @@ class TeVirtualMidiPort:
             if self.__port_address_to_instance[self.__id_addr] == self:
                 return
             else:  # Creation for second instance pointing to the same port
-                raise AttributeError(
+                raise ValueError(
                     f"Can't create virtual port '{self.__name}'. "
                     'Virtual MIDI port with the same name already exists.',
                 )
