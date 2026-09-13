@@ -29,9 +29,9 @@ TYPE_TO_DATA_BYTES_COUNT = {
     MidiType.NOTE_ON: 3,
     MidiType.NOTE_OFF: 3,
     MidiType.CONTROL_CHANGE: 3,
-    MidiType.POLYTOUCH: 3,
+    MidiType.POLY_PRESSURE: 3,
     MidiType.PITCH_BEND: 3,
-    MidiType.AFTERTOUCH: 2,
+    MidiType.CHANNEL_PRESSURE: 2,
     MidiType.PROGRAM_CHANGE: 2,
 }
 
