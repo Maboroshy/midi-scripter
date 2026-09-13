@@ -1,6 +1,5 @@
 import collections
 import contextlib
-import copy
 import enum
 import inspect
 import itertools
@@ -10,7 +9,6 @@ from typing import TYPE_CHECKING, TypeVar, ClassVar, Any
 from collections.abc import Sequence
 
 import midiscripter.shared
-import midiscripter
 from midiscripter.logger import log
 from midiscripter.base.msg_base import Msg
 
