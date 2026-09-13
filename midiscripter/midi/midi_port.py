@@ -290,7 +290,7 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
     def __init__(self, port_name: str, *, virtual: bool = False, loopback: bool = False):
         """
         Args:
-            port_name: MIDI port name
+            port_name: MIDI port name common for input and output, also works for common part of "In"/"Out" name pair
             virtual: Create virtual input and output ports
             loopback: Immediately send the messages received by the input port with the output port
         """

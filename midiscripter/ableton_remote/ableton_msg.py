@@ -107,7 +107,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
     """Ableton Live remote script event"""
 
     index: None | int = None
-    """Track/clip/send index"""
+    """Track/send index"""
 
     value: int | bool
     """Control event value"""
@@ -150,6 +150,7 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
         """
         super().__init__(type)
         if value is None:
+            self.index = None
             self.value = index_or_value
         else:
             self.index = index_or_value

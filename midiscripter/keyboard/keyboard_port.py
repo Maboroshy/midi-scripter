@@ -114,8 +114,8 @@ class KeyOut(midiscripter.base.port_base.Output):
         if not self._validate_msg_send(msg):
             return
 
-        # Log messages sent before actual sending, so receive messages for sent keys
-        # won't be displayed before the message
+        # Log messages sent before actual sending,
+        # so receive messages for sent keys won't be displayed before the message
         log._msg_sent(self, msg)
 
         if msg.type is KeyEvent.PRESS:

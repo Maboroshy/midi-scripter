@@ -260,7 +260,7 @@ class Port:
     def __new__(cls, *args, **kwargs) -> __port_instance_type:
         init_bound_arguments = inspect.signature(cls.__init__).bind(cls, *args, **kwargs)
         init_bound_arguments.apply_defaults()
-        uid = cls._forced_uid or init_bound_arguments.args[1]  # second after `self`
+        uid = cls._forced_uid or init_bound_arguments.args[1]  # second argument after `self`
         init_args = init_bound_arguments.arguments
         init_args.pop('self')  # popping `arguments` breaks `.args`, keep the order
 
