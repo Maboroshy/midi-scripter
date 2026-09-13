@@ -241,8 +241,8 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
         Args:
             msg: object to send
         """
-        if not self._validate_msg_send(msg):
-            return
+        if not self._is_opened:
+            log._send_failed_port_is_closed(self, msg)
 
         if msg.type == MidiType.SYSEX:
             raw_midi_output = msg.combined_data

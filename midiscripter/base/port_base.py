@@ -361,19 +361,7 @@ class Output(Port):
             Supposed to be overridden in subclasses.
             Should call `log._msg_sent(self, msg)` after message sent.
         """
-        if not self._validate_msg_send(msg):
-            return
-
         raise NotImplementedError
-
-        # noinspection PyUnreachableCode
-        log._msg_sent(self, msg)
-
-    def _validate_msg_send(self, msg: 'Msg') -> bool:
-        if not self._is_opened:
-            log.red("Can't send message {msg} - {output} is not opened!", msg=msg, output=self)
-            return False
-        return True
 
 
 class MultiPort(Port):

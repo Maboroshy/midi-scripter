@@ -169,6 +169,9 @@ class Log:
         else:
             self.red('Failed to close {port} {desc}', port=port_instance, desc=port_instance._log_description)
 
+    def _send_failed_port_is_closed(self, port_instance: 'Port', msg: 'Msg') -> None:
+        self("Can't send message {msg} - {output} is not opened!", msg=msg, output=port_instance, _color='red')
+
     def _msg_received(self, subscribable_instance: 'Subscribable', msg: 'Msg') -> None:
         """Print message received message"""
         self('{subscribable} got message {msg}', subscribable=subscribable_instance, msg=msg)

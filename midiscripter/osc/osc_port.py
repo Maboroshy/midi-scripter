@@ -110,9 +110,6 @@ class OscOut(midiscripter.base.port_base.Output):
         Args:
             msg: object to send
         """
-        if not self._validate_msg_send(msg):
-            return
-
         data = list(msg.data) if isinstance(msg.data, tuple) else msg.data
         self._osc_client.send_message(msg.address, data)
         log._msg_sent(self, msg)
