@@ -301,8 +301,9 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
             input_port = self._input_port_class(port_name, virtual=self._is_virtual)
             output_port = self._output_port_class(port_name, virtual=self._is_virtual)
         else:
-            input_port = self._input_port_class(port_name)
-            output_port = self._output_port_class(port_name)
+            input_port_name, output_port_name = self._get_io_names(port_name)
+            input_port = self._input_port_class(input_port_name)
+            output_port = self._output_port_class(output_port_name)
 
         super().__init__(port_name, input_port, output_port)
 
@@ -325,6 +326,24 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
                 if port._is_opened:
                     port._pytemidi_port.create()
 
+    def _get_io_names(self, port_name: str) -> tuple[str, str]:
+        """Get MIDI input and output port names for the port name"""
+        available_input_names = self._input_port_class._get_available_names()
+        available_output_names = self._output_port_class._get_available_names()
+
+        if port_name in available_input_names and port_name in available_output_names:
+            input_port_name = output_port_name = port_name
+        elif f'{port_name} Out' in available_input_names and f'{port_name} In' in available_output_names:
+            input_port_name = f'{port_name} Out'
+            output_port_name = f'{port_name} In'
+        elif f'{port_name} In' in available_input_names and f'{port_name} Out' in available_output_names:
+            input_port_name = f'{port_name} In'
+            output_port_name = f'{port_name} Out'
+        else:
+            input_port_name = output_port_name = port_name  # make an absent port
+
+        return input_port_name, output_port_name
+
     @classmethod
     def _get_available_names(cls) -> list[str]:
         """Get available MIDI IO port names"""
@@ -334,7 +353,17 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
         output_port_names = get_persistent_midi_port_names(output_rtmidi_port.get_ports())
         input_rtmidi_port.delete()
         output_rtmidi_port.delete()
-        return [name for name in input_port_names if name in output_port_names]
+
+        stripped_output_port_names = [port.removesuffix(' In').removesuffix(' Out') for port in output_port_names]
+
+        available_names = []
+        for port_name in input_port_names:
+            if port_name in output_port_names:
+                available_names.append(port_name)
+            elif port_name.removesuffix(' In').removesuffix(' Out') in stripped_output_port_names:
+                available_names.append(port_name.removesuffix(' In').removesuffix(' Out'))
+
+        return available_names
 
     @property
     def _is_available(self) -> bool:
