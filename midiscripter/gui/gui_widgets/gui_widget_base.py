@@ -7,6 +7,7 @@ from PySide6.QtWidgets import *
 import midiscripter.base.msg_base
 import midiscripter.base.port_base
 import midiscripter.gui.app
+import midiscripter.gui.gui_widgets.window
 
 from .gui_msg import GuiEventMsg, GuiEvent
 
@@ -93,7 +94,7 @@ class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
 
         self.qt_widget.setObjectName(self._title)
 
-        midiscripter.gui.app.add_qwidget(self.qt_widget)
+        midiscripter.gui.gui_widgets.window.GuiWindow.add_qwidget(self.qt_widget)
 
         if isinstance(content, types.GeneratorType):
             content = tuple(content)
