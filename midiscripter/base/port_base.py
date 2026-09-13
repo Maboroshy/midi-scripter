@@ -208,8 +208,7 @@ class Subscribable:
         self._send_call_on_msg_to_calls(CallOn.PORT_INIT, Msg('Init'))
 
 
-
-class Port:
+class Port(metaclass=midiscripter.shared.util.SupressInitAutorun):
     """Port base class.
 
     Notes:
@@ -275,22 +274,19 @@ class Port:
                 )
         except KeyError:
             instance = super().__new__(cls)
+            instance.__repr = f'{cls.__name__}({midiscripter.shared.unbracket_args_and_kwargs(args, kwargs)})'
             instance.__inited_with_args = init_args
+
+            instance.__init__(*args, **kwargs)
+
             cls._uid_to_instance[uid] = instance
-
-            args_repr = ', '.join([repr(arg) for arg in args])
-            kwargs_repr = ', '.join([f'{key}={repr(value)}' for key, value in kwargs.items()])
-            instance.__repr = (
-                f'{cls.__name__}({args_repr}{", " if args and kwargs else ""}{kwargs_repr})'
-            )
-
             cls._class_instances.append(instance)
 
             parent_class: Port
             for parent_class in cls.mro()[1:-1]:  # exclude `object`
                 try:
                     parent_class._subclass_instances.append(instance)
-                except AttributeError:  # not a Port subclass in mro
+                except AttributeError:  # not a Port subclass
                     pass
 
             return instance
