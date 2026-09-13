@@ -1,8 +1,7 @@
 import platform
 from typing import TYPE_CHECKING, overload
 
-import rtmidi
-import rtmidi.midiconstants
+import supriya_midi
 
 import midiscripter.base.port_base
 from midiscripter.logger import log
@@ -15,13 +14,13 @@ if TYPE_CHECKING:
 
 
 BYTE_TO_TYPE_MAP = {
-    rtmidi.midiconstants.NOTE_ON: MidiType.NOTE_ON,
-    rtmidi.midiconstants.NOTE_OFF: MidiType.NOTE_OFF,
-    rtmidi.midiconstants.PITCH_BEND: MidiType.PITCH_BEND,
-    rtmidi.midiconstants.PROGRAM_CHANGE: MidiType.PROGRAM_CHANGE,
-    rtmidi.midiconstants.CONTROLLER_CHANGE: MidiType.CONTROL_CHANGE,
-    rtmidi.midiconstants.POLY_PRESSURE: MidiType.POLYTOUCH,
-    rtmidi.midiconstants.CHANNEL_PRESSURE: MidiType.AFTERTOUCH,
+    0x90: MidiType.NOTE_ON,
+    0x80: MidiType.NOTE_OFF,
+    0xE0: MidiType.PITCH_BEND,
+    0xC0: MidiType.PROGRAM_CHANGE,
+    0xB0: MidiType.CONTROL_CHANGE,
+    0xA0: MidiType.POLY_PRESSURE,
+    0xD0: MidiType.CHANNEL_PRESSURE,
 }
 
 TYPE_TO_BYTE_MAP = {type_: byte_ for byte_, type_ in BYTE_TO_TYPE_MAP.items()}
@@ -53,8 +52,8 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
     # Attrs provided by the class that inherits from MidiPortMixin
     _is_opened: bool
     _uid: str
-    _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut]
-    _rtmidi_port: rtmidi.MidiIn | rtmidi.MidiOut | None = None
+    _rtmidi_port_class: type[supriya_midi.MidiIn | supriya_midi.MidiOut]
+    _rtmidi_port: supriya_midi.MidiIn | supriya_midi.MidiOut | None = None
     _pytemidi_port: 'TeVirtualMidiPort | None' = None
 
     # noinspection PyMissingConstructor
@@ -139,7 +138,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
     """MIDI input port. Produces [`MidiMsg`][midiscripter.MidiMsg] objects."""
 
-    _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut] = rtmidi.MidiIn
+    _rtmidi_port_class: type[supriya_midi.MidiIn | supriya_midi.MidiOut] = supriya_midi.MidiIn
     _log_description: str = 'MIDI input'
 
     def __init__(self, port_name: str, *, virtual: bool = False):
@@ -189,7 +188,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         return super().subscribe(type, channel, data1, data2)
 
     @overload
-    def _callback(self, rtmidi_input: list[list[hex, ...], float], _: list) -> None: ...
+    def _callback(self, rtmidi_input: list[hex, ...], timestamp: float, data: None) -> None: ...
 
     @overload
     def _callback(self, pytemidi_input: list[hex, ...]) -> None: ...
@@ -198,7 +197,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         if not self._is_opened:
             return
 
-        raw_midi_data = args[0] if self._pytemidi_port else args[0][0]
+        raw_midi_data = args[0]
         [output._passthrough_send(raw_midi_data) for output in self._attached_passthrough_outs]
         self._send_input_msg_to_calls(self._convert_to_msg(raw_midi_data))
 
@@ -213,12 +212,12 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
         self, raw_midi_data: list[hex, ...]
     ) -> 'midiscripter.midi.midi_msg.ChannelMsg | midiscripter.midi.midi_msg.SysexMsg':
         if (
-            raw_midi_data[0] == rtmidi.midiconstants.SYSTEM_EXCLUSIVE
-            and raw_midi_data[-1] == rtmidi.midiconstants.END_OF_EXCLUSIVE
+            raw_midi_data[0] == 0xF0
+            and raw_midi_data[-1] == 0xF7
         ):
             return midiscripter.midi.midi_msg.SysexMsg(raw_midi_data)
 
-        elif raw_midi_data[0] < rtmidi.midiconstants.SYSTEM_EXCLUSIVE:
+        elif raw_midi_data[0] < 0xF0:
             msg_atts = self._raw_channel_midi_to_attrs(raw_midi_data)
             return midiscripter.midi.midi_msg.ChannelMsg(*msg_atts)
 
@@ -229,7 +228,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
 class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
     """MIDI output port. Sends [`MidiMsg`][midiscripter.MidiMsg] objects."""
 
-    _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut] = rtmidi.MidiOut
+    _rtmidi_port_class: type[supriya_midi.MidiIn | supriya_midi.MidiOut] = supriya_midi.MidiOut
     _log_description: str = 'MIDI output'
     _disable_logging_in_send: bool = False
 
@@ -264,7 +263,7 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
             else:
                 self._rtmidi_port.send_message(raw_midi_output)
         except Exception:
-            # For _rtmidi.SystemError or teVirtualMIDI.DriverError
+            # For rtmidi errors or teVirtualMIDI.DriverError
             log.red(f'Failed to send message: {msg}')
             return
 
@@ -279,7 +278,7 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
                 else:
                     self._rtmidi_port.send_message(raw_midi_data)
             except Exception:
-                # For _rtmidi.SystemError or teVirtualMIDI.DriverError
+                # For rtmidi errors or teVirtualMIDI.DriverError
                 log.red(f'Failed to send message data: {raw_midi_data}')
 
 

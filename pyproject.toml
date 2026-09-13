@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies = [
   'colorama ~=0.4',  # BSD
-  'python-rtmidi ~=1.5',  # MIT
+  'supriya-midi',  # MIT
   'python-osc ~=1.7',  # Unlicense
   'pynput ~=1.7',  # LGPL
   'watchdog ~=4.0',  # Apache
