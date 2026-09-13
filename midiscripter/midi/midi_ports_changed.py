@@ -23,7 +23,7 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
         super().__init__()
 
     def _open(self) -> None:
-        self.is_opened = True
+        self._is_opened = True
 
         self.__last_check_inputs = MidiIn._get_available_names()
         self.__last_check_outputs = MidiOut._get_available_names()
@@ -32,12 +32,12 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
         midiscripter.logger.log('Started MIDI ports change watcher')
 
     def _close(self) -> None:
-        self.is_opened = False
+        self._is_opened = False
         midiscripter.logger.log('Stopped MIDI ports change watcher')
 
     def __updater_worker(self) -> None:
         n = 0
-        while self.is_opened:
+        while self._is_opened:
             n += 1
 
             time.sleep(self.refresh_rate_sec)
@@ -49,7 +49,7 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
                 self.__last_check_inputs != current_inputs
                 or self.__last_check_outputs != current_outputs
             ):
-                msg = Msg('MIDI Ports Changed', self)
+                msg = Msg('MIDI Ports Changed')
                 self._send_input_msg_to_calls(msg)
 
                 self.__last_check_inputs = current_inputs

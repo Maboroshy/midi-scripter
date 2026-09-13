@@ -35,13 +35,13 @@ class AbletonIn(MidiIn):
 
         try:
             event, index = midi_to_ableton_button_map[lead_msg_atts]
-            return AbletonMsg(event, index, bool(value), source=self)
+            return AbletonMsg(event, index, bool(value))
         except KeyError:
             pass
 
         try:
             event, index = midi_to_ableton_slider_map[lead_msg_atts]
-            return AbletonMsg(event, index, value, source=self)
+            return AbletonMsg(event, index, value)
         except KeyError:
             pass
 

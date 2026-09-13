@@ -4,7 +4,6 @@ import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
     from collections.abc import Container
-    from midiscripter.ableton_remote.ableton_port import AbletonIn
 
 
 class AbletonEvent(midiscripter.base.msg_base.AttrEnum):
@@ -113,16 +112,12 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
     value: int | bool
     """Control event value"""
 
-    source: 'None | AbletonIn'
-
     @overload
     def __init__(
         self,
         type: AbletonEvent,
         index: int | tuple[int, int],
         value: int | bool,
-        *,
-        source: 'None | AbletonIn' = None,
     ): ...
 
     @overload
@@ -130,31 +125,23 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
         self, type: AbletonEvent, value: int | bool = True, *, source: 'None | AbletonIn' = None
     ): ...
 
-    def __init__(
-        self,
-        type: AbletonEvent,
-        index_or_value: int | bool = True,
-        value: int | bool = None,
-        *,
-        source: 'None | AbletonIn' = None,
-    ):
+    @overload
+    def __init__(self, type: AbletonEvent, index: int, value: int | bool): ...
+
+    def __init__(self, type: AbletonEvent, index_or_value: int | bool = True, value: int | bool = None):
         """
         **Overloads:**
             ``` python
             AbletonMsg(
                 type: AbletonEvent,
                 index: int,
-                value: int | bool,
-                *,
-                source: 'None | AbletonIn' = None
+                value: int | bool
             )
             ```
             ``` python
             AbletonMsg(
                 type: AbletonEvent,
-                value: int | bool,
-                *,
-                source: 'None | AbletonIn' = None
+                value: int | bool
             )
             ```
 
@@ -162,7 +149,6 @@ class AbletonMsg(midiscripter.base.msg_base.Msg):
             type: Ableton Live remote script event
             index (int): Track/encoder/device bank index
             value (int | bool): Control event value (0-127 or True / False)
-            source: The [`AbletonIn`][midiscripter.AbletonIn] instance that generated the message
         """
         super().__init__(type, source)
         if value is None:

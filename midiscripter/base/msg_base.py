@@ -26,28 +26,17 @@ class Msg:
     type: str
     """Message type description for filtering and representation"""
 
-    ctime: float
-    """Message creation time in ["Unix time"](https://wikipedia.org/wiki/Unix_time) format"""
-
-    source: 'Input | None'
-    """Input port instance that generated the message"""
-
     __match_args__: tuple[str] = ('type',)
 
     _log_color: str | None = 'blue'
     _log_show_link: bool = True
 
-    def __init__(self, type: str, source: 'Input | None' = None):
+    def __init__(self, type: str):
         """
         Args:
-            source: Input port instance that generated the message
+            type: Message distinctive type
         """
         self.type = type
-        self.source = source
-        self.ctime = midiscripter.shared.precise_epoch_time()
-
-        self.ctime: float  # workaround for mkdocstrings issue #607
-        """Message creation time in ["Unix time"](https://wikipedia.org/wiki/Unix_time) format"""
 
     def __repr__(self):
         return f'{self.__class__.__name__}({", ".join(repr(value) for value in self._as_tuple())})'

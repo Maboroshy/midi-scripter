@@ -45,7 +45,7 @@ class KeyIn(midiscripter.base.port_base.Input):
         if key not in self.pressed_keys:
             self.pressed_keys.append(key)
 
-        msg = KeyMsg(KeyEvent.PRESS, self.pressed_keys.copy(), source=self)
+        msg = KeyMsg(KeyEvent.PRESS, self.pressed_keys.copy())
         self._send_input_msg_to_calls(msg)
 
     def __on_release(self, key: pynput.keyboard.Key) -> None:
@@ -56,7 +56,7 @@ class KeyIn(midiscripter.base.port_base.Input):
             pressed_keys_for_msg = self.pressed_keys.copy()
             self.pressed_keys.remove(key)
 
-            msg = KeyMsg(KeyEvent.RELEASE, pressed_keys_for_msg, source=self)
+            msg = KeyMsg(KeyEvent.RELEASE, pressed_keys_for_msg)
             self._send_input_msg_to_calls(msg)
         except ValueError:
             pass
@@ -67,13 +67,13 @@ class KeyIn(midiscripter.base.port_base.Input):
         )
         self.__pynput_listener.start()
         self.__pynput_listener.wait()
-        self.is_opened = True
+        self._is_opened = True
         log._port_open(self, True)
 
     def _close(self) -> None:
         self.__pynput_listener.stop()
         self.__pynput_listener = None
-        self.is_opened = False
+        self._is_opened = False
         log._port_close(self, True)
 
     @overload

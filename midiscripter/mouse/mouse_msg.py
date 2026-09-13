@@ -51,27 +51,17 @@ class MouseMsg(midiscripter.base.msg_base.Msg):
     y: int
     """Event vertical screen coordinates"""
 
-    source: 'None | MouseIn'
-
-    def __init__(
-        self,
-        type: MouseEvent,
-        x: int,
-        y: int,
-        *,
-        source: 'None | MouseIn' = None,
-    ):
+    def __init__(self, type: MouseEvent, x: int, y: int):
         """
         Args:
             type: Mouse event type
             x: Event horizontal axis coordinates
             y: Event vertical axis coordinates
-            source: The [`MouseIn`][midiscripter.MouseIn] instance that generated the message
 
         Tip:
             Run GUI and Enable mouse input. Use log to get mouse events you need.
         """
-        super().__init__(type, source)
+        super().__init__(type)
         self.x = x
         self.y = y
 

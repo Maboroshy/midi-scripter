@@ -51,7 +51,7 @@ def get_persistent_midi_port_names(raw_port_names: list[str]) -> list[str]:
 
 class _MidiPortMixin(midiscripter.base.port_base.Port):
     # Attrs provided by the class that inherits from MidiPortMixin
-    is_opened: bool
+    _is_opened: bool
     _uid: str
     _rtmidi_port_class: type[rtmidi.MidiIn | rtmidi.MidiOut]
     _rtmidi_port: rtmidi.MidiIn | rtmidi.MidiOut | None = None
@@ -107,7 +107,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
                     self._rtmidi_port.open_port(port_index)
 
             log._port_open(self, True)
-            self.is_opened = True
+            self._is_opened = True
 
         except ValueError:
             log._port_open(
@@ -129,7 +129,7 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
                 self._rtmidi_port.delete()
                 self._rtmidi_port = None
 
-            self.is_opened = False
+            self._is_opened = False
 
             log._port_close(self, True)
         except Exception:
@@ -195,7 +195,7 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
     def _callback(self, pytemidi_input: list[hex, ...]) -> None: ...
 
     def _callback(self, *args) -> None:
-        if not self.is_opened:
+        if not self._is_opened:
             return
 
         raw_midi_data = args[0] if self._pytemidi_port else args[0][0]
@@ -216,11 +216,11 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
             raw_midi_data[0] == rtmidi.midiconstants.SYSTEM_EXCLUSIVE
             and raw_midi_data[-1] == rtmidi.midiconstants.END_OF_EXCLUSIVE
         ):
-            return midiscripter.midi.midi_msg.SysexMsg(raw_midi_data, source=self)
+            return midiscripter.midi.midi_msg.SysexMsg(raw_midi_data)
 
         elif raw_midi_data[0] < rtmidi.midiconstants.SYSTEM_EXCLUSIVE:
             msg_atts = self._raw_channel_midi_to_attrs(raw_midi_data)
-            return midiscripter.midi.midi_msg.ChannelMsg(*msg_atts, source=self)
+            return midiscripter.midi.midi_msg.ChannelMsg(*msg_atts)
 
         else:
             log.red(f'Unsupported MIDI msg type byte: {raw_midi_data[0]}')
@@ -272,7 +272,7 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
             log._msg_sent(self, msg)
 
     def _passthrough_send(self, raw_midi_data: tuple[hex, ...]) -> None:
-        if self.is_opened:
+        if self._is_opened:
             try:
                 if self._pytemidi_port:
                     self._pytemidi_port.send(raw_midi_data)
@@ -329,7 +329,7 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
 
             for port in (input_port, output_port):
                 port._pytemidi_port = pytemidi_port
-                if port.is_opened:
+                if port._is_opened:
                     port._pytemidi_port.create()
 
     @classmethod

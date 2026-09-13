@@ -7,7 +7,6 @@ import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
     from collections.abc import Container
-    from midiscripter.midi.midi_port import MidiIn
 
 
 class MidiType(midiscripter.base.msg_base.AttrEnum):
@@ -88,7 +87,6 @@ class ChannelMsg(MidiMsg):
         data2: int = 64,
         *,
         combined_data: None | int = None,
-        source: 'None | MidiIn' = None,
     ):
         """
         Args:
@@ -99,9 +97,8 @@ class ChannelMsg(MidiMsg):
             data2: Second data byte: velocity, value depending on MIDI message type (0-127)
             combined_data: Both data bytes combined to 14-bit number -
                            pitch value for pitch bend MIDI message (0-16383)
-            source: The [`MidiIn`][midiscripter.MidiIn] instance that generated the message
         """
-        super().__init__(type, source)
+        super().__init__(type)
         self.channel = channel
         if combined_data:
             self.combined_data = combined_data
@@ -160,13 +157,12 @@ class SysexMsg(MidiMsg):
         """Resets base class custom __new__"""
         return object.__new__(SysexMsg)
 
-    def __init__(self, combined_data: Sequence[int, ...], *, source: 'None | MidiIn' = None):
+    def __init__(self, combined_data: Sequence[int, ...]):
         """
         Args:
             combined_data: Whole sysex message including opening (`240`) and closing (`247`) bytes
-            source: The [`MidiIn`][midiscripter.MidiIn] instance that generated the message
         """
-        midiscripter.base.msg_base.Msg.__init__(self, MidiType.SYSEX, source)
+        midiscripter.base.msg_base.Msg.__init__(self, MidiType.SYSEX)
         self.combined_data = combined_data
 
     def __eq__(self, other: MidiMsg):

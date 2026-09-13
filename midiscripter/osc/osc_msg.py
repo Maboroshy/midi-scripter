@@ -4,7 +4,6 @@ import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
     from collections.abc import Container
-    from midiscripter.osc.osc_port import OscIn
 
 
 class OscMsg(midiscripter.base.msg_base.Msg):
@@ -19,22 +18,13 @@ class OscMsg(midiscripter.base.msg_base.Msg):
     data: str | bytes | bool | int | float | list | tuple
     """Message data"""
 
-    source: 'None | OscIn'
-
-    def __init__(
-        self,
-        address: str,
-        data: str | bytes | bool | int | float | list | tuple = None,
-        *,
-        source: 'None | OscIn' = None,
-    ):
+    def __init__(self, address: str, data: str | bytes | bool | int | float | list | tuple = None):
         """
         Args:
             address: Open Sound Control message address
             data: Open Sound Control message data
-            source: The [`OscIn`][midiscripter.OscIn] instance that generated the message
         """
-        super().__init__(self.type, source)
+        super().__init__('OSC')
         self.address = address
         self.data = data
 

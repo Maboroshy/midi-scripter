@@ -7,7 +7,6 @@ import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
     from collections.abc import Container
-    from midiscripter.keyboard.keyboard_port import KeyIn
 
 
 MODIFIER_KEYS = {
@@ -52,25 +51,16 @@ class KeyMsg(midiscripter.base.msg_base.Msg):
     keycodes: list[pynput.keyboard.Key]
     """Keycodes in the order they were pressed. Use when pressing order matters."""
 
-    source: 'None | KeyIn'
-
-    def __init__(
-        self,
-        type: KeyEvent,
-        shortcut_or_keycodes: str | Iterable[pynput.keyboard.Key],
-        *,
-        source: 'None | KeyIn' = None,
-    ):
+    def __init__(self, type: KeyEvent, shortcut_or_keycodes: str | Iterable[pynput.keyboard.Key]):
         """
         Args:
             type: Keyboard event type
             shortcut_or_keycodes: keyboard shortcut description or event key codes
-            source: The [`KeyIn`][midiscripter.KeyIn] instance that generated the message
 
         Tip:
             Use log to get the shortcuts you need
         """
-        super().__init__(type, source)
+        super().__init__(type)
         self.__shortcut_cache = ''
         self.__cached_keycodes = None
 

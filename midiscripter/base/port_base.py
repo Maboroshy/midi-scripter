@@ -457,8 +457,8 @@ class MultiPort(Port):
         return calls
 
     @property
-    def is_opened(self) -> bool:
-        return all(port.is_opened for port in self._wrapped_ports)
+    def _is_opened(self) -> bool:
+        return all(port._is_opened for port in self._wrapped_ports)
 
     def subscribe(
         self,

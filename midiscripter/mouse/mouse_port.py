@@ -42,7 +42,7 @@ class MouseIn(midiscripter.base.port_base.Input):
         self.__pynput_listener = None
 
     def __on_move(self, x: int, y: int) -> None:
-        self._send_input_msg_to_calls(MouseMsg(MouseEvent.MOVE, x, y, source=self))
+        self._send_input_msg_to_calls(MouseMsg(MouseEvent.MOVE, x, y))
 
     def __on_click(self, x: int, y: int, button: pynput.mouse.Button, pressed: bool) -> None:
         try:
@@ -50,18 +50,18 @@ class MouseIn(midiscripter.base.port_base.Input):
         except KeyError:
             msg_type = f'{button.name.upper()}_{("RELEASE", "PRESS")[pressed]}'
 
-        self._send_input_msg_to_calls(MouseMsg(msg_type, x, y, source=self))
+        self._send_input_msg_to_calls(MouseMsg(msg_type, x, y))
 
     def __on_scroll(self, x: int, y: int, dx: int, dy: int) -> None:
         if dy == -1:
-            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_UP, x, y, source=self))
+            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_UP, x, y))
         elif dy == 1:
-            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_DOWN, x, y, source=self))
+            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_DOWN, x, y))
 
         if dx == -1:
-            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_LEFT, x, y, source=self))
+            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_LEFT, x, y))
         elif dx == 1:
-            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_RIGHT, x, y, source=self))
+            self._send_input_msg_to_calls(MouseMsg(MouseEvent.SCROLL_RIGHT, x, y))
 
     def _open(self) -> None:
         self.__pynput_listener = pynput.mouse.Listener(
@@ -69,13 +69,13 @@ class MouseIn(midiscripter.base.port_base.Input):
         )
         self.__pynput_listener.start()
         self.__pynput_listener.wait()
-        self.is_opened = True
+        self._is_opened = True
         log._port_open(self, True)
 
     def _close(self) -> None:
         self.__pynput_listener.stop()
         self.__pynput_listener = None
-        self.is_opened = False
+        self._is_opened = False
         log._port_close(self, True)
 
     @overload

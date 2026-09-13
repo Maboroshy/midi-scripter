@@ -57,13 +57,13 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
         )
         if not shared_observer.is_alive():
             shared_observer.start()
-        self.is_opened = True
+        self._is_opened = True
         log._port_open(self, True)
 
     def _close(self) -> None:
         if self.__watch:
             shared_observer.unschedule(self.__watch)
-        self.is_opened = False
+        self._is_opened = False
         log._port_close(self, True)
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent) -> None:
@@ -72,9 +72,7 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
         event_path = pathlib.Path(event.src_path)
 
         if self.__watch_dir_changes or event_path == self.__path:
-            msg = midiscripter.file_event.file_event_msg.FileEventMsg(
-                event.event_type.upper(), self.__path, source=self
-            )
+            msg = midiscripter.file_event.file_event_msg.FileEventMsg(event.event_type.upper(), self.__path)
             self._send_input_msg_to_calls(msg)
 
     @overload

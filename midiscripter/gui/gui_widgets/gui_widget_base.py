@@ -223,7 +223,7 @@ class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
     def color(self, color: str | tuple[int, int, int]) -> None:
         self._color = color
         self.qt_widget.set_color_signal.emit(color)
-        self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.COLOR_SET, color, source=self))
+        self._send_input_msg_to_calls(GuiEventMsg(GuiEvent.COLOR_SET, color))
 
     @property
     def is_visible(self) -> bool:

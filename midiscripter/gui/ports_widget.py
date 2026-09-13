@@ -48,12 +48,12 @@ class PortItem(PortWidgetItem):
 
     def update_ports_state(self) -> None:
         if isinstance(self.port_instance, MultiPort):
-            wrapped_port_states = [port.is_opened for port in self.port_instance._wrapped_ports]
+            wrapped_port_states = [port._is_opened for port in self.port_instance._wrapped_ports]
             if all(wrapped_port_states) != any(wrapped_port_states):
                 self.setCheckState(0, Qt.CheckState.PartiallyChecked)
                 return
 
-        if self.port_instance.is_opened:
+        if self.port_instance._is_opened:
             self.setCheckState(0, Qt.CheckState.Checked)
         else:
             self.setCheckState(0, Qt.CheckState.Unchecked)
@@ -82,7 +82,7 @@ class PortItem(PortWidgetItem):
         if state:
             self.port_instance._open()
 
-            if self.port_instance.is_opened:
+            if self.port_instance._is_opened:
                 self.__set_broken_status(False)
                 self.setCheckState(0, Qt.CheckState.Checked)
             else:
@@ -282,7 +282,7 @@ class PortsView(QTreeWidget):
             if (
                 port_instance in self.__ports_declared_in_script
                 and port_instance._is_available
-                and not port_instance.is_opened
+                and not port_instance._is_opened
                 and port_instance not in self.__port_instances_closed_by_user
             ):
                 port_instance._open()
@@ -293,7 +293,7 @@ class PortsView(QTreeWidget):
             if (
                 not port_instance._is_available
                 and port_instance.__class__ is not MidiIO
-                and port_instance.is_opened
+                and port_instance._is_opened
             ):
                 port_instance._close()
 

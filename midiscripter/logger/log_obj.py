@@ -203,15 +203,7 @@ class Log:
 
     def _msg_sent(self, output: 'Output', msg: 'Msg') -> None:
         """Print message sent message"""
-        if msg.source:
-            self(
-                '{output} sent message {msg} received {age_ms} ms ago',
-                output=output,
-                msg=msg,
-                age_ms=msg._age_ms,
-            )
-        else:
-            self('{output} sent message {msg}', output=output, msg=msg)
+        self('{output} sent message {msg}', output=output, msg=msg)
 
     def _call_made(self, call: 'SubscribedCall') -> None:
         """Print subscribed callable called message"""

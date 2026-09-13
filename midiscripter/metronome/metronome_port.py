@@ -61,17 +61,15 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         self.__interval_sec = 60 / bpm
 
     def _open(self) -> None:
-        self.is_opened = True
+        self._is_opened = True
         midiscripter.shared.thread_executor.submit(self.__send_clicks_worker)
         log._port_open(self, True, custom_text='Started {input} at {bpm}', input=self, bpm=self.bpm)
 
     def __send_clicks_worker(self) -> None:
         msg_counter = 1
-        while self.is_opened:
+        while self._is_opened:
             time.sleep(self.__interval_sec)
 
-            self.msg_to_send.source = self
-            self.msg_to_send.ctime = midiscripter.shared.precise_epoch_time()
             self.msg_to_send.bpm = self.bpm
             self.msg_to_send.number = msg_counter
 
@@ -82,4 +80,4 @@ class MetronomeIn(midiscripter.base.port_base.Input):
         log._port_close(self, True, custom_text='Stopped {input}', input=self)
 
     def _close(self) -> None:
-        self.is_opened = False
+        self._is_opened = False

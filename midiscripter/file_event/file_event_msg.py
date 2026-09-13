@@ -5,7 +5,6 @@ import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
     from collections.abc import Container
-    from midiscripter.file_event.file_event_port import FileEventIn
 
 
 class FileEvent(midiscripter.base.msg_base.AttrEnum):
@@ -30,23 +29,13 @@ class FileEventMsg(midiscripter.base.msg_base.Msg):
     path: pathlib.Path
     """File path of event"""
 
-    source: 'None | FileEventIn'
-
-    def __init__(
-        self,
-        type: FileEvent | str,
-        path: pathlib.Path,
-        *,
-        source: 'None | FileEventIn' = None,
-    ):
+    def __init__(self, type: FileEvent | str, path: pathlib.Path):
         """
         Args:
             type: File event type
             path: File path
-            source: The [`FileEventIn`][midiscripter.FileEventIn] instance that generated the message
         """
-        super().__init__(type, source)
-        self.type = type
+        super().__init__(type)
         self.path = path
 
     def matches(

@@ -4,7 +4,6 @@ import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
     from collections.abc import Sequence, Container
-    from midiscripter.gui.gui_widgets.gui_widget_base import GuiWidget
 
 
 class GuiEvent(midiscripter.base.msg_base.AttrEnum):
@@ -40,20 +39,10 @@ class GuiEventMsg(midiscripter.base.msg_base.Msg):
     RANGE_SET - New value range  
     """
 
-    source: 'None | GuiWidget'
-    """`GuiWidget` instance that generated the message"""
-
     __match_args__: tuple[str] = ('type', 'data')
 
-    def __init__(
-        self,
-        type: GuiEvent,
-        data: 'str | int | bool | Sequence | None' = None,
-        *,
-        source: 'None | GuiWidget' = None,
-    ):
-        super().__init__(source)
-        self.type = type
+    def __init__(self, type: GuiEvent, data: 'str | int | bool | Sequence | None' = None):
+        super().__init__(type)
         self.data = data
 
     def matches(
