@@ -1,8 +1,6 @@
 from typing import TYPE_CHECKING
 from collections.abc import Sequence
 
-import rtmidi.midiconstants
-
 import midiscripter.base.msg_base
 
 if TYPE_CHECKING:
@@ -177,23 +175,12 @@ class SysexMsg(MidiMsg):
     @property
     def combined_data(self) -> tuple[int, ...]:
         """Whole sysex message including opening `240` and closing `247` bytes"""
-        return (
-            rtmidi.midiconstants.SYSTEM_EXCLUSIVE,
-            *self.channel,
-            *self.data1,
-            *self.data2,
-            rtmidi.midiconstants.END_OF_EXCLUSIVE,
-        )
+        return 0xF0, *self.channel, *self.data1, *self.data2, 0xF7
 
     @combined_data.setter
     def combined_data(self, combined_data: Sequence[int]) -> None:
-        if (
-            combined_data[0] != rtmidi.midiconstants.SYSTEM_EXCLUSIVE
-            or combined_data[-1] != rtmidi.midiconstants.END_OF_EXCLUSIVE
-        ):
-            raise AttributeError(
-                'Sysex message should start with 240 (0xF0) and end with 247 (0xF7)'
-            )
+        if combined_data[0] != 0xF0 or combined_data[-1] != 0xF7:
+            raise AttributeError('Sysex message should start with 240 (0xF0) and end with 247 (0xF7)')
 
         payload_data = combined_data[1:-1]  # without opening and closing bytes
 
