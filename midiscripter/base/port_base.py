@@ -31,7 +31,7 @@ class CallOn(enum.StrEnum):
 @contextlib.contextmanager
 def _all_opened() -> None:
     for port in itertools.chain(Input._subclass_instances, Output._subclass_instances):
-        if not port.is_opened:
+        if not port._is_opened:
             port._open()
 
     for input_port in Input._subclass_instances:
@@ -40,7 +40,7 @@ def _all_opened() -> None:
     yield
 
     for port in Port._subclass_instances:
-        if port.is_opened:
+        if port._is_opened:
             port._close()
 
     log._flush()
@@ -218,7 +218,7 @@ class Port:
         Port declarations with the same arguments will return the same instance port (singleton).
     """
 
-    is_opened: bool = False
+    _is_opened: bool = False
     """`True` if port is listening messages / ready to send messages"""
 
     _forced_uid: ClassVar[None | str] = None
@@ -305,7 +305,7 @@ class Port:
         self._uid = uid or self._forced_uid
         self._wrapped_in = []
 
-        self.is_opened: bool  # workaround for mkdocstrings issue #607
+        self._is_opened: bool  # workaround for mkdocstrings issue #607
         """`True` if port is listening messages / ready to send messages"""
 
     def __repr__(self):
@@ -326,7 +326,7 @@ class Port:
             Supposed to be overridden in subclasses.
             Must set `is_opened` parameter to `True` on success.
         """
-        self.is_opened = True
+        self._is_opened = True
         log._port_open(self, True)
 
     def _close(self) -> None:
@@ -336,7 +336,7 @@ class Port:
             Supposed to be overridden in subclasses.
             Must set `is_opened` parameter to `False`.
         """
-        self.is_opened = False
+        self._is_opened = False
         log._port_close(self, True)
 
 
@@ -377,8 +377,8 @@ class Output(Port):
         log._msg_sent(self, msg)
 
     def _validate_msg_send(self, msg: 'Msg') -> bool:
-        if not self.is_opened:
-            log.red("Can't send message {msg} - {output} is disabled!", msg=msg, output=self)
+        if not self._is_opened:
+            log.red("Can't send message {msg} - {output} is not opened!", msg=msg, output=self)
             return False
         return True
 
@@ -413,12 +413,12 @@ class MultiPort(Port):
 
     def _open(self) -> None:
         for port in self._wrapped_ports:
-            if not port.is_opened:
+            if not port._is_opened:
                 port._open()
 
     def _close(self) -> None:
         for port in self._wrapped_ports:
-            if port.is_opened:
+            if port._is_opened:
                 port._close()
 
     @property

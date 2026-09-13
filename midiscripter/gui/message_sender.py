@@ -104,7 +104,7 @@ class MessageSender(QWidget):
     def update_ports(self) -> None:
         self.output_selector.clear()
 
-        enabled_ports = [output for output in Output._subclass_instances if output.is_opened]
+        enabled_ports = [output for output in Output._subclass_instances if output._is_opened]
 
         if not enabled_ports:
             self.output_selector.setPlaceholderText('No Enabled Output Ports')

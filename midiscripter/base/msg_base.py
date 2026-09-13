@@ -1,9 +1,6 @@
 import enum
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from collections.abc import Container
-
-if TYPE_CHECKING:
-    from midiscripter.base.port_base import Input
 
 
 class Not:
@@ -107,12 +104,6 @@ class Msg:
                 return False
 
         return True
-
-    @property
-    def _age_ms(self) -> float:
-        """Time passed since message creation in milliseconds"""
-        # Using faster rounding
-        return int((midiscripter.shared.precise_epoch_time() - self.ctime) * 1000000) / 1000
 
     def _as_tuple(self) -> tuple:
         """Converts message to a tuple based on message's __match_args__ class attribute
