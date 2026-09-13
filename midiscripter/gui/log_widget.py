@@ -23,7 +23,7 @@ class LogWidget(QWidget):
         layout.addWidget(self.log_view, 2, 1, 1, 5)
 
         self.exclude_line = QLineEdit()
-        self.exclude_line.setPlaceholderText('Substrings divided by ;')
+        self.exclude_line.setPlaceholderText('Substrings separated by ;')
         self.exclude_line.setClearButtonEnabled(True)
         self.exclude_line.textChanged.connect(self.log_view.set_exclude)
         self.exclude_line.textChanged.connect(
@@ -36,7 +36,7 @@ class LogWidget(QWidget):
         layout.addWidget(self.exclude_line, 3, 2, 1, 1)
 
         self.filter_line = QLineEdit()
-        self.filter_line.setPlaceholderText('Substrings divided by ;')
+        self.filter_line.setPlaceholderText('Substrings separated by ;')
         self.filter_line.setClearButtonEnabled(True)
         self.filter_line.textChanged.connect(self.log_view.set_filter)
         self.filter_line.textChanged.connect(

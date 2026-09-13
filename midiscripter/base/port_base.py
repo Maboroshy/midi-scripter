@@ -359,8 +359,7 @@ class Output(Port):
 
         Notes:
             Supposed to be overridden in subclasses.
-            Should use `self._validate_msg_send(msg)` before sending
-            and `log._msg_sent(self, msg)` after.
+            Should call `log._msg_sent(self, msg)` after message sent.
         """
         if not self._validate_msg_send(msg):
             return
