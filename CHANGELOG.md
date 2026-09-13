@@ -1,5 +1,22 @@
 # Changelog
 
+## **v0.9** - 14.09.2026
+
+### Added
+- Implemented "In"/"Out" port pairs auto-resolving for `MidiIO`
+- [BREAKING] `GuiWindow` class to add custom widgets and set window and tray icon, `add_qwidget` became its method
+
+### Fixed
+- [!] Python 3.13+ support by replacing `rtmidi` dependency with `supriya_midi`
+- Singleton classes running init on each call
+- Passthrough port widget items recursion
+- OSC ports error handling
+- Profiled and optimized message hot path to reduce latency 
+
+### Changed
+- [BREAKING] Removed `Port.is_opened`, `Msg.ctime` and `Msg.source` to lighten public API
+- [BREAKING] Renamed aftertouch MIDI message types according to MIDI spec
+
 ## **v0.8.1** - 19.09.2025 
 
 ### Fixed
@@ -10,7 +27,7 @@
 ### Added
 - `MultiPort` port wrapper class and IO port classes based on it
 - `GuiEditableText` widget and a complex Global device presets 
-for Ableton Live example that uses it
+   for Ableton Live example that uses it
 - `GuiWidgetLayout` items stretching and spacers
 - Ableton Live remote script installer by GUI menubar action
 

@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 name = 'midiscripter'
-version = '0.8.1'
+version = '0.9'
 description = 'Framework for scripting MIDI, Open Sound Control, keyboard and mouse input and output'
 readme = 'README.md'
 requires-python = '>=3.11'
@@ -28,7 +28,7 @@ dependencies = [
   'supriya-midi',  # MIT
   'python-osc ~=1.7',  # Unlicense
   'pynput ~=1.7',  # LGPL
-  'watchdog ~=4.0',  # Apache
+  'watchdog',  # Apache
   'PySide6_Essentials >6.5',  # LGPL
   'pywin32; platform_system == "Windows"',  # BSD
 ]
