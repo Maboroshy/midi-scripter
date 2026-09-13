@@ -216,6 +216,7 @@ class LogView(QPlainTextEdit):
         super().hideEvent(event)
 
     def showEvent(self, event: QShowEvent) -> None:
+        log._flush()
         log._flushing_is_enabled = True
         super().showEvent(event)
 

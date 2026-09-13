@@ -5,9 +5,10 @@
 ### Added
 - Implemented "In"/"Out" port pairs auto-resolving for `MidiIO`
 - [BREAKING] `GuiWindow` class to add custom widgets and set window and tray icon, `add_qwidget` became its method
+- Error report for second starter function call
 
 ### Fixed
-- [!] Python 3.13+ support by replacing `rtmidi` dependency with `supriya_midi`
+- [!] Python 3.13+ support by replacing `python-rtmidi` dependency with `supriya-midi`
 - Singleton classes running init on each call
 - Passthrough port widget items recursion
 - OSC ports error handling
