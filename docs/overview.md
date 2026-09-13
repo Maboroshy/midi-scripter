@@ -154,16 +154,16 @@ type.
 [MIDI message][midiscripter.MidiMsg] objects attributes meanings depending
 on [MIDI message type][midiscripter.MidiType]:
 
-| `type`                    | `channel`                               | `data1`                       | `data2`                     | `combined_data`                      |
-|---------------------------|-----------------------------------------|-------------------------------|-----------------------------|--------------------------------------|
-| `MidiType.NOTE_ON`        | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Velocity**<br>(0-127)     | useless                              |
-| `MidiType.NOTE_OFF`       | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Velocity**<br>(0-127)     | useless                              |
-| `MidiType.CONTROL_CHANGE` | **Channel**<br>(1-16)                   | **Controller**<br>(0-127)     | **Value**<br>(0-127)        | useless                              |
-| `MidiType.POLYTOUCH`      | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Pressure**<br>(0-127)     | useless                              |
-| `MidiType.AFTERTOUCH`     | **Channel**<br>(1-16)                   | **Pressure**<br>(0-127)       | useless                     | useless                              |
-| `MidiType.PROGRAM_CHANGE` | **Channel** <br>(1-16)                  | **Program**<br>(0-127)        | useless                     | useless                              |
-| `MidiType.PITCH_BEND`     | **Channel**<br>(1-16)                   | useless                       | useless                     | **Pitch**<br>(0-16383)               |
-| `MidiType.SYSEX`          | **Manufacturer ID** <br>(ints in tuple) | **Sub ID**<br>(ints in tuple) | **Data**<br>(ints in tuple) | **Whole message**<br>(ints in tuple) | 
+| `type`                      | `channel`                               | `data1`                       | `data2`                     | `combined_data`                      |
+|-----------------------------|-----------------------------------------|-------------------------------|-----------------------------|--------------------------------------|
+| `MidiType.NOTE_ON`          | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Velocity**<br>(0-127)     | useless                              |
+| `MidiType.NOTE_OFF`         | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Velocity**<br>(0-127)     | useless                              |
+| `MidiType.CONTROL_CHANGE`   | **Channel**<br>(1-16)                   | **Controller**<br>(0-127)     | **Value**<br>(0-127)        | useless                              |
+| `MidiType.POLY_PRESSURE`    | **Channel**<br>(1-16)                   | **Note**<br>(0-127)           | **Pressure**<br>(0-127)     | useless                              |
+| `MidiType.CHANNEL_PRESSURE` | **Channel**<br>(1-16)                   | **Pressure**<br>(0-127)       | useless                     | useless                              |
+| `MidiType.PROGRAM_CHANGE`   | **Channel** <br>(1-16)                  | **Program**<br>(0-127)        | useless                     | useless                              |
+| `MidiType.PITCH_BEND`       | **Channel**<br>(1-16)                   | useless                       | useless                     | **Pitch**<br>(0-16383)               |
+| `MidiType.SYSEX`            | **Manufacturer ID** <br>(ints in tuple) | **Sub ID**<br>(ints in tuple) | **Data**<br>(ints in tuple) | **Whole message**<br>(ints in tuple) | 
 
 The common attribute names and their defaults allows to safely change
 message's `type`:
