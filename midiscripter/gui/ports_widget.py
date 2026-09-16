@@ -12,6 +12,7 @@ from midiscripter.mouse import MouseIn, MouseOut, MouseIO
 from midiscripter.file_event import FileEventIn
 from midiscripter.metronome import MetronomeIn
 from midiscripter.gui.color_theme import theme_color
+from midiscripter.shared import unbracket_args_and_kwargs
 from .saved_state_controls import SavedToggleButton
 
 
@@ -389,7 +390,7 @@ class PortsView(QTreeWidget):
 
         if item.call.conditions:
             if isinstance(item.call.conditions, tuple):
-                conditions_str = f'{item.call.conditions[0] or ""}{item.call.conditions[1] or ""}'
+                conditions_str = unbracket_args_and_kwargs(*item.call.conditions)
             else:
                 conditions_str = str(item.call.conditions)
             tooltip_text = f'Conditions: {conditions_str}\n{tooltip_text}'
