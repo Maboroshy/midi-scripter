@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class CallOn(enum.StrEnum):
     """Special conditions to use as `@input_port.subscribe(condition)`"""
 
-    NOT_MATCHED_BY_ANY_CALL = 'NOT MATCHED BY ANY CALLS'
+    NOT_MATCHED = 'NOT MATCHED'
     """Call when a message is not matched by any other call"""
 
     PORT_INIT = 'PORT INIT'
@@ -48,6 +48,7 @@ def _all_opened() -> None:
     except AttributeError:  # for exit before log fully set up
         pass
 
+
 class SubscribedCall:
     """Wrapper object created for subscribed callable"""
 
@@ -61,7 +62,7 @@ class SubscribedCall:
     _log_show_link: bool = False
 
     def __init__(
-        self, conditions: 'None | tuple[tuple, dict]', callable_: 'Callable', owner: 'Subscribable'
+        self, conditions: 'None | CallOn | tuple[tuple, dict]', callable_: 'Callable', owner: 'Subscribable'
     ):
         self.conditions = conditions
         self.pre_call_statistics = collections.deque(maxlen=20)
@@ -109,7 +110,7 @@ class Subscribable:
 
     def __init__(self):
         self._msg_calls = []
-        self._event_calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED_BY_ANY_CALL: []}
+        self._event_calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED: []}
 
     def subscribe(self,
                   *msg_matches_args: 'None | MatchCondition | Any',
@@ -203,7 +204,7 @@ class Subscribable:
                 has_matched_calls = True
 
         if not has_matched_calls:
-            for call in self._event_calls[CallOn.NOT_MATCHED_BY_ANY_CALL]:
+            for call in self._event_calls[CallOn.NOT_MATCHED]:
                 thread_executor.submit(call, msg_received_time_delta, msg.__copy__())
 
     def _send_call_on_msg_to_calls(self, event: CallOn, msg: 'Msg') -> None:
@@ -427,7 +428,7 @@ class MultiPort(Port):
 
     @property
     def _event_calls(self) -> dict[CallOn, list[SubscribedCall]]:
-        calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED_BY_ANY_CALL: []}
+        calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED: []}
         for input_port in self._input_ports:
             for event, call_list in input_port._event_calls.items():
                 calls[event].extend(call_list)
