@@ -7,6 +7,7 @@ from midiscripter.keyboard.keyboard_msg import KeyEvent, KeyMsg
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
+    from midiscripter.base.match_conditions import MatchCondition
 
 
 class KeyIn(midiscripter.base.port_base.Input):
@@ -82,14 +83,14 @@ class KeyIn(midiscripter.base.port_base.Input):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[KeyEvent] | KeyEvent' = None,
-        shortcut: 'None | Container[str] | str' = None,
+        type: 'None | MatchCondition | Container[KeyEvent] | KeyEvent' = None,
+        shortcut: 'None | MatchCondition | Container[str] | str' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[KeyEvent] | KeyEvent' = None,
-        shortcut: 'None | Container[str] | str' = None,
+        type: 'None | MatchCondition | Container[KeyEvent] | KeyEvent' = None,
+        shortcut: 'None | MatchCondition | Container[str] | str' = None,
     ) -> 'Callable':
         return super().subscribe(type, shortcut)
 
@@ -168,14 +169,14 @@ class KeyIO(midiscripter.base.port_base.MultiPort):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[KeyEvent] | KeyEvent' = None,
-        shortcut: 'None | Container[str] | str' = None,
+        type: 'None | MatchCondition | Container[KeyEvent] | KeyEvent' = None,
+        shortcut: 'None | MatchCondition | Container[str] | str' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[KeyEvent] | KeyEvent' = None,
-        shortcut: 'None | Container[str] | str' = None,
+        type: 'None | MatchCondition | Container[KeyEvent] | KeyEvent' = None,
+        shortcut: 'None | MatchCondition| Container[str] | str' = None,
     ) -> 'Callable':
         return self._input_ports[0].subscribe(type, shortcut)
 

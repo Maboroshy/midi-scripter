@@ -11,6 +11,7 @@ from collections.abc import Sequence
 import midiscripter.shared
 from midiscripter.logger import log
 from midiscripter.base.msg_base import Msg
+from midiscripter.base.match_conditions import MatchCondition, Contains
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Hashable, Container
@@ -111,8 +112,8 @@ class Subscribable:
         self._event_calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED_BY_ANY_CALL: []}
 
     def subscribe(self,
-                  *msg_matches_args: 'None | Container[Any] | Any',
-                  **msg_matches_kwargs: 'dict[str, None | Container[Any] | Any]'
+                  *msg_matches_args: 'None | MatchCondition | Any',
+                  **msg_matches_kwargs: 'dict[str, None | MatchCondition | Any]'
                   ) -> 'Callable':
         """Decorator to subscribe a callable to the input's messages.
 
@@ -425,8 +426,8 @@ class MultiPort(Port):
 
     def subscribe(
         self,
-        *msg_matches_args: 'None | Container[Any] | Any',
-        **msg_matches_kwargs: 'dict[str, None | Container[Any] | Any]',
+        *msg_matches_args: 'None | MatchCondition | Container[Any] | Any',
+        **msg_matches_kwargs: 'dict[str, None | MatchCondition | Container[Any] | Any]',
     ) -> 'Callable':
         """Decorator to subscribe a callable to all the wrapped inputs' messages.
 

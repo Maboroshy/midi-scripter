@@ -14,6 +14,7 @@ from .gui_msg import GuiEventMsg, GuiEvent
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
     from .mixins import WrappedQWidgetMixin
+    from midiscripter.base.match_conditions import MatchCondition
 
 
 class GuiWindowItem:
@@ -237,13 +238,13 @@ class GuiWidget(GuiWindowItem, midiscripter.base.port_base.Subscribable):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[GuiEvent] | GuiEvent' = None,
-        data: 'None | Container | str | int | bool | Sequence' = None,
+        type: 'None | MatchCondition | Container[GuiEvent] | GuiEvent' = None,
+        data: 'None | MatchCondition | Container | str | int | bool | Sequence' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[GuiEvent] | GuiEvent' = None,
-        data: 'None | Container | str | int | bool | Sequence' = None,
+        type: 'None | MatchCondition | Container[GuiEvent] | GuiEvent' = None,
+        data: 'None | MatchCondition | Container | str | int | bool | Sequence' = None,
     ) -> 'Callable':
         return super().subscribe(type, data)

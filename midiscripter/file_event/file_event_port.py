@@ -11,6 +11,7 @@ from midiscripter.logger import log
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
     from midiscripter.file_event.file_event_msg import FileEvent, FileEventMsg
+    from midiscripter.base.match_conditions import MatchCondition
 
 shared_observer = watchdog.observers.Observer()
 shared_observer.daemon = True
@@ -81,13 +82,13 @@ class FileEventIn(midiscripter.base.port_base.Input, watchdog.events.FileSystemE
     @overload
     def subscribe(
         self,
-        type: 'None | Container[FileEvent] | FileEvent | str' = None,
-        path: 'None | Container[pathlib.Path] | pathlib.Path' = None,
+        type: 'None | MatchCondition | Container[FileEvent] | FileEvent | str' = None,
+        path: 'None | MatchCondition | Container[pathlib.Path] | pathlib.Path' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[FileEvent] | FileEvent | str' = None,
-        path: 'None | Container[pathlib.Path] | pathlib.Path' = None,
+        type: 'None | MatchCondition | Container[FileEvent] | FileEvent | str' = None,
+        path: 'None | MatchCondition | Container[pathlib.Path] | pathlib.Path' = None,
     ) -> 'Callable':
         return super().subscribe(type, path)

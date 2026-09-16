@@ -12,6 +12,7 @@ from midiscripter.osc.osc_msg import OscMsg
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
+    from midiscripter.base.match_conditions import MatchCondition
 
 
 def _parse_ip_port(ip_port: str | int) -> tuple[str, int]:
@@ -78,14 +79,14 @@ class OscIn(midiscripter.base.port_base.Input):
     @overload
     def subscribe(
         self,
-        address: 'None | Container | str' = None,
-        data: 'None | Container | str | bytes | bool | int | float | list | tuple' = None,
+        address: 'None | MatchCondition | Container | str' = None,
+        data: 'None | MatchCondition | Container | str | bytes | bool | int | float | list | tuple' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        address: 'None | Container | str' = None,
-        data: 'None | Container | str | bytes | bool | int | float | list | tuple' = None,
+        address: 'None | MatchCondition | Container | str' = None,
+        data: 'None | MatchCondition | Container | str | bytes | bool | int | float | list | tuple' = None,
     ) -> 'Callable':
         return super().subscribe(address, data)
 
@@ -131,9 +132,7 @@ class OscIO(midiscripter.base.port_base.MultiPort):
         """
         input_port = OscIn(input_listener_ip_port)
         output_port = OscOut(output_target_ip_port)
-        super().__init__(
-            f'{input_listener_ip_port} > {output_target_ip_port}', input_port, output_port
-        )
+        super().__init__(f'{input_listener_ip_port} > {output_target_ip_port}', input_port, output_port)
 
         self.__new_msg_condition = threading.Condition()
         self.__last_msg = OscMsg('')
@@ -170,9 +169,7 @@ class OscIO(midiscripter.base.port_base.MultiPort):
             )
             self._output_ports[0].send(OscMsg(address, data))
 
-            if self.__new_msg_condition.wait_for(
-                lambda: self.__last_msg.address == address, timeout=timeout_sec
-            ):
+            if self.__new_msg_condition.wait_for(lambda: self.__last_msg.address == address, timeout=timeout_sec):
                 return self.__last_msg.data
             else:
                 raise TimeoutError(f"OSC query to '{address}' got no response")
@@ -188,14 +185,14 @@ class OscIO(midiscripter.base.port_base.MultiPort):
     @overload
     def subscribe(
         self,
-        address: 'None | Container | str' = None,
-        data: 'None | Container | str | bytes | bool | int | float | list | tuple' = None,
+        address: 'None | MatchCondition | Container | str' = None,
+        data: 'None | MatchCondition | Container | str | bytes | bool | int | float | list | tuple' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        address: 'None | Container | str' = None,
-        data: 'None | Container | str | bytes | bool | int | float | list | tuple' = None,
+        address: 'None | MatchCondition | Container | str' = None,
+        data: 'None | MatchCondition | Container | str | bytes | bool | int | float | list | tuple' = None,
     ) -> 'Callable':
         return self._input_ports[0].subscribe(address, data)
 

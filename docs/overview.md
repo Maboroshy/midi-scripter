@@ -216,7 +216,7 @@ There are 3 starter functions:
 
 Message objects can be filtered within callables by their attribute values as in 
 the example above, but they also have more powerful 
-[`.matches`][midiscripter.Msg.matches] method.
+[`.matches`][midiscripter.base.msg_base.Msg.matches] method.
 
 This method takes conditions for each message object attribute in the 
 order of message object's `__init__`.
@@ -229,7 +229,7 @@ The matching uses the simplified
 3. If the condition is a container (list, tuple) and contains the attribute, 
 it matches the attribute.
 
-Use `Not(condition)` to invert condition matching.
+Use [`Not(condition)`][midiscripter.base.match_conditions.Not] to invert condition matching.
 
 ``` python
 >>> msg = MidiMsg(MidiType.NOTE_ON, 1, 61, 80)
@@ -247,6 +247,10 @@ True
 )  
 False
 ```
+
+Use [`Glob(pattern)`][midiscripter.base.match_conditions.Glob]
+or [`Regex(pattern)`][midiscripter.base.match_conditions.Regex] for string pattern matching, 
+which is useful for matching incoming messages OSC address.
 
 The matching pattern can be used as arguments for 
 `@input_port_subscribe` decorator. Only matching messages will go to calls:

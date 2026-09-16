@@ -12,6 +12,7 @@ from midiscripter.ableton_remote.remote_script_midi_mapping import (
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
+    from midiscripter.base.match_conditions import MatchCondition
 
 
 # noinspection PyMethodOverriding
@@ -53,16 +54,16 @@ class AbletonIn(MidiIn):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
-        index: 'None | Container | int | tuple[int, int]' = None,
-        value: 'None | Container[int] | int | bool' = None,
+        type: 'None | MatchCondition | Container[AbletonEvent] | AbletonEvent' = None,
+        index: 'None | MatchCondition | Container | int | tuple[int, int]' = None,
+        value: 'None | MatchCondition | Container[int] | int | bool' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
-        index: 'None | Container[int, tuple[int, int]] | int | tuple[int, int]' = None,
-        value: 'None | Container[int] | int | bool' = None,
+        type: 'None | MatchCondition | Container[AbletonEvent] | AbletonEvent' = None,
+        index: 'None | MatchCondition | Container[int, tuple[int, int]] | int | tuple[int, int]' = None,
+        value: 'None | MatchCondition | Container[int] | int | bool' = None,
     ) -> 'Callable':
         return Input.subscribe(self, type, index, value)  # bypassing MidiIn method
 
@@ -127,16 +128,16 @@ class AbletonIO(MidiIO):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
-        index: 'None | Container | int | tuple[int, int]' = None,
-        value: 'None | Container[int] | int | bool' = None,
+        type: 'None | MatchCondition | Container[AbletonEvent] | AbletonEvent' = None,
+        index: 'None | MatchCondition | Container | int | tuple[int, int]' = None,
+        value: 'None | MatchCondition | Container[int] | int | bool' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[AbletonEvent] | AbletonEvent' = None,
-        index: 'None | Container[int, tuple[int, int]] | int | tuple[int, int]' = None,
-        value: 'None | Container[int] | int | bool' = None,
+        type: 'None | MatchCondition | Container[AbletonEvent] | AbletonEvent' = None,
+        index: 'None | MatchCondition | Container[int, tuple[int, int]] | int | tuple[int, int]' = None,
+        value: 'None | MatchCondition | Container[int] | int | bool' = None,
     ) -> 'Callable':
         return self._input_ports[0].subscribe(type, index, value)
 

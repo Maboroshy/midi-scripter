@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from midiscripter.midi.teVirtualMIDI import TeVirtualMidiPort
     from collections.abc import Callable, Container
     from midiscripter.ableton_remote.ableton_port import AbletonIn, AbletonOut
+    from midiscripter.base.match_conditions import MatchCondition
 
 
 BYTE_TO_TYPE_MAP = {
@@ -166,18 +167,18 @@ class MidiIn(_MidiPortMixin, midiscripter.base.port_base.Input):
     @overload
     def subscribe(
         self,
-        type: 'None | Container | MidiType' = None,
-        channel: 'None | Container | int | tuple[int, ...]' = None,
-        data1: 'None | Container | int | tuple[int, ...]' = None,
-        data2: 'None | Container | int | tuple[int, ...]' = None,
+        type: 'None | MatchCondition | Container | MidiType' = None,
+        channel: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data1: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data2: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container | MidiType' = None,
-        channel: 'None | Container | int | tuple[int, ...]' = None,
-        data1: 'None | Container | int | tuple[int, ...]' = None,
-        data2: 'None | Container | int | tuple[int, ...]' = None,
+        type: 'None | MatchCondition | Container | MidiType' = None,
+        channel: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data1: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data2: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
     ) -> 'Callable':
         return super().subscribe(type, channel, data1, data2)
 
@@ -386,18 +387,18 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
     @overload
     def subscribe(
         self,
-        type: 'None | Container | MidiType' = None,
-        channel: 'None | Container | int | tuple[int, ...]' = None,
-        data1: 'None | Container | int | tuple[int, ...]' = None,
-        data2: 'None | Container | int | tuple[int, ...]' = None,
+        type: 'None | MatchCondition | Container | MidiType' = None,
+        channel: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data1: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data2: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container | MidiType' = None,
-        channel: 'None | Container | int | tuple[int, ...]' = None,
-        data1: 'None | Container | int | tuple[int, ...]' = None,
-        data2: 'None | Container | int | tuple[int, ...]' = None,
+        type: 'None | MatchCondition | Container | MidiType' = None,
+        channel: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data1: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
+        data2: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
     ) -> 'Callable':
         return self._input_ports[0].subscribe(type, channel, data1, data2)
 

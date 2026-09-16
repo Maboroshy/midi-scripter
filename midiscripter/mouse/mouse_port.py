@@ -7,6 +7,7 @@ from midiscripter.logger import log
 
 if TYPE_CHECKING:
     from collections.abc import Container, Callable
+    from midiscripter.base.match_conditions import MatchCondition
 
 
 pynput_buttons_to_msg_type_map = {
@@ -84,16 +85,16 @@ class MouseIn(midiscripter.base.port_base.Input):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[MouseEvent] | MouseEvent' = None,
-        x: 'None | Container[int] | int' = None,
-        y: 'None | Container[int] | int' = None,
+        type: 'None | MatchCondition | Container[MouseEvent] | MouseEvent' = None,
+        x: 'None | MatchCondition | Container[int] | int' = None,
+        y: 'None | MatchCondition | Container[int] | int' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[MouseEvent] | MouseEvent' = None,
-        x: 'None | Container[int] | int' = None,
-        y: 'None | Container[int] | int' = None,
+        type: 'None | MatchCondition | Container[MouseEvent] | MouseEvent' = None,
+        x: 'None | MatchCondition | Container[int] | int' = None,
+        y: 'None | MatchCondition | Container[int] | int' = None,
     ) -> 'Callable':
         return super().subscribe(type, x, y)
 
@@ -169,16 +170,16 @@ class MouseIO(midiscripter.base.port_base.MultiPort):
     @overload
     def subscribe(
         self,
-        type: 'None | Container[MouseEvent] | MouseEvent' = None,
-        x: 'None | Container[int] | int' = None,
-        y: 'None | Container[int] | int' = None,
+        type: 'None | MatchCondition | Container[MouseEvent] | MouseEvent' = None,
+        x: 'None | MatchCondition | Container[int] | int' = None,
+        y: 'None | MatchCondition | Container[int] | int' = None,
     ) -> 'Callable': ...
 
     def subscribe(
         self,
-        type: 'None | Container[MouseEvent] | MouseEvent' = None,
-        x: 'None | Container[int] | int' = None,
-        y: 'None | Container[int] | int' = None,
+        type: 'None | MatchCondition | Container[MouseEvent] | MouseEvent' = None,
+        x: 'None | MatchCondition | Container[int] | int' = None,
+        y: 'None | MatchCondition | Container[int] | int' = None,
     ) -> 'Callable':
         return self._input_ports[0].subscribe(type, x, y)
 

@@ -1,2 +1,3 @@
-from .msg_base import Msg, Not
+from .msg_base import Msg
 from .port_base import MultiPort, CallOn
+from .match_conditions import Not, Glob, Regex

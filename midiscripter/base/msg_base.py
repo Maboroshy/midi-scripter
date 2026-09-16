@@ -1,18 +1,4 @@
 import enum
-from typing import Any
-from collections.abc import Container
-
-
-class Not:
-    """Inverts wrapped condition"""
-    def __init__(self, value: Container | Any):
-        self._value = value
-
-    def __eq__(self, other: Any):
-        return other != self._value
-
-    def __contains__(self, item: Any):
-        return item not in self._value
 
 
 class AttrEnum(enum.StrEnum):
@@ -55,7 +41,7 @@ class Msg:
     def __copy__(self):
         return type(self)(*self._as_tuple())
 
-    def matches(self, *conditions_args, **conditions_kwargs) -> bool:  # noqa: C901 Hot path optimizations
+    def matches(self, *conditions_args, **conditions_kwargs) -> bool:
         """Checks if message's attributes match all provided attribute conditions:
 
         1. If condition is `None` or omitted, it matches anything.
@@ -64,7 +50,9 @@ class Msg:
 
         3. If condition is a container (list, tuple) and contains the attribute, it matches the attribute.
 
-        Use `Not(condition)` to invert condition matching.
+        Use [`Not(condition)`][midiscripter.base.match_conditions.Not] to invert condition matching.
+        Use [`Glob(pattern)`][midiscripter.base.match_conditions.Glob]
+        or [`Regex(pattern)`][midiscripter.base.match_conditions.Regex] for string pattern matching.
 
         Returns:
             `True` if all attributes match, `False` if any does not match
@@ -72,36 +60,16 @@ class Msg:
         attr_values = self._as_tuple()
 
         for index, condition in enumerate(conditions_args):
-            if condition is None:
-                continue
-
-            value = attr_values[index]
-
-            if condition == value:
-                continue
-            try:
-                if value in condition:
-                    continue
-            except TypeError:
-                pass
-            return False
+            if condition is not None and condition != attr_values[index]:
+                return False
 
         if conditions_kwargs:
             for parameter_name, condition in conditions_kwargs.items():
-                if condition is None:
-                    continue
                 try:
-                    value = getattr(self, parameter_name)
+                    if condition is not None or condition != getattr(self, parameter_name):
+                        return False
                 except AttributeError:
                     return False
-                if condition == value:
-                    continue
-                try:
-                    if value in condition:
-                        continue
-                except TypeError:
-                    pass
-                return False
 
         return True
 
