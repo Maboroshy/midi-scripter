@@ -55,7 +55,9 @@ class OscIn(midiscripter.base.port_base.Input):
         self._query_queues = []
 
     def __osc_server_msg_handler(self, address: str, *data) -> None:
-        if len(data) == 1:
+        if not data:
+            data = None
+        elif len(data) == 1:
             data = data[0]
         input_msg = OscMsg(address, data)
         self._send_input_msg_to_calls(input_msg)
