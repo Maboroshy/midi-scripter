@@ -111,8 +111,12 @@ class _MidiPortMixin(midiscripter.base.port_base.Port):
 
         except ValueError:
             log._port_not_found(self)
+            self._rtmidi_port.delete()
+            self._rtmidi_port = None
         except Exception:
             log._port_open(self, False)
+            self._rtmidi_port.delete()
+            self._rtmidi_port = None
 
     def _close(self) -> None:
         try:
