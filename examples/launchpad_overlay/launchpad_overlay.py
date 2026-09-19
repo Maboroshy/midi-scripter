@@ -18,8 +18,8 @@ overlay_toggle = GuiToggleButton('LPX OVERLAY ON', toggle_state=True)
 
 @ableton_osc.subscribe(CallOn.PORT_INIT)
 @ableton_osc.subscribe(address='/live/startup')
-def start_selected_scene_listener(_: OscMsg = None) -> None:
-    """Sets selected scene listener on script start or Ableton Live start"""
+def start_selected_scene_observer(_: OscMsg = None) -> None:
+    """Sets selected scene observer on script start or Ableton Live start"""
     ableton_osc.send(OscMsg('/live/view/start_listen/selected_scene'))
 
 
@@ -34,7 +34,7 @@ def input_proxy(msg: MidiMsg) -> None:
 
 @ableton_osc.subscribe('/live/view/get/selected_scene')
 def feedback_from_osc(msg: OscMsg) -> None:
-    """Lights up selected scene pad based on selected scene listener OSC input"""
+    """Lights up selected scene pad based on selected scene OSC input"""
     for index, cc in enumerate(SCENES_CC):
         value = SELECTED_SCENE_PAD_COLOR if index == msg.data else 0
         lpx.send(MidiMsg(MidiType.CONTROL_CHANGE, LPX_CHANNEL, cc, value))

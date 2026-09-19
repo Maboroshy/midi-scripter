@@ -1,4 +1,4 @@
-# Select Armed Track in Ableton Live with OSC
+# Select Armed Track in Ableton Live with Ableton OSC
 
 This script uses AbletonOSC to select the armed track in Ableton Live.
 

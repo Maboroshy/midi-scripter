@@ -49,7 +49,9 @@ nav:
             - Metronome: api/metronome_port.md
             - Midi Ports Watcher: api/midi_ports_changed.md
         
-        - Extra Call Conditions: api/base_call.md
+        - Special Call Conditions: api/base_call.md
+
+        - Special Matching Conditions: api/base_matching.md
         
         - Base Classes:
             - Ports: api/base_ports.md

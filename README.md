@@ -1,4 +1,3 @@
-
 # <img src="https://raw.githubusercontent.com/Maboroshy/midi-scripter/master/docs/icon.svg" width="23"/> MIDI Scripter
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/midiscripter?style=flat-square&logo=python&logoColor=yellow)](https://pypi.org/project/midiscripter/) ![GitHub License](https://img.shields.io/github/license/maboroshy/midi-scripter?style=flat-square&color=darkgreen) ![For](https://img.shields.io/badge/for-Windows%20|%20macOS%20|%20Linux-darkmagenta?style=flat-square)
 
@@ -47,9 +46,6 @@ https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transpose
 
 The average latency for the script above is less than 0.25 milliseconds.
 
-Currently, MIDI Scripter is at "beta" development stage. 
-It is fully functional but needs more user feedback. 
-
 ## Use cases
 
 - Programming MIDI input/output handling scripts 
@@ -80,8 +76,10 @@ MIDI Scripter has fully documented and type hinted API.
 
 Extra steps for Windows:
 
-1. Enable `Add python .exe to PATH` option in Python installer.
-2. Install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) for virtual MIDI port support.
+1. Enable `Add python.exe to PATH` option in Python installer.
+2. For virtual MIDI port support install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) and enable `Compatible with older Windows` MIDI 1.0 port naming in 
+[MIDI Settings app](https://microsoft.github.io/MIDI/tools/settings/). 
+Alternative is setting up virtual loopbacks in MIDI Settings app. 
 
 ## Quick Start Guide
 
@@ -92,6 +90,7 @@ Extra steps for Windows:
    Enable the checkboxes for any available ports to open them. Monitor the log for incoming messages.
 4. Click on the port names and messages in the log or port list to copy their declarations to the clipboard. 
    You can paste the declarations into your script.
+   `Ctrl` + Click copies the arguments. 
 5. Rewrite the template function to achieve desired functionality. Use `log('messages')` for debugging purposes.
 6. Restart the script from the GUI to see how it performs.
 7. Develop more complex scripts by utilizing additional inputs, outputs and functions (callables). 

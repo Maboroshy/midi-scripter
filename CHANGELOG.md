@@ -1,22 +1,28 @@
 # Changelog
 
-## **v0.9** - 14.09.2026
+## **v0.9** - 20.09.2026
 
 ### Added
 - Implemented "In"/"Out" port pairs auto-resolving for `MidiIO`
-- [BREAKING] `GuiWindow` class to add custom widgets and set window and tray icon, `add_qwidget` became its method
-- Error report for second starter function call
+- `GuiWindow` class to add custom widgets and set window and tray icon
+- `Glob` and `Regex` message matching conditions, useful for OSC addresses
+- `Clear` button to log widget
+- Error reporting for second starter running
 
 ### Fixed
 - [!] Python 3.13+ support by replacing `python-rtmidi` dependency with `supriya-midi`
-- Singleton classes running init on each call
+- Profiled and optimized message to call hot path, reduced latency
 - Passthrough port widget items recursion
 - OSC ports error handling
-- Profiled and optimized message hot path to reduce latency 
+- `OscMsg.data` for incoming message with no data is now `None` instead of `()`
+- Singleton classes running init on each call
+- Absent MIDI ports issues on script exit
 
 ### Changed
 - [BREAKING] Removed `Port.is_opened`, `Msg.ctime` and `Msg.source` to lighten public API
 - [BREAKING] Renamed aftertouch MIDI message types according to MIDI spec
+- [BREAKING] `CallOn.NOT_MATCHED_BY_ANY_CALLS` became `CallOn.NOT_MATCHED`
+- [BREAKING] `add_qwidget` became a method of `GuiWindow`
 
 ## **v0.8.1** - 19.09.2025 
 

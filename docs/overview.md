@@ -40,7 +40,7 @@ Virtual MIDI ports can be created with `MidiIn('Virtual port name', virtual=True
 Virtual MIDI ports can be used to write proxy scripts like the one above.
 
 Port instance declaration is all you need to use the port.
-The starter function opens all declared ports, input ports start feeding 
+The [starter function](#5-starter) opens all declared ports, input ports start feeding 
 incoming messages to subscribed callables.
 
 Input and i/o ports can [subscribe callables with the decorator](#3-calls). 
@@ -109,7 +109,7 @@ callable to call with incoming message object. Callables can have any name,
 must accept a message as their only argument or have no arguments at all,
 and are not expected to return anything.
 
-To subscribe a callable to the messages from an input port or a GUI widget,
+To subscribe a callable to messages from an input port or a GUI widget,
 use the `@input_port.subscribe` decorator. A single callable can be subscribed 
 to multiple ports by stacking multiple decorators:
 
@@ -133,7 +133,7 @@ The color methods are `red`, `yellow`, `green`, `cyan`, `blue` and `magenta`.
 Each call runs in its own thread, but all calls run in the same process.
 So if a call performs some heavy computing, it can increase latency and 
 jitter for the whole script. It's recommended to move heavy computing out 
-of the main process with Python's
+of the main process with Python
 [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html) module.
 
 Each callable receives its own copy of the input message it can modify 
@@ -248,12 +248,11 @@ True
 False
 ```
 
-Use [`Glob(pattern)`][midiscripter.base.match_conditions.Glob]
-or [`Regex(pattern)`][midiscripter.base.match_conditions.Regex] for string pattern matching, 
-which is useful for matching incoming messages OSC address.
+There are extra [`Glob(pattern)`][midiscripter.base.match_conditions.Glob]
+and [`Regex(pattern)`][midiscripter.base.match_conditions.Regex] string pattern matching conditions 
+useful for matching OSC address of incoming messages.
 
-The matching pattern can be used as arguments for 
-`@input_port_subscribe` decorator. Only matching messages will go to calls:
+The matching pattern can be used as arguments for `@input_port_subscribe` decorator:
 
 ``` python
 @input_port.subscribe(MidiType.SYSEX)
@@ -264,17 +263,12 @@ def only_sysex(msg: MidiMsg) -> None:
 Using `subscribe` arguments where possible improves the script's efficiency, 
 since no calls are made for non-matching messages.
 
-The one-line filtered message proxy using matching `subscribe`:
-``` python
-MidiIn('MIDI Controller').subscribe(MidiType.SYSEX)(MidiOut('To DAW').send)
-```
-
 ## Combining multiple scripts
 
 A single combined script is easier to manage than running multiple
 scripts in parallel.
 
-To combine multiple atomic scripts to run as a single one you can
+To combine multiple stand-alone scripts to run as a single one you can
 import them.
 
 It is possible because port declaration with the same arguments returns 

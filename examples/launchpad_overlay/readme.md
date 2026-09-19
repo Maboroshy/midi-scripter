@@ -2,8 +2,7 @@
 
 This script overrides messages from the 4 top "scene launch" pads of 
 Novation Launchpad X to Ableton Live. 
-The pads will select scenes instead of launching them
-which can be useful for session record. 
+The pads will select scenes instead of launching them. 
 The script also implements feedback to Launchpad on scene selection 
 and a GUI button to disable the overlay.
 

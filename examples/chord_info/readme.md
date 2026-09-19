@@ -19,7 +19,3 @@ Degree for chords out of scale will be printed red.
 ## Notes
 
 The script shouldn't be a proxy because music21 introduces too much latency.
-
-The latency can be reduced to normal by using `.passthrough`
-and moving music21 functions to another Python process,
-but using after-DAW MIDI input is easier. 

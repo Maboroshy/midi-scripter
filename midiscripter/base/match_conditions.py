@@ -55,7 +55,7 @@ class Regex(MatchCondition):
 
 
 class Glob(MatchCondition):
-    """Glob pattern matching condition. Supports `*`, `?`, `[chars]` and `[!chars]` matching"""
+    """Glob pattern matching condition. Supports `*`, `?`, `[chars]` and `[!chars]` matching."""
 
     def __init__(self, glob_pattern: str):
         self.__pattern = glob_pattern
