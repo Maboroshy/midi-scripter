@@ -1,3 +1,4 @@
+import queue
 import threading
 from typing import TYPE_CHECKING, overload
 
@@ -46,9 +47,12 @@ class OscIn(midiscripter.base.port_base.Input):
             listener_ip_port: `'ip:port'` or local port to listen for incoming OSC messages
         """
         super().__init__(listener_ip_port)
-        self.listener_ip_address, self.listener_port = _parse_ip_port(listener_ip_port)
-        self.__dispatcher = pythonosc.osc_server.Dispatcher()
+        self.__listener_ip_port = _parse_ip_port(listener_ip_port)
+        self.__dispatcher = pythonosc.osc_server.Dispatcher(False)
         self.__dispatcher.set_default_handler(self.__osc_server_msg_handler)
+
+        self._query_queues_lock = threading.Lock()
+        self._query_queues = []
 
     def __osc_server_msg_handler(self, address: str, *data) -> None:
         if len(data) == 1:
@@ -56,20 +60,23 @@ class OscIn(midiscripter.base.port_base.Input):
         input_msg = OscMsg(address, data)
         self._send_input_msg_to_calls(input_msg)
 
+        if self._query_queues:
+            with self._query_queues_lock:
+                for queue_ in self._query_queues:
+                    queue_.put(input_msg)
+
     def _open(self) -> None:
         try:
-            self._osc_server = pythonosc.osc_server.BlockingOSCUDPServer(
-                (self.listener_ip_address, self.listener_port), self.__dispatcher
-            )
-            midiscripter.shared.thread_executor.submit(self._osc_server.serve_forever)
+            self.__osc_server = pythonosc.osc_server.BlockingOSCUDPServer(self.__listener_ip_port, self.__dispatcher)
+            midiscripter.shared.thread_executor.submit(self.__osc_server.serve_forever)
             self._is_opened = True
             log._port_open(self, True)
         except OSError:
             log._port_open(self, False)
 
     def _close(self) -> None:
-        self._osc_server.shutdown()
-        self._osc_server.server_close()
+        self.__osc_server.shutdown()
+        self.__osc_server.server_close()
         self._is_opened = False
         log._port_close(self, True)
 
@@ -103,7 +110,7 @@ class OscOut(midiscripter.base.port_base.Output):
         """
         super().__init__(target_ip_port)
         target_ip_address, target_port = _parse_ip_port(target_ip_port)
-        self._osc_client = pythonosc.udp_client.SimpleUDPClient(target_ip_address, target_port)
+        self.__osc_client = pythonosc.udp_client.SimpleUDPClient(target_ip_address, target_port)
 
     def send(self, msg: OscMsg) -> None:
         """Send the OSC message.
@@ -112,7 +119,7 @@ class OscOut(midiscripter.base.port_base.Output):
             msg: object to send
         """
         data = list(msg.data) if isinstance(msg.data, tuple) else msg.data
-        self._osc_client.send_message(msg.address, data)
+        self.__osc_client.send_message(msg.address, data)
         log._msg_sent(self, msg)
 
 
@@ -130,13 +137,9 @@ class OscIO(midiscripter.base.port_base.MultiPort):
             input_listener_ip_port: `'ip:port'` or local port to listen for incoming OSC messages
             output_target_ip_port: `'ip:port'` or local port to send output OSC messages to
         """
-        input_port = OscIn(input_listener_ip_port)
-        output_port = OscOut(output_target_ip_port)
-        super().__init__(f'{input_listener_ip_port} > {output_target_ip_port}', input_port, output_port)
-
-        self.__new_msg_condition = threading.Condition()
-        self.__last_msg = OscMsg('')
-        input_port.subscribe(self.__osc_query_listener)
+        self.__input_port = OscIn(input_listener_ip_port)
+        self.__output_port = OscOut(output_target_ip_port)
+        super().__init__(f'{input_listener_ip_port} > {output_target_ip_port}', self.__input_port, self.__output_port)
 
     def query(
         self,
@@ -159,25 +162,25 @@ class OscIO(midiscripter.base.port_base.MultiPort):
         Returns:
             Response OSC message data
         """
-        with self.__new_msg_condition:
-            self.__last_msg = OscMsg('')
+        log("Requesting '{address}' data from OSC {input}", address=address, input=self.__input_port)
 
-            log(
-                "Requesting '{address}' data from OSC {input}",
-                address=address,
-                input=self._input_ports[0],
-            )
-            self._output_ports[0].send(OscMsg(address, data))
+        query_queue = queue.SimpleQueue()
+        query_queue_list = self.__input_port._query_queues
+        with self.__input_port._query_queues_lock:
+            query_queue_list.append(query_queue)
+        self.__output_port.send(OscMsg(address, data))
 
-            if self.__new_msg_condition.wait_for(lambda: self.__last_msg.address == address, timeout=timeout_sec):
-                return self.__last_msg.data
-            else:
-                raise TimeoutError(f"OSC query to '{address}' got no response")
-
-    def __osc_query_listener(self, msg: OscMsg) -> None:
-        with self.__new_msg_condition:
-            self.__last_msg = msg
-            self.__new_msg_condition.notify_all()
+        while True:
+            try:
+                msg = query_queue.get(timeout=timeout_sec)
+                if msg.address == address:
+                    with self.__input_port._query_queues_lock:
+                        query_queue_list.remove(query_queue)
+                    return msg.data
+            except queue.Empty:
+                with self.__input_port._query_queues_lock:
+                    query_queue_list.remove(query_queue)
+                raise TimeoutError(f"OSC query to '{address}' got no response") from None
 
     @overload
     def subscribe(self, call: 'Callable[[OscMsg], None]') -> 'Callable': ...
@@ -202,4 +205,4 @@ class OscIO(midiscripter.base.port_base.MultiPort):
         Args:
             msg: object to send
         """
-        self._output_ports[0].send(msg)
+        self.__output_port.send(msg)
