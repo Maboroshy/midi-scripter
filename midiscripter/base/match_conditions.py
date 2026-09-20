@@ -27,19 +27,6 @@ class Not(MatchCondition):
         return f'Not({self.__condition})'
 
 
-class Contains(MatchCondition):
-    """Value in container matching condition"""
-
-    def __init__(self, container: Container):
-        self.__container = container
-
-    def __eq__(self, other: Any):
-        return other == self.__container or other in self.__container
-
-    def __repr__(self) -> str:
-        return repr(self.__container)
-
-
 class Regex(MatchCondition):
     """Regex pattern matching condition"""
 
