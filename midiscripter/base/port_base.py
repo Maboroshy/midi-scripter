@@ -23,8 +23,8 @@ class CallOn(enum.StrEnum):
     NOT_MATCHED = 'NOT MATCHED'
     """Call when a message is not matched by any other call"""
 
-    PORT_INIT = 'PORT INIT'
-    """Call after port is initially opened"""
+    SCRIPT_START = 'SCRIPT START'
+    """Call on script start after all ports are opened"""
 
 
 @contextlib.contextmanager
@@ -110,7 +110,7 @@ class Subscribable:
 
     def __init__(self):
         self._msg_calls = []
-        self._event_calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED: []}
+        self._event_calls = {CallOn.SCRIPT_START: [], CallOn.NOT_MATCHED: []}
 
     def subscribe(self,
                   *msg_matches_args: 'None | MatchCondition | Any',
@@ -207,22 +207,19 @@ class Subscribable:
             for call in self._event_calls[CallOn.NOT_MATCHED]:
                 thread_executor.submit(call, msg_received_time_delta, msg.__copy__())
 
-    def _send_call_on_msg_to_calls(self, event: CallOn, msg: 'Msg') -> None:
+    def _send_call_on_event_to_calls(self, event: CallOn, msg: 'Msg') -> None:
         msg_received_time_delta = time.perf_counter()
         thread_executor = midiscripter.shared.thread_executor
         for call in self._event_calls[event]:
             thread_executor.submit(call, msg_received_time_delta, msg.__copy__())
 
-    def _call_on_init(self) -> None:
-        """Called after input port is opened for the first time.
+    def _call_on_script_start(self) -> None:
+        """To call by starter on script start after all ports are opened
 
         Notes:
             Not supposed to be overridden in subclasses.
         """
-        if self.__init_called:
-            return
-        self.__init_called = True
-        self._send_call_on_msg_to_calls(CallOn.PORT_INIT, Msg('Init'))
+        self._send_call_on_event_to_calls(CallOn.SCRIPT_START, Msg('Script Started'))
 
 
 class Port(metaclass=midiscripter.shared.util.SupressInitAutorun):
@@ -428,7 +425,7 @@ class MultiPort(Port):
 
     @property
     def _event_calls(self) -> dict[CallOn, list[SubscribedCall]]:
-        calls = {CallOn.PORT_INIT: [], CallOn.NOT_MATCHED: []}
+        calls = {CallOn.SCRIPT_START: [], CallOn.NOT_MATCHED: []}
         for input_port in self._input_ports:
             for event, call_list in input_port._event_calls.items():
                 calls[event].extend(call_list)

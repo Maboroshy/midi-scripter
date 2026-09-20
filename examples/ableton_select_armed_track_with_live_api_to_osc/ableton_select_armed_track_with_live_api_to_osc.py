@@ -7,7 +7,7 @@ live_api_osc = OscIO(7500, 7400)
 track_ids = []
 
 
-@live_api_osc.subscribe(CallOn.PORT_INIT)
+@live_api_osc.subscribe(CallOn.SCRIPT_START)
 @live_api_osc.subscribe(address='/live_set/startup')
 def set_observers() -> None:
     live_api_osc.send(OscMsg('/live_set/tracks/observe', 1))

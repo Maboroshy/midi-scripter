@@ -4,7 +4,7 @@ from midiscripter import *
 ableton_osc = OscIO(11001, 11000)
 
 
-@ableton_osc.subscribe(CallOn.PORT_INIT)
+@ableton_osc.subscribe(CallOn.SCRIPT_START)
 @ableton_osc.subscribe(address='/live/startup')
 def set_observers() -> None:
     try:

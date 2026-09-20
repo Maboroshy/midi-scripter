@@ -21,7 +21,7 @@
 ### Changed
 - [BREAKING] Removed `Port.is_opened`, `Msg.ctime` and `Msg.source` to lighten public API
 - [BREAKING] Renamed aftertouch MIDI message types according to MIDI spec
-- [BREAKING] `CallOn.NOT_MATCHED_BY_ANY_CALLS` became `CallOn.NOT_MATCHED`
+- [BREAKING] Renamed `CallOn` enum members
 - [BREAKING] `add_qwidget` became a method of `GuiWindow`
 
 ## **v0.8.1** - 19.09.2025 

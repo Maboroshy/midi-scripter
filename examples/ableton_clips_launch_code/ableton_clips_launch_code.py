@@ -8,7 +8,7 @@ ableton_osc = OscIO(11001, 11000)
 reset_clip_listener_button = GuiButton('Reset clip listener')
 
 
-@ableton_osc.subscribe(CallOn.PORT_INIT)
+@ableton_osc.subscribe(CallOn.SCRIPT_START)
 @reset_clip_listener_button.subscribe(GuiEvent.TRIGGERED)
 @ableton_osc.subscribe(address='/live/startup')
 def set_clip_fire_listener() -> None:

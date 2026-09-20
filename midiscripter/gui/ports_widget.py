@@ -288,8 +288,6 @@ class PortsView(QTreeWidget):
                 and port_instance not in self.__port_instances_closed_by_user
             ):
                 port_instance._open()
-                if port_instance.__class__ is MidiIn:
-                    port_instance._call_on_init()
 
             # Close the ports that became absent
             if (
