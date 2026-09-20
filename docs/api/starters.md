@@ -7,3 +7,5 @@
 ---
 
 ## :::midiscripter.restart_script
+
+## :::midiscripter.ports_opened

@@ -84,7 +84,7 @@ class Log:
     _flushing_is_enabled: bool
 
     def __init__(self):
-        self._accepts_messages = True
+        self._accepts_messages = False
         self.__flushing_is_enabled = False
         self.__buffer = collections.deque(maxlen=self.BUFFER_SIZE)
         self.__last_entry_time = 0

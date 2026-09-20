@@ -13,6 +13,7 @@ def start_cli_debug() -> NoReturn:
     """Starts the script with log output to console.
     Console prints increase latency and jitter. Use for debugging only.
     """
+    log._accepts_messages = True
     midiscripter.shared.prerun_checks()
 
     log._formatter = midiscripter.logger.console.console_log_formatter
@@ -31,23 +32,21 @@ def start_cli_debug() -> NoReturn:
     log('')
 
     _run_cli_loop()
+    log._flush()
 
 
 def start_silent() -> NoReturn:
     """Starts the script without logging. The fastest way to run the script"""
     midiscripter.shared.prerun_checks()
-    log._accepts_messages = False
     _run_cli_loop()
 
 
-def _run_cli_loop() -> NoReturn:
+def _run_cli_loop() -> None:
     """Opens the ports and loops until broken by user"""
     midiscripter.shared.raise_current_process_cpu_priority()
-    with midiscripter.base.port_base._all_opened():
+    with midiscripter.base.port_base.ports_opened():
         while True:
             try:
-                time.sleep(1)
+                time.sleep(1000)
             except (KeyboardInterrupt, SystemExit):
                 break
-
-    log._flush()

@@ -28,25 +28,28 @@ class CallOn(enum.StrEnum):
 
 
 @contextlib.contextmanager
-def _all_opened() -> None:
+def ports_opened() -> None:
+    """The context manager to use midiscripter as a library in your app.
+       Opens all declared ports on enter and closes them in exit. Use it instead of starter.
+
+    ??? Example
+        ``` python
+        with midiscripter.ports_opened():
+            your_code_loop()
+        ```
+    """
     for port in itertools.chain(Input._subclass_instances, Output._subclass_instances):
         if not port._is_opened:
             port._open()
 
     for input_port in Input._subclass_instances:
-        input_port._call_on_init()
+        input_port._call_on_script_start()
 
     yield
 
     for port in Port._subclass_instances:
         if port._is_opened:
             port._close()
-
-    try:
-        log._flush()
-        log._flushing_is_enabled = False
-    except AttributeError:  # for exit before log fully set up
-        pass
 
 
 class SubscribedCall:
@@ -105,8 +108,6 @@ class Subscribable:
 
     _event_calls: dict[CallOn, list[SubscribedCall]]
     """SubscribedCalls that will be called on CallOn events. `None` conditions matches any message."""
-
-    __init_called: bool = False
 
     def __init__(self):
         self._msg_calls = []
@@ -233,8 +234,8 @@ class Port(metaclass=midiscripter.shared.util.SupressInitAutorun):
     """`True` if port is listening messages / ready to send messages"""
 
     _forced_uid: ClassVar[None | str] = None
-    """UID override for classes that have can have only one instance per whole class,
-       like keyboard port classes. Object for these classes are declared without arguments.
+    """UID override for classes that have can have only one instance per whole class, like keyboard port classes. 
+       Object for these classes are declared without arguments.
     """
 
     _wrapped_in: 'list[MultiPort]'
@@ -379,8 +380,7 @@ class Output(Port):
 
 
 class MultiPort(Port):
-    """
-    Multiport wrapper class. Combines [`Input`][midiscripter.base.port_base.Input]
+    """Multiport wrapper class. Combines [`Input`][midiscripter.base.port_base.Input]
     and [`Output`][midiscripter.base.port_base.Output] ports to a single i/o port.
     """
 

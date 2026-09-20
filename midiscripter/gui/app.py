@@ -11,9 +11,9 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 import midiscripter.base.port_base
-import midiscripter.base.msg_base
 import midiscripter.file_event
 import midiscripter.gui.main_window
+from midiscripter import log
 from .gui_widgets.window import GuiWindow
 from .color_theme import enable_dark_mode
 from .saved_state_controls import SavedCheckedAction
@@ -105,6 +105,8 @@ app_instance = ScripterGUI()
 
 def start_gui() -> NoReturn:
     """Starts the script and runs GUI. Logging goes to GUI Log widget"""
+    log._accepts_messages = True
+
     midiscripter.shared.prerun_checks()
     midiscripter.shared.raise_current_process_cpu_priority()
 
@@ -117,7 +119,7 @@ def start_gui() -> NoReturn:
     signal_checker_dummy_timer.start(1000)
     signal_checker_dummy_timer.timeout.connect(lambda: None)  # dummy python code to run
 
-    with midiscripter.base.port_base._all_opened():
+    with midiscripter.base.port_base.ports_opened():
         try:
             app_instance.prepare()
             exit_status = app_instance.exec()

@@ -7,6 +7,7 @@
 - `GuiWindow` class to add custom widgets and set window and tray icon
 - `Glob` and `Regex` message matching conditions, useful for OSC addresses
 - `Clear` button to log widget
+- `port_open` context manager to use midiscripter in your own app
 - Error reporting for second starter running
 
 ### Fixed
