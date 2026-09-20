@@ -39,7 +39,7 @@ Screenshot with only `octave_selector` widget enabled:
 ![Screenshot with only octave_selector widget enabled](
 https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot_widget.png?raw=true)
 
-Screenshot with service Ports and Log and Message Sender widgets:
+Screenshot with Ports and Log widgets enabled:
 
 ![Screenshot with all the widgets visible](
 https://github.com/Maboroshy/midi-scripter/blob/master/examples/octave_transposer/screenshot_full.png?raw=true)
