@@ -76,7 +76,7 @@ class PortItem(PortWidgetItem):
                 for call in call_list:
                     CallItem(self, self.port_instance, call_list, call)
             for call in self.port_instance._msg_calls:
-                CallItem(self, self.port_instance, call_list, call)
+                CallItem(self, self.port_instance, self.port_instance._msg_calls, call)
 
     def request_state_change(self: 'GeneralPortItem | MidiPortItem | AlwaysPresentInputPortItem', state: bool) -> None:
         if state:
