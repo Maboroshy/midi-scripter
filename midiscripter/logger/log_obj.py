@@ -137,10 +137,11 @@ class Log:
 
             log_entries.append(LogEntry(time_delta, text, args, kwargs))
 
-        try:
-            self._sink(self._formatter(log_entries))
-        except (RuntimeError, AttributeError):  # ignore Qt error on widget destruction at app exit
-            pass
+        if log_entries:
+            try:
+                self._sink(self._formatter(log_entries))
+            except (RuntimeError, AttributeError):  # ignore Qt error on widget destruction at app exit
+                pass
 
     def _port_not_found(self, port_instance: 'Port') -> None:
         self("Can't find {port} {desc}. Check the port name.", port=port_instance, desc=port_instance._log_description)
