@@ -1,4 +1,5 @@
 import enum
+from collections.abc import Container
 
 
 class AttrEnum(enum.StrEnum):
@@ -60,16 +61,36 @@ class Msg:
         attr_values = self._as_tuple()
 
         for index, condition in enumerate(conditions_args):
-            if condition is not None and condition != attr_values[index]:
-                return False
+            if condition is None:
+                continue
+
+            value = attr_values[index]
+
+            if condition == value:
+                continue
+
+            if isinstance(condition, Container) and value in condition:
+                continue
+
+            return False
 
         if conditions_kwargs:
             for parameter_name, condition in conditions_kwargs.items():
+                if condition is None:
+                    continue
+
                 try:
-                    if condition is not None or condition != getattr(self, parameter_name):
-                        return False
+                    value = getattr(self, parameter_name)
                 except AttributeError:
                     return False
+
+                if condition == value:
+                    continue
+
+                if isinstance(condition, Container) and value in condition:
+                    continue
+
+                return False
 
         return True
 

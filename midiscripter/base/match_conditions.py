@@ -1,7 +1,6 @@
 import fnmatch
 import re
 from typing import Any
-from collections.abc import Container
 
 
 class MatchCondition:
@@ -23,21 +22,11 @@ class Not(MatchCondition):
     def __eq__(self, other: Any):
         return other != self.__condition
 
+    def __contains__(self, item: Any):
+        return item not in self.__condition
+
     def __repr__(self) -> str:
         return f'Not({self.__condition})'
-
-
-class Contains(MatchCondition):
-    """Value in container matching condition"""
-
-    def __init__(self, container: Container):
-        self.__container = container
-
-    def __eq__(self, other: Any):
-        return other == self.__container or other in self.__container
-
-    def __repr__(self) -> str:
-        return repr(self.__container)
 
 
 class Regex(MatchCondition):

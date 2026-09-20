@@ -11,10 +11,10 @@ from collections.abc import Sequence, Container
 import midiscripter.shared
 from midiscripter.logger import log
 from midiscripter.base.msg_base import Msg
-from midiscripter.base.match_conditions import MatchCondition, Contains
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Hashable
+    from midiscripter.base.match_conditions import MatchCondition
 
 
 class CallOn(enum.StrEnum):
@@ -164,9 +164,7 @@ class Subscribable:
                 while args[-1] is None:
                     args.pop()
 
-                args = [self.__convert_arg_to_condition(arg) for arg in args]
-                kwargs = {attr: self.__convert_arg_to_condition(value)
-                          for attr, value in msg_matches_kwargs.items() if value is not None}
+                kwargs = {attr: value for attr, value in msg_matches_kwargs.items() if value is not None}
 
                 self._msg_calls.append(SubscribedCall((tuple(args), kwargs), callable_, self))
             return callable_
@@ -175,13 +173,6 @@ class Subscribable:
             return wrapped_subscribe(msg_matches_args[0])
 
         return wrapped_subscribe
-
-    @staticmethod
-    def __convert_arg_to_condition(condition_arg: Any) -> MatchCondition:
-        if isinstance(condition_arg, Container) and not isinstance(condition_arg, str):
-            return Contains(condition_arg)
-        else:
-            return condition_arg
 
     def _send_input_msg_to_calls(self, msg: 'Msg') -> None:
         """Sends received messages to subscribed calls.

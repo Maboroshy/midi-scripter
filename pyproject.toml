@@ -50,9 +50,12 @@ Source = 'https://github.com/Maboroshy/midi-scripter'
 [tool.ruff]
 line-length = 100
 
+[tool.ruff.format]
+quote-style = 'single'
+
 [tool.ruff.lint]
 select = ['B', 'C', 'E', 'F', 'PERF', 'TCH', 'SIM', 'UP', 'ANN001', 'ANN201', 'ANN202', 'ANN205', 'ANN206']
 ignore = ['E501', 'F401', 'F405', 'F403', 'SIM105']
 
-[tool.ruff.format]
-quote-style = 'single'
+[tool.ruff.lint.mccabe]
+max-complexity = 12  # C901 check setting
