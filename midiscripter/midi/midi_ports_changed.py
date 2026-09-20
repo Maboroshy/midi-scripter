@@ -24,12 +24,9 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
         super().__init__()
 
     def _open(self) -> None:
-        self._is_opened = True
-
         self.__input_checker = supriya_midi.MidiIn()
         self.__output_checker = supriya_midi.MidiOut()
-
-        midiscripter.shared.thread_executor.submit(self.__updater_worker)
+        self._is_opened = True
         midiscripter.logger.log('Started MIDI ports change watcher')
 
     def _close(self) -> None:
@@ -41,6 +38,15 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
         self.__output_checker = None
 
         midiscripter.logger.log('Stopped MIDI ports change watcher')
+
+    def _call_on_script_start(self) -> None:
+        """To call by starter on script start after all ports are opened
+
+        Notes:
+            Not supposed to be overridden in subclasses.
+        """
+        super()._call_on_script_start()
+        midiscripter.shared.thread_executor.submit(self.__updater_worker)
 
     def __updater_worker(self) -> None:
         last_check_inputs = self.__input_checker.get_ports()
