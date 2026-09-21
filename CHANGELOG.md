@@ -1,9 +1,9 @@
 # Changelog
 
-## **v0.9** - 20.09.2026
+## **v0.9** - 22.09.2026
 
 ### Added
-- Implemented "In"/"Out" port pairs auto-resolving for `MidiIO`
+- Implemented `In`/`Out` port pairs auto-resolving for `MidiIO`
 - `GuiWindow` class to add custom widgets and set window and tray icon
 - `Glob` and `Regex` message matching conditions, useful for OSC addresses
 - `Clear` button to log widget
@@ -12,7 +12,6 @@
 
 ### Fixed
 - [!] Python 3.13+ support by replacing `python-rtmidi` dependency with `supriya-midi`
-- Profiled and optimized message to call hot path, reduced latency
 - Passthrough port widget items recursion
 - OSC ports error handling
 - `OscMsg.data` for incoming message with no data is now `None` instead of `()`
@@ -20,6 +19,7 @@
 - Absent MIDI ports issues on script exit
 
 ### Changed
+- Profiled and optimized "message to call" hot path, reduced latency
 - [BREAKING] Removed `Port.is_opened`, `Msg.ctime` and `Msg.source` to lighten public API
 - [BREAKING] Renamed aftertouch MIDI message types according to MIDI spec
 - [BREAKING] Renamed `CallOn` enum members

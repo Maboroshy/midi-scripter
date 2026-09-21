@@ -129,7 +129,7 @@ class Subscribable:
 
         2. If condition equals the message's attribute value it matches the attribute.
 
-        3. If condition is a container (list, tuple) and contains the message's attribute value,
+        3. If condition is a container (list, tuple, range, etc.) and contains the message's attribute value,
         it matches the attribute.
 
         ??? Examples
@@ -372,7 +372,7 @@ class Output(Port):
 
 class MultiPort(Port):
     """Multiport wrapper class. Combines [`Input`][midiscripter.base.port_base.Input]
-    and [`Output`][midiscripter.base.port_base.Output] ports to a single i/o port.
+    and [`Output`][midiscripter.base.port_base.Output] ports into a single i/o port.
     """
 
     _log_description: str = 'i/o port'
@@ -443,7 +443,7 @@ class MultiPort(Port):
 
         2. If condition equals the message's attribute value it matches the attribute.
 
-        3. If condition is a container (list, tuple) and contains the message's attribute value,
+        3. If condition is a container (list, tuple, range, etc.) and contains the message's attribute value,
         it matches the attribute.
 
         ??? Examples

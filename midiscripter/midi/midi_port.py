@@ -284,20 +284,20 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
 
 
 class MidiIO(midiscripter.base.port_base.MultiPort):
-    """
-    MIDI input/output port that combines [`MidiIn`][midiscripter.MidiIn] and
-    [`MidiOut`][midiscripter.MidiOut] ports with the same name.
+    """MIDI input/output port that combines [`MidiIn`][midiscripter.MidiIn] and
+    [`MidiOut`][midiscripter.MidiOut] ports with matching names.
     Produces and sends [`MidiMsg`][midiscripter.MidiMsg] objects.
     """
 
     _input_port_class: 'type[MidiIn | AbletonIn]' = MidiIn
     _output_port_class: 'type[MidiOut | AbletonOut]' = MidiOut
+
     _log_description: str = 'MIDI i/o port'
 
     def __init__(self, port_name: str, *, virtual: bool = False, loopback: bool = False):
         """
         Args:
-            port_name: MIDI port name common for input and output, also works for common part of "In"/"Out" name pair
+            port_name: MIDI port name common for input and output, works for common part of "In"/"Out" name pair
             virtual: Create virtual input and output ports
             loopback: Immediately send the messages received by the input port with the output port
         """
@@ -324,9 +324,7 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
                 if port._pytemidi_port:
                     port._pytemidi_port.close()
 
-            pytemidi_port = midiscripter.midi.teVirtualMIDI.TeVirtualMidiPort(
-                port_name, input_port._input_callback
-            )
+            pytemidi_port = midiscripter.midi.teVirtualMIDI.TeVirtualMidiPort(port_name, input_port._input_callback)
 
             for port in (input_port, output_port):
                 port._pytemidi_port = pytemidi_port

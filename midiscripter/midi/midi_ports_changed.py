@@ -46,7 +46,7 @@ class MidiPortsChangedIn(midiscripter.base.port_base.Input):
             Not supposed to be overridden in subclasses.
         """
         super()._call_on_script_start()
-        midiscripter.shared.thread_executor.submit(self.__updater_worker)
+        midiscripter.shared.thread_executor.submit(self.__updater_worker)  # start after all virtual port created
 
     def __updater_worker(self) -> None:
         last_check_inputs = self.__input_checker.get_ports()

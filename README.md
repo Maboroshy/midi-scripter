@@ -77,9 +77,10 @@ MIDI Scripter has fully documented and type hinted API.
 Extra steps for Windows:
 
 1. Enable `Add python.exe to PATH` option in Python installer.
-2. For virtual MIDI port support install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) and enable `Compatible with older Windows` MIDI 1.0 port naming in 
+2. For virtual MIDI port support install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) 
+and enable `Compatible with older Windows` MIDI 1.0 port naming in 
 [MIDI Settings app](https://microsoft.github.io/MIDI/tools/settings/). 
-Alternative is setting up virtual loopbacks in MIDI Settings app. 
+The alternative is setting up virtual loopbacks in MIDI Settings app. 
 
 ## Quick Start Guide
 

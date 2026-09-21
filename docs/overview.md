@@ -226,7 +226,7 @@ The matching uses the simplified
 
 1. If the condition is `None` or omitted, it matches anything.
 2. If the condition equals the attribute, it matches the attribute.
-3. If the condition is a container (list, tuple) and contains the attribute, 
+3. If the condition is a container (list, tuple, range, etc.) and contains the attribute, 
 it matches the attribute.
 
 Use [`Not(condition)`][midiscripter.base.match_conditions.Not] to invert condition matching.
