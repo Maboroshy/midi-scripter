@@ -125,11 +125,13 @@ class OscOut(midiscripter.base.port_base.Output):
         log._msg_sent(self, msg)
 
 
-class OscIO(midiscripter.base.port_base.MultiPort):
+class OscIO(midiscripter.base.port_base.IoPort):
     """Open Sound Control input/output port that combines [`OscIn`][midiscripter.OscIn] and
     [`OscOut`][midiscripter.OscOut] ports.
     Produces and sends [`OscMsg`][midiscripter.OscMsg] objects.
     """
+    _input_port: OscIn
+    _output_port: OscOut
 
     _log_description: str = 'OSC i/o port'
 
@@ -139,9 +141,9 @@ class OscIO(midiscripter.base.port_base.MultiPort):
             input_listener_ip_port: `'ip:port'` or local port to listen for incoming OSC messages
             output_target_ip_port: `'ip:port'` or local port to send output OSC messages to
         """
-        self.__input_port = OscIn(input_listener_ip_port)
-        self.__output_port = OscOut(output_target_ip_port)
-        super().__init__(f'{input_listener_ip_port} > {output_target_ip_port}', self.__input_port, self.__output_port)
+        input_port = OscIn(input_listener_ip_port)
+        output_port = OscOut(output_target_ip_port)
+        super().__init__(f'{input_listener_ip_port} > {output_target_ip_port}', input_port, output_port)
 
     def query(
         self,
@@ -164,23 +166,23 @@ class OscIO(midiscripter.base.port_base.MultiPort):
         Returns:
             Response OSC message data
         """
-        log("Requesting '{address}' data from OSC {input}", address=address, input=self.__input_port)
+        log("Requesting '{address}' data from OSC {input}", address=address, input=self._input_port)
 
         query_queue = queue.SimpleQueue()
-        query_queue_list = self.__input_port._query_queues
-        with self.__input_port._query_queues_lock:
+        query_queue_list = self._input_port._query_queues
+        with self._input_port._query_queues_lock:
             query_queue_list.append(query_queue)
-        self.__output_port.send(OscMsg(address, data))
+        self._output_port.send(OscMsg(address, data))
 
         while True:
             try:
                 msg = query_queue.get(timeout=timeout_sec)
                 if msg.address == address:
-                    with self.__input_port._query_queues_lock:
+                    with self._input_port._query_queues_lock:
                         query_queue_list.remove(query_queue)
                     return msg.data
             except queue.Empty:
-                with self.__input_port._query_queues_lock:
+                with self._input_port._query_queues_lock:
                     query_queue_list.remove(query_queue)
                 raise TimeoutError(f"OSC query to '{address}' got no response") from None
 
@@ -199,7 +201,7 @@ class OscIO(midiscripter.base.port_base.MultiPort):
         address: 'None | MatchCondition | Container | str' = None,
         data: 'None | MatchCondition | Container | str | bytes | bool | int | float | list | tuple' = None,
     ) -> 'Callable':
-        return self._input_ports[0].subscribe(address, data)
+        return self._input_port.subscribe(address, data)
 
     def send(self, msg: OscMsg) -> None:
         """Send the OSC message.
@@ -207,4 +209,4 @@ class OscIO(midiscripter.base.port_base.MultiPort):
         Args:
             msg: object to send
         """
-        self.__output_port.send(msg)
+        self._output_port.send(msg)

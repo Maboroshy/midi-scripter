@@ -116,6 +116,9 @@ class AbletonOut(MidiOut):
 
 # noinspection PyMethodOverriding
 class AbletonIO(MidiIO):
+    _input_port: AbletonIn
+    _output_port: AbletonOut
+
     _input_port_class: 'type[MidiIn | AbletonIn]' = AbletonIn
     _output_port_class: 'type[MidiOut | AbletonOut]' = AbletonOut
 
@@ -139,7 +142,7 @@ class AbletonIO(MidiIO):
         index: 'None | MatchCondition | Container[int, tuple[int, int]] | int | tuple[int, int]' = None,
         value: 'None | MatchCondition | Container[int] | int | bool' = None,
     ) -> 'Callable':
-        return self._input_ports[0].subscribe(type, index, value)
+        return self._input_port.subscribe(type, index, value)
 
     def send(self, msg: AbletonMsg | ChannelMsg) -> None:
         """Send message to Ableton remote script.
@@ -147,4 +150,4 @@ class AbletonIO(MidiIO):
         Args:
             msg: object to send
         """
-        self._output_ports[0].send(msg)
+        self._output_port.send(msg)

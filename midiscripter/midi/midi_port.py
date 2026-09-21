@@ -283,11 +283,13 @@ class MidiOut(_MidiPortMixin, midiscripter.base.port_base.Output):
                 log.red(f'Failed to send message data: {raw_midi_data}')
 
 
-class MidiIO(midiscripter.base.port_base.MultiPort):
+class MidiIO(midiscripter.base.port_base.IoPort):
     """MIDI input/output port that combines [`MidiIn`][midiscripter.MidiIn] and
     [`MidiOut`][midiscripter.MidiOut] ports with matching names.
     Produces and sends [`MidiMsg`][midiscripter.MidiMsg] objects.
     """
+    _input_port: MidiIn
+    _output_port: MidiOut
 
     _input_port_class: 'type[MidiIn | AbletonIn]' = MidiIn
     _output_port_class: 'type[MidiOut | AbletonOut]' = MidiOut
@@ -373,6 +375,9 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
     @property
     def _is_available(self) -> bool:
         """Port is available and can be opened"""
+        if self._is_virtual:
+            return True
+
         return self._uid in self._get_available_names()
 
     def passthrough_out(self, midi_output: 'MidiOut') -> None:
@@ -383,7 +388,7 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
         Args:
             midi_output: [`MidiOut`][midiscripter.MidiOut] port to use for pass-through
         """
-        self._input_ports[0].passthrough_out(midi_output)
+        self._input_port.passthrough_out(midi_output)
 
     @overload
     def subscribe(self, call: 'Callable[[MidiMsg], None]') -> 'Callable': ...
@@ -404,7 +409,7 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
         data1: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
         data2: 'None | MatchCondition | Container | int | tuple[int, ...]' = None,
     ) -> 'Callable':
-        return self._input_ports[0].subscribe(type, channel, data1, data2)
+        return self._input_port.subscribe(type, channel, data1, data2)
 
     def send(self, msg: MidiMsg) -> None:
         """Send the MIDI message.
@@ -412,4 +417,4 @@ class MidiIO(midiscripter.base.port_base.MultiPort):
         Args:
             msg: object to send
         """
-        self._output_ports[0].send(msg)
+        self._output_port.send(msg)

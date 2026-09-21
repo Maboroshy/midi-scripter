@@ -135,11 +135,13 @@ class KeyOut(midiscripter.base.port_base.Output):
         self.__pynput_controller.type(string_to_type)
 
 
-class KeyIO(midiscripter.base.port_base.MultiPort):
+class KeyIO(midiscripter.base.port_base.IoPort):
     """Keyboard input/output port that combines [`KeyIn`][midiscripter.KeyIn] and
     [`KeyOut`][midiscripter.KeyOut] ports.
     Produces and sends [`KeyMsg`][midiscripter.KeyMsg] objects.
     """
+    _input_port: KeyIn
+    _output_port: KeyOut
 
     _forced_uid: ClassVar[str] = 'Keyboard'
     _log_description: str = 'keyboard i/o'
@@ -161,7 +163,7 @@ class KeyIO(midiscripter.base.port_base.MultiPort):
     @property
     def pressed_keys(self) -> list[pynput.keyboard.Key]:
         """Currently pressed keys"""
-        return self._input_ports[0].pressed_keys
+        return self._input_port.pressed_keys
 
     @overload
     def subscribe(self, call: 'Callable[[KeyMsg], None]') -> 'Callable': ...
@@ -178,7 +180,7 @@ class KeyIO(midiscripter.base.port_base.MultiPort):
         type: 'None | MatchCondition | Container[KeyEvent] | KeyEvent' = None,
         shortcut: 'None | MatchCondition| Container[str] | str' = None,
     ) -> 'Callable':
-        return self._input_ports[0].subscribe(type, shortcut)
+        return self._input_port.subscribe(type, shortcut)
 
     def send(self, msg: KeyMsg) -> None:
         """Send the keyboard input.
@@ -186,8 +188,8 @@ class KeyIO(midiscripter.base.port_base.MultiPort):
         Args:
             msg: object to send
         """
-        self._output_ports[0].send(msg)
+        self._output_port.send(msg)
 
     def type_in(self, string_to_type: str) -> None:
         """Type in the text as a keyboard"""
-        self._output_ports[0].type(string_to_type)
+        self._output_port.type_in(string_to_type)

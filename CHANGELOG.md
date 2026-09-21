@@ -24,6 +24,7 @@
 - [BREAKING] Renamed aftertouch MIDI message types according to MIDI spec
 - [BREAKING] Renamed `CallOn` enum members
 - [BREAKING] `add_qwidget` became a method of `GuiWindow`
+- [BREAKING] Replaced `MultiPort` base class with `IoPort`
 
 ## **v0.8.1** - 19.09.2025 
 

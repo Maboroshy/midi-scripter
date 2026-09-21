@@ -151,11 +151,13 @@ class MouseOut(midiscripter.base.port_base.Output):
             log.red(f'Invalid MouseMsg type: {msg.type}')
 
 
-class MouseIO(midiscripter.base.port_base.MultiPort):
+class MouseIO(midiscripter.base.port_base.IoPort):
     """Mouse input/output port that combines [`MouseIn`][midiscripter.MouseIn] and
     [`MouseOut`][midiscripter.MouseOut] ports.
     Produces and sends [`MouseMsg`][midiscripter.MouseMsg] objects.
     """
+    _input_port: MouseIn
+    _output_port: MouseOut
 
     _forced_uid: ClassVar[str] = 'Mouse'
     _log_description: str = 'mouse i/o'
@@ -181,7 +183,7 @@ class MouseIO(midiscripter.base.port_base.MultiPort):
         x: 'None | MatchCondition | Container[int] | int' = None,
         y: 'None | MatchCondition | Container[int] | int' = None,
     ) -> 'Callable':
-        return self._input_ports[0].subscribe(type, x, y)
+        return self._input_port.subscribe(type, x, y)
 
     def send(self, msg: MouseMsg) -> None:
         """Send the mouse input.
@@ -189,4 +191,4 @@ class MouseIO(midiscripter.base.port_base.MultiPort):
         Args:
             msg: object to send
         """
-        self._output_ports[0].send(msg)
+        self._output_port.send(msg)

@@ -6,14 +6,13 @@ import itertools
 import time
 import traceback
 from typing import TYPE_CHECKING, TypeVar, ClassVar, Any
-from collections.abc import Sequence, Container
 
 import midiscripter.shared
 from midiscripter.logger import log
 from midiscripter.base.msg_base import Msg
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Hashable
+    from collections.abc import Callable, Container, Hashable
     from midiscripter.base.match_conditions import MatchCondition
 
 
@@ -229,8 +228,8 @@ class Port(metaclass=midiscripter.shared.util.SupressInitAutorun):
        Object for these classes are declared without arguments.
     """
 
-    _wrapped_in: 'list[MultiPort]'
-    """The MultiPort instances the port is wrapped in"""
+    _is_wrapped_in: bool = False
+    """"Is the port wrapped in IoPort"""
 
     _is_virtual: bool = False
     """Is the port virtual. Used by MIDI ports."""
@@ -303,10 +302,7 @@ class Port(metaclass=midiscripter.shared.util.SupressInitAutorun):
             uid: Port's unique ID
         """
         self._uid = uid or self._forced_uid
-        self._wrapped_in = []
-
-        self._is_opened: bool  # workaround for mkdocstrings issue #607
-        """`True` if port is listening messages / ready to send messages"""
+        self._is_opened: bool
 
     def __repr__(self):
         return self.__repr
@@ -370,61 +366,37 @@ class Output(Port):
         raise NotImplementedError
 
 
-class MultiPort(Port):
-    """Multiport wrapper class. Combines [`Input`][midiscripter.base.port_base.Input]
+class IoPort(Port):
+    """Combines [`Input`][midiscripter.base.port_base.Input]
     and [`Output`][midiscripter.base.port_base.Output] ports into a single i/o port.
     """
 
     _log_description: str = 'i/o port'
 
-    def __init__(
-        self,
-        uid: str,
-        input_ports: 'Input | Sequence[Input]',
-        output_ports: 'Output | Sequence[Output]',
-    ):
+    def __init__(self, uid: str, input_port: 'Input', output_port: 'Output'):
         """
         Args:
             uid: Port's unique ID
-            input_ports: input ports to wrap
-            output_ports: output ports to wrap
+            input_port: input port to wrap
+            output_port: output port to wrap
         """
         super().__init__(uid)
-        self._input_ports = input_ports if isinstance(input_ports, Sequence) else [input_ports]
-        self._output_ports = output_ports if isinstance(output_ports, Sequence) else [output_ports]
-        self._wrapped_ports = self._input_ports + self._output_ports
-
-        for port in self._wrapped_ports:
-            port._wrapped_in.append(self)
+        self._input_port = input_port
+        self._output_port = output_port
+        self._input_port._is_wrapped_in = True
+        self._output_port._is_wrapped_in = True
 
     def _open(self) -> None:
-        for port in self._wrapped_ports:
-            if not port._is_opened:
-                port._open()
+        self._input_port._open()
+        self._output_port._open()
 
     def _close(self) -> None:
-        for port in self._wrapped_ports:
-            if port._is_opened:
-                port._close()
-
-    @property
-    def _msg_calls(self) -> list[SubscribedCall]:
-        calls = []
-        for input_port in self._input_ports:
-            calls.extend(input_port._msg_calls)
-        return calls
-
-    @property
-    def _event_calls(self) -> dict[CallOn, list[SubscribedCall]]:
-        calls = {CallOn.SCRIPT_START: [], CallOn.NOT_MATCHED: []}
-        for input_port in self._input_ports:
-            for event, call_list in input_port._event_calls.items():
-                calls[event].extend(call_list)
-        return calls
+        self._input_port._close()
+        self._output_port._close()
 
     @property
     def _is_opened(self) -> bool:
-        return all(port._is_opened for port in self._wrapped_ports)
+        return self._input_port._is_opened and self._output_port._is_opened
 
     def subscribe(
         self,
@@ -467,13 +439,7 @@ class MultiPort(Port):
         Returns:
             Subscribed callable.
         """
-        if not self._input_ports:
-            raise AttributeError(f"Can't subscribe to {self}. It has no input ports.")
-
-        call = None
-        for input_port in self._input_ports:
-            call = input_port.subscribe(*msg_matches_args, **msg_matches_kwargs)
-        return call
+        return self._input_port.subscribe(*msg_matches_args, **msg_matches_kwargs)
 
     def send(self, msg: Msg) -> None:
         """Send message using wrapped output ports
@@ -481,5 +447,4 @@ class MultiPort(Port):
         Args:
             msg: Message to send.
         """
-        for output_port in self._output_ports:
-            output_port.send(msg)
+        self._output_port.send(msg)

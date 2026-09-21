@@ -2,7 +2,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-from midiscripter.base.port_base import Input, SubscribedCall, Port, MultiPort
+from midiscripter.base.port_base import Input, SubscribedCall, Port, IoPort
 from midiscripter.midi import MidiIn, MidiOut, MidiIO, MidiPortsChangedIn
 from midiscripter.midi.midi_port import _MidiPortMixin
 from midiscripter.osc import OscIn, OscOut, OscIO
@@ -48,11 +48,10 @@ class PortItem(PortWidgetItem):
             self.update_ports_state()
 
     def update_ports_state(self) -> None:
-        if isinstance(self.port_instance, MultiPort):
-            wrapped_port_states = [port._is_opened for port in self.port_instance._wrapped_ports]
-            if all(wrapped_port_states) != any(wrapped_port_states):
-                self.setCheckState(0, Qt.CheckState.PartiallyChecked)
-                return
+        if (isinstance(self.port_instance, IoPort) and
+        (self.port_instance._input_port._is_opened != self.port_instance._output_port._is_opened)):
+            self.setCheckState(0, Qt.CheckState.PartiallyChecked)
+            return
 
         if self.port_instance._is_opened:
             self.setCheckState(0, Qt.CheckState.Checked)
@@ -60,12 +59,9 @@ class PortItem(PortWidgetItem):
             self.setCheckState(0, Qt.CheckState.Unchecked)
 
     def add_children(self) -> None:  # noqa: C901
-        if isinstance(self.port_instance, MultiPort) and not isinstance(self, PassthroughOutputMidiPortItem):
-            for port_instance in self.port_instance._input_ports:
-                PortItem(self, port_instance, 'In:')
-
-            for port_instance in self.port_instance._output_ports:
-                PortItem(self, port_instance, 'Out:')
+        if isinstance(self.port_instance, IoPort) and not isinstance(self, PassthroughOutputMidiPortItem):
+            PortItem(self, self.port_instance._input_port, 'In:')
+            PortItem(self, self.port_instance._output_port, 'Out:')
 
         if isinstance(self.port_instance, MidiIn):
             for passthrough_out_port in self.port_instance._attached_passthrough_outs:
@@ -92,7 +88,7 @@ class PortItem(PortWidgetItem):
             self.port_instance._close()
             self.setCheckState(0, Qt.CheckState.Unchecked)
 
-        if isinstance(self.port_instance, MultiPort):
+        if isinstance(self.port_instance, IoPort):
             self.update_ports_state()
             [self.child(n).update_ports_state() for n in range(self.childCount())]
 
@@ -227,7 +223,7 @@ class PortsView(QTreeWidget):
             AbletonIO,
             AbletonIn,
             AbletonOut,
-            MultiPort,
+            IoPort,
             KeyIO,
             KeyIn,
             KeyOut,
@@ -295,14 +291,14 @@ class PortsView(QTreeWidget):
             ):
                 port_instance._close()
 
-            if not port_instance._wrapped_in:
+            if not port_instance._is_wrapped_in:
                 PortItem(top_item, port_instance)
 
     def __add_declared_ports(self, title: str, *port_types: type[Port]) -> None:
         port_instances_to_add = []
         for port_type in port_types:
             for port_instance in port_type._class_instances:
-                if not port_instance._wrapped_in:
+                if not port_instance._is_wrapped_in:
                     port_instances_to_add.append(port_instance)  # noqa: PERF401
 
         if not port_instances_to_add:
