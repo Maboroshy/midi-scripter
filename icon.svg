@@ -1,0 +1,19 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <defs>
+   <mask id="cutout">
+    <ellipse ry="256" rx="256" cy="256" cx="254" fill="white"/>
+    <rect height="112" width="100" y="200" x="0" fill="black"/>
+   </mask>
+  </defs>
+  <rect height="512" width="512" fill="black" mask="url(#cutout)"/>
+  <ellipse ry="40" rx="40" cy="90" cx="282" fill="red"/>
+  <ellipse ry="40" rx="40" cy="144" cx="382" fill="yellow"/>
+  <ellipse ry="40" rx="40" cy="257" cx="430" fill="lawngreen"/>
+  <ellipse ry="40" rx="40" cy="368" cx="385" fill="cyan"/>
+  <ellipse ry="40" rx="40" cy="423" cx="280" fill="magenta"/>
+  <path d="m153.67707,101.41906l181.16136,153.41944l-182.5805,
+           153.54826l-41.29029,-41.93545l132.90312,-110.32249l-132.90312,
+           -110.96765l42.70942,-43.74211z" fill="white"/>
+ </g>
+</svg>
