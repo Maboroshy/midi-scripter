@@ -48,8 +48,7 @@ The average latency for the script above is less than 0.25 milliseconds.
 
 ## Use cases
 
-- Programming MIDI input/output handling scripts 
-  that may also use OSC, keyboard and mouse input/output.
+- Programming MIDI input/output handling scripts that may also use OSC, keyboard and mouse input/output.
 - Mapping your MIDI controller in your own custom way, 
   from simple MIDI message filtering or conversion to mostly anything you can imagine.
 - Controlling Ableton Live with Python, without diving into 
@@ -80,7 +79,7 @@ Extra steps for Windows:
 2. For virtual MIDI port support install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) 
 and enable `Compatible with older Windows` MIDI 1.0 port naming in 
 [MIDI Settings app](https://microsoft.github.io/MIDI/tools/settings/). 
-The alternative is setting up virtual loopbacks in MIDI Settings app. 
+The alternative is setting up loopback ports in MIDI Settings app. 
 
 ## Quick Start Guide
 
