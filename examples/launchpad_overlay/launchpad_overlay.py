@@ -1,43 +1,63 @@
+import json
+import pathlib
+from typing import Callable
+
 from midiscripter import *
 
 
-# Settings
-SCENES_CC = (89, 79, 69, 59)
-LPX_CHANNEL = 1
-SELECTED_SCENE_PAD_COLOR = 21
+storage_file_path = pathlib.Path(SCRIPT_PATH_STR).with_suffix('.json')
 
 
-lpx = MidiIO('LPX MIDI')
-daw_lpx = MidiIO('DAW LPX', virtual=True)
-ableton_osc = OscIO(11001, 11000)
-
-daw_lpx.passthrough_out(lpx)  # proxies all MIDI feedback back to LPX
-
-overlay_toggle = GuiToggleButton('LPX OVERLAY ON', toggle_state=True)
+try:
+    overlay_cc = json.loads(storage_file_path.read_text())
+except (json.JSONDecodeError, FileNotFoundError):
+    overlay_cc = []
 
 
-@ableton_osc.subscribe(CallOn.SCRIPT_START)
-@ableton_osc.subscribe(address='/live/startup')
-def start_selected_scene_observer(_: OscMsg = None) -> None:
-    """Sets selected scene observer on script start or Ableton Live start"""
-    ableton_osc.send(OscMsg('/live/view/start_listen/selected_scene'))
+def label_pad(pad_index: int) -> str:
+    pad_label = str(pad_index)
+    if pad_label.startswith('9'):
+        return ['▴', '▾', '◂', '▸', 'Session', '  Note  ', 'Custom', '⭕'][pad_index - 90 - 1]
+    if pad_label.endswith('9'):
+        return '>'
+    return pad_label
 
 
-@lpx.subscribe
-def input_proxy(msg: MidiMsg) -> None:
-    """A general MIDI input proxy that make selected pads send OSC messages instead of MIDI"""
-    if msg.matches(MidiType.CONTROL_CHANGE, LPX_CHANNEL, SCENES_CC) and overlay_toggle.toggle_state:
-        ableton_osc.send(OscMsg('/live/view/set/selected_scene', SCENES_CC.index(msg.data1)))
-    else:
-        daw_lpx.send(msg)
+def make_callback_for_value(midi_value: int) -> Callable:
+    def toggle_cc(msg: GuiEventMsg):
+        overlay_cc.append(midi_value) if msg.data else overlay_cc.remove(midi_value)
+        storage_file_path.write_text(json.dumps(overlay_cc))
+    return toggle_cc
 
 
-@ableton_osc.subscribe('/live/view/get/selected_scene')
-def feedback_from_osc(msg: OscMsg) -> None:
-    """Lights up selected scene pad based on selected scene OSC input"""
-    for index, cc in enumerate(SCENES_CC):
-        value = SELECTED_SCENE_PAD_COLOR if index == msg.data else 0
-        lpx.send(MidiMsg(MidiType.CONTROL_CHANGE, LPX_CHANNEL, cc, value))
+def prepare_lpx_layout() -> list:
+    rows = []
+    for row_i in range(1, 10):
+        column = []
+        rows.append(column)
+        for column_i in range(1, 10):
+            midi_value = row_i * 10 + column_i
+            if midi_value == 99:
+                column.append(GuiText('◪'))
+            else:
+                toggle_button = GuiToggleButton(label_pad(midi_value), toggle_state=midi_value in overlay_cc)
+                toggle_button.subscribe(GuiEvent.TOGGLED)(make_callback_for_value(midi_value))
+                column.append(toggle_button)
+    rows.reverse()
+    return rows
+
+
+widget = GuiWidgetLayout(*prepare_lpx_layout(), title='LPX Pad Selector')
+
+
+real_lpx = MidiIn('LPX MIDI')
+lpx_proxy = MidiOut('LPX Proxy', virtual=True)
+
+
+@real_lpx.subscribe((MidiType.CONTROL_CHANGE, MidiType.NOTE_ON), 1, overlay_cc)
+def send_mappable(msg: ChannelMsg):
+    msg.channel = 4
+    lpx_proxy.send(msg)
 
 
 if __name__ == '__main__':
