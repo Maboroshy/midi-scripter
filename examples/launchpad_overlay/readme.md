@@ -1,6 +1,6 @@
 # Launchpad X mappable overlay for Ableton Live
 
-![](/examples/octave_transposer/launchpad_overlay.png)
+![](/examples/launchpad_overlay/launchpad_overlay.png)
 
 This script changes MIDI channel of Novation Launchpad X of individual pads in DAW mode,
 so you can map them to anything in Ableton Live. Pads lighting and other pads still work in DAW mode.
